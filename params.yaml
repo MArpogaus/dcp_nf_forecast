@@ -1,0 +1,31 @@
+log_level: info
+log_file: logs/pipeline.log
+seed: 42
+
+paths:
+  raw_data: ../dcp/norm_data/norm_fondium_15_min_data_2023.csv
+  data_interim: data/interim
+  data_processed: data/processed
+
+data:
+  datetime_column: new_time
+  data_format: feather
+  fillna_method: ffill
+  tabular_covariate_columns:
+  - ofen_g_koks_kg
+  - ofen_f_koks_kg
+  - pl2_stromverbrauch_kwh
+  time_feature_components:
+    time: 4
+    day_of_week: 4
+    day_of_year: 4
+  target_names:
+  - dla
+  - ofen_g_koks
+  - ofen_f_koks
+  - pl2
+
+splits:
+  train: 0.70
+  val: 0.15
+  test: 0.15

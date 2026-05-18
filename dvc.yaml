@@ -1,0 +1,71 @@
+stages:
+  prepare:
+    foreach: ${data.target_names}
+    do:
+      cmd: >
+        python scripts/prepare_features.py
+        --raw-data-path ${paths.raw_data}
+        --datetime-column ${data.datetime_column}
+        --fillna-method ${data.fillna_method}
+        --tabular-covariate-columns
+        ofen_g_koks_kg
+        ofen_f_koks_kg
+        pl2_stromverbrauch_kwh
+        --time-component time:4
+        --time-component day_of_week:4
+        --time-component day_of_year:4
+        --target-config params/targets/${item}.yaml
+        --output-dir ${paths.data_interim}/${item}
+        --data-format ${data.data_format}
+        --log-level ${log_level}
+        --log-file ${log_file}
+      deps:
+      - scripts/prepare_features.py
+      - src/dcp_nf_forecast/
+      - ${paths.raw_data}
+      - params/targets/${item}.yaml
+      params:
+      - paths.raw_data
+      - paths.data_interim
+      - data.datetime_column
+      - data.fillna_method
+      - data.tabular_covariate_columns
+      - data.data_format
+      - data.time_feature_components
+      - log_level
+      - log_file
+      outs:
+      - data/interim/${item}/X.feather
+      - data/interim/${item}/y.feather
+
+  split:
+    foreach: ${data.target_names}
+    do:
+      cmd: >
+        python scripts/split_data.py
+        --input-dir ${paths.data_interim}/${item}
+        --output-dir ${paths.data_processed}/${item}
+        --train-ratio ${splits.train}
+        --val-ratio ${splits.val}
+        --test-ratio ${splits.test}
+        --data-format ${data.data_format}
+        --log-level ${log_level}
+        --log-file ${log_file}
+      deps:
+      - scripts/split_data.py
+      - src/dcp_nf_forecast/
+      - data/interim/${item}/
+      params:
+      - paths.data_interim
+      - paths.data_processed
+      - data.data_format
+      - splits
+      - log_level
+      - log_file
+      outs:
+      - data/processed/${item}/X_train.feather
+      - data/processed/${item}/y_train.feather
+      - data/processed/${item}/X_val.feather
+      - data/processed/${item}/y_val.feather
+      - data/processed/${item}/X_test.feather
+      - data/processed/${item}/y_test.feather

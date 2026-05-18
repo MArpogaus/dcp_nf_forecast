@@ -1,0 +1,72 @@
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = ["setuptools>=61"]
+
+[project]
+dependencies = [
+  "numpy>=1.26",
+  "pandas>=2.0",
+  "pyyaml>=6.0",
+  "hybrid-flows @ git+https://github.com/MArpogaus/hybrid-flows.git@v0.1.0",
+  "tensorflow>=2.15",
+  "tensorflow-probability>=0.23",
+  "dvc>=3.67.1",
+  "pyarrow>=14.0"
+]
+description = "Forecasting with multivariate normalizing flows"
+name = "dcp-nf-forecast"
+requires-python = ">=3.11"
+version = "0.1.0"
+
+[project.optional-dependencies]
+dev = [
+  "ruff>=0.5",
+  "mypy>=1.10",
+  "pre-commit>=3.0",
+  "commitizen>=3.0",
+  "pytest>=8.0",
+  "pytest-cov>=4.0",
+  "pytest-xdist>=3.0"
+]
+dvc = [
+  "dvc>=3.0",
+  "dvc-stage>=1.0"
+]
+train = [
+  "mlflow>=2.0"
+]
+
+[tool.commitizen]
+major_version_zero = true
+name = "cz_conventional_commits"
+tag_format = "v$version"
+update_changelog_on_bump = true
+version_provider = "scm"
+version_scheme = "pep440"
+
+[tool.coverage.report]
+fail_under = 90
+show_missing = true
+
+[tool.coverage.run]
+branch = true
+omit = ["test/*", "scripts/*"]
+source = ["src/dcp_nf_forecast"]
+
+[tool.pytest.ini_options]
+addopts = ["-v", "--tb=short", "-n", "auto", "--dist=loadfile"]
+markers = ["slow", "integration"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+testpaths = ["test"]
+
+[tool.ruff]
+indent-width = 4
+line-length = 88
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["I", "E", "F", "UP"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
