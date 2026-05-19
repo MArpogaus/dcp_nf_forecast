@@ -2,8 +2,8 @@ compile_kwargs: {}
 fit_kwargs:
   batch_size: 256
   early_stopping_patience: 10
-  epochs: 50
-  learning_rate: 0.001
+  epochs: 100
+  learning_rate: 0.0005
   verbose: true
 model_kwargs:
   distribution: masked_autoregressive_flow

@@ -1583,8 +1583,8 @@ stages:
       nfiles: 6
     - path: params/models/dla/bernstein_nf_lognormal.yaml
       hash: md5
-      md5: 52bb170d850747a7de4e3704e30c2817
-      size: 688
+      md5: 06d02911842ab6495a014ef11181cb25
+      size: 690
     - path: scripts/train.py
       hash: md5
       md5: 3cdf1e59436ec663b29459265373cb14
@@ -1625,8 +1625,8 @@ stages:
         fit_kwargs:
           batch_size: 256
           early_stopping_patience: 10
-          epochs: 50
-          learning_rate: 0.001
+          epochs: 100
+          learning_rate: 0.0005
           verbose: true
         model_kwargs:
           distribution: masked_autoregressive_flow
@@ -1658,15 +1658,15 @@ stages:
     outs:
     - path: results/dla/bernstein_nf_lognormal/metrics.yaml
       hash: md5
-      md5: 8eefaffbee6aefac912a5ffd10efccb0
+      md5: 76885f7b3fdd831e2559d85148455b1b
       size: 149
     - path: results/dla/bernstein_nf_lognormal/model_weights.h5
       hash: md5
-      md5: b8eabc0b772e8b5927df2c9323c1ba13
+      md5: bc815bbe98190a77ee93ec4950cffa70
       size: 1742216
     - path: results/dla/bernstein_nf_lognormal/parent_run_id.txt
       hash: md5
-      md5: b2c23d6cc0eafa553b6b6b0aabb75352
+      md5: 44293aa72207e7d2d063a15200abf412
       size: 32
   train_spline_lognormal@0:
     cmd: "python scripts/train.py --processed-dir data/processed/dla --target-name
