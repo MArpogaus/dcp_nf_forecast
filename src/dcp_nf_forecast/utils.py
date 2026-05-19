@@ -2,6 +2,27 @@ import logging
 from pathlib import Path
 
 import pandas as pd
+import yaml
+
+
+def load_model_params(target: str, model: str) -> dict:
+    """Read model hyperparameters from ``params/models/<target>/<model>.yaml``.
+
+    Parameters
+    ----------
+    target : str
+        Target name (e.g. ``"dla"``).
+    model : str
+        Model name (e.g. ``"bernstein_nf"``).
+
+    Returns
+    -------
+    dict
+        Model hyperparameters.
+    """
+    path = Path("params/models") / target / f"{model}.yaml"
+    with open(path) as f:
+        return yaml.safe_load(f)
 
 
 def setup_logging(log_level: str, log_file: str) -> logging.Logger:
