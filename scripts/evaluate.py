@@ -232,6 +232,7 @@ def main() -> None:
     parser.add_argument("--prediction-horizon", required=True, type=int)
     parser.add_argument("--n-samples", required=True, type=int)
     parser.add_argument("--stage-name", required=True, type=str)
+    parser.add_argument("--experiment-name", required=True, type=str)
     parser.add_argument("--test-mode", required=True, type=str)
     parser.add_argument("--log-level", required=True, type=str)
     parser.add_argument("--log-file", required=True, type=str)
@@ -240,6 +241,7 @@ def main() -> None:
     setup_logging(args.log_level, args.log_file)
     test_mode = args.test_mode.lower() in ("true", "1", "yes")
     run_name = f"eval_{args.model}_{args.target_name}"
+    experiment_name = args.experiment_name + ("_test" if test_mode else "")
 
     processed_dir = Path(args.processed_dir)
     results_dir = Path("results") / args.target_name / args.model
@@ -275,61 +277,72 @@ def main() -> None:
     model.load_weights(str(results_dir / "model_weights.h5"))
     logger.info("Loaded weights from %s", results_dir)
 
-    with start_run_with_exception_logging(run_name=run_name):
-        log_cfg(vars(args))
-        mlflow.log_params({"model_kwargs": str(model_kwargs)})
-        mlflow.tensorflow.autolog()
+    mlflow.set_experiment(experiment_name)
 
-        logger.info("Sampling %d draws from predictive distribution ...", n_samples)
-        samples = sample_predictions(
-            model, x_test, n_samples=n_samples, batch_size=batch_size
-        )
-        logger.info("Sampled shape: %s", samples.shape)
+    parent_run_id_file = results_dir / "parent_run_id.txt"
+    run_context = (
+        mlflow.start_run(run_id=parent_run_id_file.read_text().strip())
+        if parent_run_id_file.exists()
+        else mlflow.start_run(run_name=run_name)
+    )
 
-        out_dir = results_dir / "evaluation"
-        out_dir.mkdir(parents=True, exist_ok=True)
+    with run_context:
+        with start_run_with_exception_logging(run_name=f"{run_name}_evaluation"):
+            mlflow.set_tag("stage", "evaluation")
+            mlflow.log_dict(params, "dvc_params.yaml")
+            log_cfg(vars(args) | {f"{prefix}model_kwargs": model_kwargs})
+            mlflow.tensorflow.autolog()
 
-        logger.info("Generating forecast plot ...")
-        fig = plot_forecast_with_intervals(
-            y_test,
-            samples,
-            n_show=48,
-            title=f"{args.model} \u2013 {args.target_name}",
-        )
-        log_and_save_figure(fig, str(out_dir), "forecast", "pdf", dpi=300)
-        log_and_save_figure(fig, str(out_dir), "forecast", "png", dpi=150)
-        plt.close(fig)
+            logger.info("Sampling %d draws from predictive distribution ...", n_samples)
+            samples = sample_predictions(
+                model, x_test, n_samples=n_samples, batch_size=batch_size
+            )
+            logger.info("Sampled shape: %s", samples.shape)
 
-        logger.info("Generating PIT histogram ...")
-        fig = plot_pit_histogram(
-            y_test,
-            samples,
-            n_bins=20,
-            title=f"{args.model} \u2013 {args.target_name}",
-        )
-        log_and_save_figure(fig, str(out_dir), "pit_histogram", "pdf", dpi=300)
-        log_and_save_figure(fig, str(out_dir), "pit_histogram", "png", dpi=150)
-        plt.close(fig)
+            out_dir = results_dir / "evaluation"
+            out_dir.mkdir(parents=True, exist_ok=True)
 
-        logger.info("Generating calibration plot ...")
-        fig = plot_calibration(
-            y_test,
-            samples,
-            title=f"{args.model} \u2013 {args.target_name}",
-        )
-        log_and_save_figure(fig, str(out_dir), "calibration", "pdf", dpi=300)
-        log_and_save_figure(fig, str(out_dir), "calibration", "png", dpi=150)
-        plt.close(fig)
+            logger.info("Generating forecast plot ...")
+            fig = plot_forecast_with_intervals(
+                y_test,
+                samples,
+                n_show=48,
+                title=f"{args.model} \u2013 {args.target_name}",
+            )
+            log_and_save_figure(fig, str(out_dir), "forecast", "pdf", dpi=300)
+            log_and_save_figure(fig, str(out_dir), "forecast", "png", dpi=150)
+            plt.close(fig)
 
-        metrics = compute_metrics(y_test, samples)
-        logger.info("Metrics: %s", metrics)
+            logger.info("Generating PIT histogram ...")
+            fig = plot_pit_histogram(
+                y_test,
+                samples,
+                n_bins=20,
+                title=f"{args.model} \u2013 {args.target_name}",
+            )
+            log_and_save_figure(fig, str(out_dir), "pit_histogram", "pdf", dpi=300)
+            log_and_save_figure(fig, str(out_dir), "pit_histogram", "png", dpi=150)
+            plt.close(fig)
 
-        mlflow.log_metrics(metrics)
-        with open(out_dir / "metrics.yaml", "w") as f:
-            yaml.dump(metrics, f)
+            logger.info("Generating calibration plot ...")
+            fig = plot_calibration(
+                y_test,
+                samples,
+                title=f"{args.model} \u2013 {args.target_name}",
+            )
+            log_and_save_figure(fig, str(out_dir), "calibration", "pdf", dpi=300)
+            log_and_save_figure(fig, str(out_dir), "calibration", "png", dpi=150)
+            plt.close(fig)
 
-        mlflow.log_artifacts(str(results_dir))
-        logger.info("Evaluation saved to %s", out_dir)
+            metrics = compute_metrics(y_test, samples)
+            logger.info("Metrics: %s", metrics)
+
+            mlflow.log_metrics(metrics)
+            with open(out_dir / "metrics.yaml", "w") as f:
+                yaml.dump(metrics, f)
+
+            mlflow.log_artifacts(str(results_dir))
+            logger.info("Evaluation saved to %s", out_dir)
 
 
 if __name__ == "__main__":

@@ -109,6 +109,7 @@ stages:
         --data-format ${data.data_format}
         --prediction-horizon ${item.prediction_horizon}
         --stage-name train_bernstein
+        --experiment-name ${experiment_name}-${item.name}
         --test-mode ${test_mode}
         --log-level ${log_level}
         --log-file ${log_file}
@@ -119,6 +120,7 @@ stages:
       - params/models/${item.name}/bernstein_nf.yaml
       params:
       - params/models/${item.name}/bernstein_nf.yaml:
+      - experiment_name
       - paths.data_processed
       - data.data_format
       - targets
@@ -128,6 +130,7 @@ stages:
       - log_file
       outs:
       - results/${item.name}/bernstein_nf/model_weights.h5
+      - results/${item.name}/bernstein_nf/parent_run_id.txt
       metrics:
       - results/${item.name}/bernstein_nf/metrics.yaml
 
@@ -142,6 +145,7 @@ stages:
         --data-format ${data.data_format}
         --prediction-horizon ${item.prediction_horizon}
         --stage-name train_spline
+        --experiment-name ${experiment_name}-${item.name}
         --test-mode ${test_mode}
         --log-level ${log_level}
         --log-file ${log_file}
@@ -152,6 +156,7 @@ stages:
       - params/models/${item.name}/spline_nf.yaml
       params:
       - params/models/${item.name}/spline_nf.yaml:
+      - experiment_name
       - paths.data_processed
       - data.data_format
       - targets
@@ -161,6 +166,7 @@ stages:
       - log_file
       outs:
       - results/${item.name}/spline_nf/model_weights.h5
+      - results/${item.name}/spline_nf/parent_run_id.txt
       metrics:
       - results/${item.name}/spline_nf/metrics.yaml
 
@@ -175,6 +181,7 @@ stages:
         --data-format ${data.data_format}
         --prediction-horizon ${item.prediction_horizon}
         --stage-name train_bernstein_lognormal
+        --experiment-name ${experiment_name}-${item.name}
         --test-mode ${test_mode}
         --log-level ${log_level}
         --log-file ${log_file}
@@ -185,6 +192,7 @@ stages:
       - params/models/${item.name}/bernstein_nf_lognormal.yaml
       params:
       - params/models/${item.name}/bernstein_nf_lognormal.yaml:
+      - experiment_name
       - paths.data_processed
       - data.data_format
       - targets
@@ -194,6 +202,7 @@ stages:
       - log_file
       outs:
       - results/${item.name}/bernstein_nf_lognormal/model_weights.h5
+      - results/${item.name}/bernstein_nf_lognormal/parent_run_id.txt
       metrics:
       - results/${item.name}/bernstein_nf_lognormal/metrics.yaml
 
@@ -208,6 +217,7 @@ stages:
         --data-format ${data.data_format}
         --prediction-horizon ${item.prediction_horizon}
         --stage-name train_spline_lognormal
+        --experiment-name ${experiment_name}-${item.name}
         --test-mode ${test_mode}
         --log-level ${log_level}
         --log-file ${log_file}
@@ -218,6 +228,7 @@ stages:
       - params/models/${item.name}/spline_nf_lognormal.yaml
       params:
       - params/models/${item.name}/spline_nf_lognormal.yaml:
+      - experiment_name
       - paths.data_processed
       - data.data_format
       - targets
@@ -227,6 +238,7 @@ stages:
       - log_file
       outs:
       - results/${item.name}/spline_nf_lognormal/model_weights.h5
+      - results/${item.name}/spline_nf_lognormal/parent_run_id.txt
       metrics:
       - results/${item.name}/spline_nf_lognormal/metrics.yaml
 
@@ -242,6 +254,7 @@ stages:
         --prediction-horizon ${item.prediction_horizon}
         --n-samples ${eval.n_samples}
         --stage-name evaluate_bernstein
+        --experiment-name ${experiment_name}-${item.name}
         --test-mode ${test_mode}
         --log-level ${log_level}
         --log-file ${log_file}
@@ -250,9 +263,11 @@ stages:
       - src/dcp_nf_forecast/
       - data/processed/${item.name}/
       - results/${item.name}/bernstein_nf/model_weights.h5
+      - results/${item.name}/bernstein_nf/parent_run_id.txt
       - params/models/${item.name}/bernstein_nf.yaml
       params:
       - params/models/${item.name}/bernstein_nf.yaml:
+      - experiment_name
       - data.data_format
       - targets
       - seed
@@ -279,6 +294,7 @@ stages:
         --prediction-horizon ${item.prediction_horizon}
         --n-samples ${eval.n_samples}
         --stage-name evaluate_spline
+        --experiment-name ${experiment_name}-${item.name}
         --test-mode ${test_mode}
         --log-level ${log_level}
         --log-file ${log_file}
@@ -287,9 +303,11 @@ stages:
       - src/dcp_nf_forecast/
       - data/processed/${item.name}/
       - results/${item.name}/spline_nf/model_weights.h5
+      - results/${item.name}/spline_nf/parent_run_id.txt
       - params/models/${item.name}/spline_nf.yaml
       params:
       - params/models/${item.name}/spline_nf.yaml:
+      - experiment_name
       - data.data_format
       - targets
       - seed
@@ -303,3 +321,83 @@ stages:
       - results/${item.name}/spline_nf/evaluation/calibration.pdf
       metrics:
       - results/${item.name}/spline_nf/evaluation/metrics.yaml
+
+  evaluate_bernstein_lognormal:
+    foreach: ${targets}
+    do:
+      cmd: >
+        python scripts/evaluate.py
+        --processed-dir ${paths.data_processed}/${item.name}
+        --target-name ${item.name}
+        --model bernstein_nf_lognormal
+        --data-format ${data.data_format}
+        --prediction-horizon ${item.prediction_horizon}
+        --n-samples ${eval.n_samples}
+        --stage-name evaluate_bernstein_lognormal
+        --experiment-name ${experiment_name}-${item.name}
+        --test-mode ${test_mode}
+        --log-level ${log_level}
+        --log-file ${log_file}
+      deps:
+      - scripts/evaluate.py
+      - src/dcp_nf_forecast/
+      - data/processed/${item.name}/
+      - results/${item.name}/bernstein_nf_lognormal/model_weights.h5
+      - results/${item.name}/bernstein_nf_lognormal/parent_run_id.txt
+      - params/models/${item.name}/bernstein_nf_lognormal.yaml
+      params:
+      - params/models/${item.name}/bernstein_nf_lognormal.yaml:
+      - experiment_name
+      - data.data_format
+      - targets
+      - seed
+      - test_mode
+      - eval.n_samples
+      - log_level
+      - log_file
+      outs:
+      - results/${item.name}/bernstein_nf_lognormal/evaluation/forecast.pdf
+      - results/${item.name}/bernstein_nf_lognormal/evaluation/pit_histogram.pdf
+      - results/${item.name}/bernstein_nf_lognormal/evaluation/calibration.pdf
+      metrics:
+      - results/${item.name}/bernstein_nf_lognormal/evaluation/metrics.yaml
+
+  evaluate_spline_lognormal:
+    foreach: ${targets}
+    do:
+      cmd: >
+        python scripts/evaluate.py
+        --processed-dir ${paths.data_processed}/${item.name}
+        --target-name ${item.name}
+        --model spline_nf_lognormal
+        --data-format ${data.data_format}
+        --prediction-horizon ${item.prediction_horizon}
+        --n-samples ${eval.n_samples}
+        --stage-name evaluate_spline_lognormal
+        --experiment-name ${experiment_name}-${item.name}
+        --test-mode ${test_mode}
+        --log-level ${log_level}
+        --log-file ${log_file}
+      deps:
+      - scripts/evaluate.py
+      - src/dcp_nf_forecast/
+      - data/processed/${item.name}/
+      - results/${item.name}/spline_nf_lognormal/model_weights.h5
+      - results/${item.name}/spline_nf_lognormal/parent_run_id.txt
+      - params/models/${item.name}/spline_nf_lognormal.yaml
+      params:
+      - params/models/${item.name}/spline_nf_lognormal.yaml:
+      - experiment_name
+      - data.data_format
+      - targets
+      - seed
+      - test_mode
+      - eval.n_samples
+      - log_level
+      - log_file
+      outs:
+      - results/${item.name}/spline_nf_lognormal/evaluation/forecast.pdf
+      - results/${item.name}/spline_nf_lognormal/evaluation/pit_histogram.pdf
+      - results/${item.name}/spline_nf_lognormal/evaluation/calibration.pdf
+      metrics:
+      - results/${item.name}/spline_nf_lognormal/evaluation/metrics.yaml

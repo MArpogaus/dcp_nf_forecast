@@ -116,7 +116,7 @@ stages:
   train_bernstein@0:
     cmd: "python scripts/train.py --processed-dir data/processed/dla --target-name
       dla --model bernstein_nf --data-format feather --prediction-horizon 12 --stage-name
-      train_bernstein --test-mode true --log-level info --log-file logs/pipeline.log\n"
+      train_bernstein --test-mode false --log-level info --log-file logs/pipeline.log\n"
     deps:
     - path: data/processed/dla/
       hash: md5
@@ -125,12 +125,12 @@ stages:
       nfiles: 6
     - path: params/models/dla/bernstein_nf.yaml
       hash: md5
-      md5: e62ac3bc16cbc1578de151c45a2b8fab
-      size: 679
+      md5: b0c96bf14b2a4c1d0b7354ec38759a05
+      size: 685
     - path: scripts/train.py
       hash: md5
-      md5: 10dc488b91aa9eff73d17cccbe4e4a17
-      size: 4702
+      md5: 13dfe8ad62898b2c597a5b144ecda4e7
+      size: 4776
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: d302b1abedd23439c3a26601234f4cfd.dir
@@ -160,13 +160,13 @@ stages:
           y_column: pl2_stromverbrauch_kwh
           prediction_horizon: 12
           lag_columns: pl2_stromverbrauch_kwh:96
-        test_mode: true
+        test_mode: false
       params/models/dla/bernstein_nf.yaml:
         compile_kwargs: {}
         fit_kwargs:
           batch_size: 256
-          early_stopping_patience: 15
-          epochs: 5
+          early_stopping_patience: 10
+          epochs: 10
           learning_rate: 0.001
           verbose: true
         model_kwargs:
@@ -180,30 +180,31 @@ stages:
             extrapolation: false
           invert: true
           base_distribution_kwargs:
-            distribution_name: lognormal
+            distribution_name: normal
           num_parameters: 96
           parameters_constraint_fn:
             hybrid_flows.activations.get_thetas_constrain_fn
           parameters_constraint_fn_kwargs:
             allow_flexible_bounds: false
-            bounds: linear
-            low: -4
-            high: 4
+            bounds: none
+            low: 0.007
+            high: 148
           parameters_fn_kwargs:
             activation: relu
             hidden_units:
-            - 128
-            - 128
+            - 256
+            - 256
+            - 256
             conditional: true
     outs:
     - path: results/dla/bernstein_nf/metrics.yaml
       hash: md5
-      md5: e287efa5902b8b38bc9aa5e6ec523f3c
-      size: 92
+      md5: e91299d2e3ffe99201bde7a7547d531d
+      size: 146
     - path: results/dla/bernstein_nf/model_weights.h5
       hash: md5
-      md5: ee9a40a5ba5ab26117bd4769a89cbd54
-      size: 683360
+      md5: a1e808af7cdbc477ab7a91e4bb0602b7
+      size: 1742216
   describe@0:
     cmd: "python scripts/describe_data.py --processed-dir data/processed/dla --target-name
       dla --data-format feather --log-level info --log-file logs/pipeline.log\n"
@@ -1572,8 +1573,8 @@ stages:
   train_bernstein_lognormal@0:
     cmd: "python scripts/train.py --processed-dir data/processed/dla --target-name
       dla --model bernstein_nf_lognormal --data-format feather --prediction-horizon
-      12 --stage-name train_bernstein_lognormal --test-mode true --log-level info
-      --log-file logs/pipeline.log\n"
+      12 --stage-name train_bernstein_lognormal --experiment-name dcp_nf_forecast-dla
+      --test-mode true --log-level info --log-file logs/pipeline.log\n"
     deps:
     - path: data/processed/dla/
       hash: md5
@@ -1582,12 +1583,12 @@ stages:
       nfiles: 6
     - path: params/models/dla/bernstein_nf_lognormal.yaml
       hash: md5
-      md5: b5a067358d9ea147f56abf152a49c606
+      md5: 52bb170d850747a7de4e3704e30c2817
       size: 688
     - path: scripts/train.py
       hash: md5
-      md5: 13dfe8ad62898b2c597a5b144ecda4e7
-      size: 4776
+      md5: 3cdf1e59436ec663b29459265373cb14
+      size: 5553
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: d302b1abedd23439c3a26601234f4cfd.dir
@@ -1596,6 +1597,7 @@ stages:
     params:
       params.yaml:
         data.data_format: feather
+        experiment_name: dcp_nf_forecast
         log_file: logs/pipeline.log
         log_level: info
         paths.data_processed: data/processed
@@ -1623,7 +1625,7 @@ stages:
         fit_kwargs:
           batch_size: 256
           early_stopping_patience: 10
-          epochs: 10
+          epochs: 50
           learning_rate: 0.001
           verbose: true
         model_kwargs:
@@ -1656,12 +1658,16 @@ stages:
     outs:
     - path: results/dla/bernstein_nf_lognormal/metrics.yaml
       hash: md5
-      md5: 74c12ce41ac177e94482703d22a1a961
+      md5: 9d19c25132cbcec83bd8fa578b1cbc49
       size: 150
     - path: results/dla/bernstein_nf_lognormal/model_weights.h5
       hash: md5
-      md5: 95d57ebf8593d2b018d2c57cfaf66e95
+      md5: 161f1bcd6812a53837b5cc4968769c14
       size: 1742216
+    - path: results/dla/bernstein_nf_lognormal/parent_run_id.txt
+      hash: md5
+      md5: b6ce320961c75df9eafd5e07550f9f4c
+      size: 32
   train_spline_lognormal@0:
     cmd: "python scripts/train.py --processed-dir data/processed/dla --target-name
       dla --model spline_nf_lognormal --data-format feather --prediction-horizon 12
@@ -1751,3 +1757,113 @@ stages:
       hash: md5
       md5: 421f676fa9eb80cef303796a1f44fb35
       size: 1729880
+  evaluate_bernstein_lognormal@0:
+    cmd: "python scripts/evaluate.py --processed-dir data/processed/dla --target-name
+      dla --model bernstein_nf_lognormal --data-format feather --prediction-horizon
+      12 --n-samples 1000 --stage-name evaluate_bernstein_lognormal --experiment-name
+      dcp_nf_forecast-dla --test-mode true --log-level info --log-file logs/pipeline.log\n"
+    deps:
+    - path: data/processed/dla/
+      hash: md5
+      md5: 7f18d8e55de7ec41a4114b43b7a9d782.dir
+      size: 12546540
+      nfiles: 6
+    - path: params/models/dla/bernstein_nf_lognormal.yaml
+      hash: md5
+      md5: 52bb170d850747a7de4e3704e30c2817
+      size: 688
+    - path: results/dla/bernstein_nf_lognormal/model_weights.h5
+      hash: md5
+      md5: 161f1bcd6812a53837b5cc4968769c14
+      size: 1742216
+    - path: results/dla/bernstein_nf_lognormal/parent_run_id.txt
+      hash: md5
+      md5: b6ce320961c75df9eafd5e07550f9f4c
+      size: 32
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: d3263d4b4c400b418fc3bca37cfa2d3d
+      size: 13939
+    - path: src/dcp_nf_forecast/
+      hash: md5
+      md5: d302b1abedd23439c3a26601234f4cfd.dir
+      size: 31931
+      nfiles: 8
+    params:
+      params.yaml:
+        data.data_format: feather
+        eval.n_samples: 1000
+        experiment_name: dcp_nf_forecast
+        log_file: logs/pipeline.log
+        log_level: info
+        seed: 42
+        targets:
+        - name: dla
+          y_column: dla_stromverbrauch_kwh
+          prediction_horizon: 12
+          lag_columns: dla_stromverbrauch_kwh:96
+        - name: ofen_g_koks
+          y_column: ofen_g_koks_kg
+          prediction_horizon: 12
+          lag_columns: ofen_g_koks_kg:96
+        - name: ofen_f_koks
+          y_column: ofen_f_koks_kg
+          prediction_horizon: 12
+          lag_columns: ofen_f_koks_kg:96
+        - name: pl2
+          y_column: pl2_stromverbrauch_kwh
+          prediction_horizon: 12
+          lag_columns: pl2_stromverbrauch_kwh:96
+        test_mode: true
+      params/models/dla/bernstein_nf_lognormal.yaml:
+        compile_kwargs: {}
+        fit_kwargs:
+          batch_size: 256
+          early_stopping_patience: 10
+          epochs: 50
+          learning_rate: 0.001
+          verbose: true
+        model_kwargs:
+          distribution: masked_autoregressive_flow
+          num_layers: 1
+          bijector: BernsteinPolynomial
+          bijector_kwargs:
+            domain:
+            - 0
+            - 1
+            extrapolation: false
+          invert: true
+          base_distribution_kwargs:
+            distribution_name: lognormal
+          num_parameters: 96
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_thetas_constrain_fn
+          parameters_constraint_fn_kwargs:
+            allow_flexible_bounds: false
+            bounds: none
+            low: 0.007
+            high: 148
+          parameters_fn_kwargs:
+            activation: relu
+            hidden_units:
+            - 256
+            - 256
+            - 256
+            conditional: true
+    outs:
+    - path: results/dla/bernstein_nf_lognormal/evaluation/calibration.pdf
+      hash: md5
+      md5: d848a92f8dca4d6945dc58b99ee04495
+      size: 23863
+    - path: results/dla/bernstein_nf_lognormal/evaluation/forecast.pdf
+      hash: md5
+      md5: 7f02901ebddd9695b693c3e7319a0a12
+      size: 55213
+    - path: results/dla/bernstein_nf_lognormal/evaluation/metrics.yaml
+      hash: md5
+      md5: 7b54c602e8ace567b83b9f8368d8fcb0
+      size: 90
+    - path: results/dla/bernstein_nf_lognormal/evaluation/pit_histogram.pdf
+      hash: md5
+      md5: 2644ec2aa5f976e356abf92fbc0fb4fa
+      size: 21626

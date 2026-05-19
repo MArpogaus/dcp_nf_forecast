@@ -25,6 +25,7 @@ def main() -> None:
     parser.add_argument("--data-format", required=True, type=str)
     parser.add_argument("--prediction-horizon", required=True, type=int)
     parser.add_argument("--stage-name", required=True, type=str)
+    parser.add_argument("--experiment-name", required=True, type=str)
     parser.add_argument("--test-mode", required=True, type=str)
     parser.add_argument("--log-level", required=True, type=str)
     parser.add_argument("--log-file", required=True, type=str)
@@ -35,6 +36,8 @@ def main() -> None:
     run_name = f"{args.model}_{args.target_name}"
     results_dir = Path("results") / args.target_name / args.model
     results_dir.mkdir(parents=True, exist_ok=True)
+
+    experiment_name = args.experiment_name + ("_test" if test_mode else "")
 
     params = dvc.api.params_show(stages=args.stage_name)
     prefix = f"params/models/{args.target_name}/{args.model}.yaml:"
@@ -63,79 +66,88 @@ def main() -> None:
         model_kwargs,
     )
 
-    with start_run_with_exception_logging(run_name=run_name):
-        log_cfg(
-            vars(args)
-            | {
-                f"{prefix}model_kwargs": model_kwargs,
-                f"{prefix}fit_kwargs": fit_kwargs,
-                f"{prefix}compile_kwargs": compile_kwargs,
-            }
-        )
-        mlflow.tensorflow.autolog(checkpoint_save_weights_only=True)
+    mlflow.set_experiment(experiment_name)
 
-        model = DensityRegressionModel(dims=dims, **model_kwargs)
+    with mlflow.start_run(run_name=run_name) as parent_run:
+        parent_run_id_file = results_dir / "parent_run_id.txt"
+        with open(parent_run_id_file, "w") as f:
+            f.write(parent_run.info.run_id)
 
-        model.compile(
-            optimizer=tf.keras.optimizers.Adam(
-                learning_rate=fit_kwargs["learning_rate"]
-            ),
-            loss=lambda y, p_y: -p_y.log_prob(y),
-            **compile_kwargs,
-        )
+        with start_run_with_exception_logging(run_name=f"{run_name}_training"):
+            mlflow.set_tag("stage", "training")
+            mlflow.log_dict(params, "dvc_params.yaml")
+            log_cfg(
+                vars(args)
+                | {
+                    f"{prefix}model_kwargs": model_kwargs,
+                    f"{prefix}fit_kwargs": fit_kwargs,
+                    f"{prefix}compile_kwargs": compile_kwargs,
+                }
+            )
+            mlflow.tensorflow.autolog(checkpoint_save_weights_only=True)
 
-        logger.info(
-            "Training %s: epochs=%d batch_size=%d test_mode=%s",
-            run_name,
-            fit_kwargs["epochs"],
-            fit_kwargs["batch_size"],
-            test_mode,
-        )
+            model = DensityRegressionModel(dims=dims, **model_kwargs)
 
-        callbacks: list[tf.keras.callbacks.Callback] = []
-        patience = fit_kwargs["early_stopping_patience"]
-        if not test_mode and patience > 0:
-            callbacks.append(
-                tf.keras.callbacks.EarlyStopping(
-                    patience=patience,
-                    restore_best_weights=True,
-                )
+            model.compile(
+                optimizer=tf.keras.optimizers.Adam(
+                    learning_rate=fit_kwargs["learning_rate"]
+                ),
+                loss=lambda y, p_y: -p_y.log_prob(y),
+                **compile_kwargs,
             )
 
-        history = model.fit(
-            x=x_train,
-            y=y_train,
-            validation_data=(x_val, y_val),
-            epochs=fit_kwargs["epochs"],
-            batch_size=fit_kwargs["batch_size"],
-            callbacks=callbacks,
-            verbose=int(fit_kwargs["verbose"]),
-        )
+            logger.info(
+                "Training %s: epochs=%d batch_size=%d test_mode=%s",
+                run_name,
+                fit_kwargs["epochs"],
+                fit_kwargs["batch_size"],
+                test_mode,
+            )
 
-        model.save_weights(str(results_dir / "model_weights.h5"))
+            callbacks: list[tf.keras.callbacks.Callback] = []
+            patience = fit_kwargs["early_stopping_patience"]
+            if not test_mode and patience > 0:
+                callbacks.append(
+                    tf.keras.callbacks.EarlyStopping(
+                        patience=patience,
+                        restore_best_weights=True,
+                    )
+                )
 
-        hist = history.history
-        min_idx = int(np.argmin(hist["val_loss"]))
-        min_loss = float(hist["loss"][min_idx])
-        min_val_loss = float(hist["val_loss"][min_idx])
+            history = model.fit(
+                x=x_train,
+                y=y_train,
+                validation_data=(x_val, y_val),
+                epochs=fit_kwargs["epochs"],
+                batch_size=fit_kwargs["batch_size"],
+                callbacks=callbacks,
+                verbose=int(fit_kwargs["verbose"]),
+            )
 
-        mlflow.log_metric("best_epoch", min_idx)
-        mlflow.log_metric("final_epoch", len(hist["loss"]))
-        mlflow.log_metric("min_loss", min_loss)
-        mlflow.log_metric("min_val_loss", min_val_loss)
+            model.save_weights(str(results_dir / "model_weights.h5"))
 
-        metrics = {
-            "final_train_loss": float(hist["loss"][-1]),
-            "final_val_loss": float(hist["val_loss"][-1]),
-            "best_epoch": min_idx,
-            "min_loss": min_loss,
-            "min_val_loss": min_val_loss,
-        }
-        with open(results_dir / "metrics.yaml", "w") as f:
-            yaml.dump(metrics, f)
+            hist = history.history
+            min_idx = int(np.argmin(hist["val_loss"]))
+            min_loss = float(hist["loss"][min_idx])
+            min_val_loss = float(hist["val_loss"][min_idx])
 
-        mlflow.log_artifacts(str(results_dir))
-        logger.info("Saved weights + metrics to %s", results_dir)
+            mlflow.log_metric("best_epoch", min_idx)
+            mlflow.log_metric("final_epoch", len(hist["loss"]))
+            mlflow.log_metric("min_loss", min_loss)
+            mlflow.log_metric("min_val_loss", min_val_loss)
+
+            metrics = {
+                "final_train_loss": float(hist["loss"][-1]),
+                "final_val_loss": float(hist["val_loss"][-1]),
+                "best_epoch": min_idx,
+                "min_loss": min_loss,
+                "min_val_loss": min_val_loss,
+            }
+            with open(results_dir / "metrics.yaml", "w") as f:
+                yaml.dump(metrics, f)
+
+            mlflow.log_artifacts(str(results_dir))
+            logger.info("Saved weights + metrics to %s", results_dir)
 
 
 if __name__ == "__main__":

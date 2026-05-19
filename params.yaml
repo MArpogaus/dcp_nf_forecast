@@ -1,7 +1,8 @@
+experiment_name: dcp_nf_forecast
 log_level: info
 log_file: logs/pipeline.log
 seed: 42
-test_mode: true
+test_mode: false
 
 paths:
   raw_data: ../dcp/norm_data/norm_fondium_15_min_data_2023.csv
