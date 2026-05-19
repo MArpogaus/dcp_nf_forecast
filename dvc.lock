@@ -1126,7 +1126,8 @@ stages:
   train_spline@0:
     cmd: "python scripts/train.py --processed-dir data/processed/dla --target-name
       dla --model spline_nf --data-format feather --prediction-horizon 12 --stage-name
-      train_spline --test-mode true --log-level info --log-file logs/pipeline.log\n"
+      train_spline --experiment-name dcp_nf_forecast-dla --test-mode false --log-level
+      info --log-file logs/pipeline.log\n"
     deps:
     - path: data/processed/dla/
       hash: md5
@@ -1135,12 +1136,12 @@ stages:
       nfiles: 6
     - path: params/models/dla/spline_nf.yaml
       hash: md5
-      md5: f87a735c62c68547067362d70344ad34
-      size: 657
+      md5: 0a01f348c2130057ee61418e52bedf83
+      size: 659
     - path: scripts/train.py
       hash: md5
-      md5: 13dfe8ad62898b2c597a5b144ecda4e7
-      size: 4776
+      md5: 3cdf1e59436ec663b29459265373cb14
+      size: 5553
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: d302b1abedd23439c3a26601234f4cfd.dir
@@ -1149,6 +1150,7 @@ stages:
     params:
       params.yaml:
         data.data_format: feather
+        experiment_name: dcp_nf_forecast
         log_file: logs/pipeline.log
         log_level: info
         paths.data_processed: data/processed
@@ -1170,14 +1172,14 @@ stages:
           y_column: pl2_stromverbrauch_kwh
           prediction_horizon: 12
           lag_columns: pl2_stromverbrauch_kwh:96
-        test_mode: true
+        test_mode: false
       params/models/dla/spline_nf.yaml:
         compile_kwargs: {}
         fit_kwargs:
           batch_size: 256
           early_stopping_patience: 10
-          epochs: 50
-          learning_rate: 0.001
+          epochs: 100
+          learning_rate: 0.0005
           verbose: true
         model_kwargs:
           distribution: masked_autoregressive_flow
@@ -1205,12 +1207,16 @@ stages:
     outs:
     - path: results/dla/spline_nf/metrics.yaml
       hash: md5
-      md5: 308f6a10a137f604e1fb77f8dd7cc464
-      size: 150
+      md5: c0a3e4aee58e7c2864492a477c9c004c
+      size: 151
     - path: results/dla/spline_nf/model_weights.h5
       hash: md5
-      md5: 2bd1b2ef1e389da0ffb0639837e7ba59
+      md5: 94e775baecd42a2791c4b84dde66f225
       size: 1729880
+    - path: results/dla/spline_nf/parent_run_id.txt
+      hash: md5
+      md5: 8ddbe15567d696beedc0a2101e148f6e
+      size: 32
   train_spline@1:
     cmd: "python scripts/train.py --processed-dir data/processed/ofen_g_koks --target-name
       ofen_g_koks --model spline_nf --data-format feather --prediction-horizon 12
@@ -1878,3 +1884,215 @@ stages:
       hash: md5
       md5: 2644ec2aa5f976e356abf92fbc0fb4fa
       size: 21626
+  evaluate_spline@0:
+    cmd: "python scripts/evaluate.py --processed-dir data/processed/dla --target-name
+      dla --model spline_nf --data-format feather --prediction-horizon 12 --n-samples
+      1000 --stage-name evaluate_spline --experiment-name dcp_nf_forecast-dla --test-mode
+      false --log-level info --log-file logs/pipeline.log\n"
+    deps:
+    - path: data/processed/dla/
+      hash: md5
+      md5: 7f18d8e55de7ec41a4114b43b7a9d782.dir
+      size: 12546540
+      nfiles: 6
+    - path: params/models/dla/spline_nf.yaml
+      hash: md5
+      md5: 0a01f348c2130057ee61418e52bedf83
+      size: 659
+    - path: results/dla/spline_nf/model_weights.h5
+      hash: md5
+      md5: 94e775baecd42a2791c4b84dde66f225
+      size: 1729880
+    - path: results/dla/spline_nf/parent_run_id.txt
+      hash: md5
+      md5: 8ddbe15567d696beedc0a2101e148f6e
+      size: 32
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: 0891f1c7dfc7a5b3953a2572a1ca70e2
+      size: 11158
+    - path: src/dcp_nf_forecast/
+      hash: md5
+      md5: d302b1abedd23439c3a26601234f4cfd.dir
+      size: 31931
+      nfiles: 8
+    params:
+      params.yaml:
+        data.data_format: feather
+        eval.n_samples: 1000
+        experiment_name: dcp_nf_forecast
+        log_file: logs/pipeline.log
+        log_level: info
+        seed: 42
+        targets:
+        - name: dla
+          y_column: dla_stromverbrauch_kwh
+          prediction_horizon: 12
+          lag_columns: dla_stromverbrauch_kwh:96
+        - name: ofen_g_koks
+          y_column: ofen_g_koks_kg
+          prediction_horizon: 12
+          lag_columns: ofen_g_koks_kg:96
+        - name: ofen_f_koks
+          y_column: ofen_f_koks_kg
+          prediction_horizon: 12
+          lag_columns: ofen_f_koks_kg:96
+        - name: pl2
+          y_column: pl2_stromverbrauch_kwh
+          prediction_horizon: 12
+          lag_columns: pl2_stromverbrauch_kwh:96
+        test_mode: false
+      params/models/dla/spline_nf.yaml:
+        compile_kwargs: {}
+        fit_kwargs:
+          batch_size: 256
+          early_stopping_patience: 10
+          epochs: 100
+          learning_rate: 0.0005
+          verbose: true
+        model_kwargs:
+          distribution: masked_autoregressive_flow
+          num_layers: 1
+          bijector: RationalQuadraticSpline
+          bijector_kwargs:
+            range_min: -4
+          base_distribution_kwargs:
+            distribution_name: normal
+          num_parameters: 95
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_spline_param_constrain_fn
+          parameters_constraint_fn_kwargs:
+            interval_width: 8
+            min_slope: 0.001
+            min_bin_width: 0.001
+            nbins: 32
+          parameters_fn_kwargs:
+            activation: relu
+            hidden_units:
+            - 256
+            - 256
+            - 256
+            conditional: true
+    outs:
+    - path: results/dla/spline_nf/evaluation/calibration.pdf
+      hash: md5
+      md5: e279c277770ee493503dfbf556bedccb
+      size: 23904
+    - path: results/dla/spline_nf/evaluation/forecast.pdf
+      hash: md5
+      md5: 986f2a1dc84276bb2f76f7ba31a4165c
+      size: 53973
+    - path: results/dla/spline_nf/evaluation/metrics.yaml
+      hash: md5
+      md5: 31aaf2d4b88562ebaa37018dab1bedf3
+      size: 90
+    - path: results/dla/spline_nf/evaluation/pit_histogram.pdf
+      hash: md5
+      md5: bd0af7062e057012b8fdccc15cb4872b
+      size: 21536
+  evaluate_spline_lognormal@0:
+    cmd: "python scripts/evaluate.py --processed-dir data/processed/dla --target-name
+      dla --model spline_nf_lognormal --data-format feather --prediction-horizon 12
+      --n-samples 1000 --stage-name evaluate_spline_lognormal --experiment-name dcp_nf_forecast-dla
+      --test-mode false --log-level info --log-file logs/pipeline.log\n"
+    deps:
+    - path: data/processed/dla/
+      hash: md5
+      md5: 7f18d8e55de7ec41a4114b43b7a9d782.dir
+      size: 12546540
+      nfiles: 6
+    - path: params/models/dla/spline_nf_lognormal.yaml
+      hash: md5
+      md5: 04bbebaf8344f80ed33811a7daee7729
+      size: 661
+    - path: results/dla/spline_nf_lognormal/model_weights.h5
+      hash: md5
+      md5: d777cbae0bdf6a0cc407e8f267d0d81a
+      size: 1729880
+    - path: results/dla/spline_nf_lognormal/parent_run_id.txt
+      hash: md5
+      md5: 61682433529fd8623cde252976affabd
+      size: 32
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: 0891f1c7dfc7a5b3953a2572a1ca70e2
+      size: 11158
+    - path: src/dcp_nf_forecast/
+      hash: md5
+      md5: d302b1abedd23439c3a26601234f4cfd.dir
+      size: 31931
+      nfiles: 8
+    params:
+      params.yaml:
+        data.data_format: feather
+        eval.n_samples: 1000
+        experiment_name: dcp_nf_forecast
+        log_file: logs/pipeline.log
+        log_level: info
+        seed: 42
+        targets:
+        - name: dla
+          y_column: dla_stromverbrauch_kwh
+          prediction_horizon: 12
+          lag_columns: dla_stromverbrauch_kwh:96
+        - name: ofen_g_koks
+          y_column: ofen_g_koks_kg
+          prediction_horizon: 12
+          lag_columns: ofen_g_koks_kg:96
+        - name: ofen_f_koks
+          y_column: ofen_f_koks_kg
+          prediction_horizon: 12
+          lag_columns: ofen_f_koks_kg:96
+        - name: pl2
+          y_column: pl2_stromverbrauch_kwh
+          prediction_horizon: 12
+          lag_columns: pl2_stromverbrauch_kwh:96
+        test_mode: false
+      params/models/dla/spline_nf_lognormal.yaml:
+        compile_kwargs: {}
+        fit_kwargs:
+          batch_size: 256
+          early_stopping_patience: 10
+          epochs: 100
+          learning_rate: 0.0005
+          verbose: true
+        model_kwargs:
+          distribution: masked_autoregressive_flow
+          num_layers: 1
+          bijector: RationalQuadraticSpline
+          bijector_kwargs:
+            range_min: 0
+          base_distribution_kwargs:
+            distribution_name: lognormal
+          num_parameters: 95
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_spline_param_constrain_fn
+          parameters_constraint_fn_kwargs:
+            interval_width: 4
+            min_slope: 0.001
+            min_bin_width: 0.001
+            nbins: 32
+          parameters_fn_kwargs:
+            activation: relu
+            hidden_units:
+            - 256
+            - 256
+            - 256
+            conditional: true
+    outs:
+    - path: results/dla/spline_nf_lognormal/evaluation/calibration.pdf
+      hash: md5
+      md5: 6fcf6db4d4c14db2f88841f038c14267
+      size: 23793
+    - path: results/dla/spline_nf_lognormal/evaluation/forecast.pdf
+      hash: md5
+      md5: 4b5731d4b94dda84df5c644832f6c96a
+      size: 51812
+    - path: results/dla/spline_nf_lognormal/evaluation/metrics.yaml
+      hash: md5
+      md5: 02dc9059483f054389af448fd997b9a3
+      size: 88
+    - path: results/dla/spline_nf_lognormal/evaluation/pit_histogram.pdf
+      hash: md5
+      md5: dcfcdd4d9c0c297b487f1fd1b58f2acb
+      size: 21564
