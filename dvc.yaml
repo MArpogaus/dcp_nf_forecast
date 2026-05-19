@@ -108,11 +108,8 @@ stages:
         --model bernstein_nf
         --data-format ${data.data_format}
         --prediction-horizon ${item.prediction_horizon}
-        --epochs ${train.epochs}
-        --early-stopping-patience ${train.early_stopping_patience}
-        --test-mode ${train.test_mode}
-        --test-epochs ${train.test_epochs}
-        --test-batch-size ${train.test_batch_size}
+        --stage-name train_bernstein
+        --test-mode ${test_mode}
         --log-level ${log_level}
         --log-file ${log_file}
       deps:
@@ -121,14 +118,12 @@ stages:
       - data/processed/${item.name}/
       - params/models/${item.name}/bernstein_nf.yaml
       params:
+      - params/models/${item.name}/bernstein_nf.yaml:
       - paths.data_processed
       - data.data_format
       - targets
-      - train.epochs
-      - train.early_stopping_patience
-      - train.test_mode
-      - train.test_epochs
-      - train.test_batch_size
+      - seed
+      - test_mode
       - log_level
       - log_file
       outs:
@@ -146,11 +141,8 @@ stages:
         --model spline_nf
         --data-format ${data.data_format}
         --prediction-horizon ${item.prediction_horizon}
-        --epochs ${train.epochs}
-        --early-stopping-patience ${train.early_stopping_patience}
-        --test-mode ${train.test_mode}
-        --test-epochs ${train.test_epochs}
-        --test-batch-size ${train.test_batch_size}
+        --stage-name train_spline
+        --test-mode ${test_mode}
         --log-level ${log_level}
         --log-file ${log_file}
       deps:
@@ -159,14 +151,12 @@ stages:
       - data/processed/${item.name}/
       - params/models/${item.name}/spline_nf.yaml
       params:
+      - params/models/${item.name}/spline_nf.yaml:
       - paths.data_processed
       - data.data_format
       - targets
-      - train.epochs
-      - train.early_stopping_patience
-      - train.test_mode
-      - train.test_epochs
-      - train.test_batch_size
+      - seed
+      - test_mode
       - log_level
       - log_file
       outs:
@@ -174,38 +164,76 @@ stages:
       metrics:
       - results/${item.name}/spline_nf/metrics.yaml
 
-  evaluate:
+  evaluate_bernstein:
     foreach: ${targets}
     do:
       cmd: >
         python scripts/evaluate.py
         --processed-dir ${paths.data_processed}/${item.name}
         --target-name ${item.name}
-        --model ${item.eval_model}
+        --model bernstein_nf
         --data-format ${data.data_format}
         --prediction-horizon ${item.prediction_horizon}
         --n-samples ${eval.n_samples}
-        --test-mode ${train.test_mode}
+        --stage-name evaluate_bernstein
+        --test-mode ${test_mode}
         --log-level ${log_level}
         --log-file ${log_file}
       deps:
       - scripts/evaluate.py
-      - scripts/train.py
       - src/dcp_nf_forecast/
       - data/processed/${item.name}/
-      - results/${item.name}/${item.eval_model}/model_weights.h5
-      - params/models/${item.name}/${item.eval_model}.yaml
+      - results/${item.name}/bernstein_nf/model_weights.h5
+      - params/models/${item.name}/bernstein_nf.yaml
       params:
-      - paths.data_processed
+      - params/models/${item.name}/bernstein_nf.yaml:
       - data.data_format
       - targets
+      - seed
+      - test_mode
       - eval.n_samples
-      - train.test_mode
       - log_level
       - log_file
       outs:
-      - results/${item.name}/${item.eval_model}/evaluation/forecast.pdf
-      - results/${item.name}/${item.eval_model}/evaluation/pit_histogram.pdf
-      - results/${item.name}/${item.eval_model}/evaluation/calibration.pdf
+      - results/${item.name}/bernstein_nf/evaluation/forecast.pdf
+      - results/${item.name}/bernstein_nf/evaluation/pit_histogram.pdf
+      - results/${item.name}/bernstein_nf/evaluation/calibration.pdf
       metrics:
-      - results/${item.name}/${item.eval_model}/evaluation/metrics.yaml
+      - results/${item.name}/bernstein_nf/evaluation/metrics.yaml
+
+  evaluate_spline:
+    foreach: ${targets}
+    do:
+      cmd: >
+        python scripts/evaluate.py
+        --processed-dir ${paths.data_processed}/${item.name}
+        --target-name ${item.name}
+        --model spline_nf
+        --data-format ${data.data_format}
+        --prediction-horizon ${item.prediction_horizon}
+        --n-samples ${eval.n_samples}
+        --stage-name evaluate_spline
+        --test-mode ${test_mode}
+        --log-level ${log_level}
+        --log-file ${log_file}
+      deps:
+      - scripts/evaluate.py
+      - src/dcp_nf_forecast/
+      - data/processed/${item.name}/
+      - results/${item.name}/spline_nf/model_weights.h5
+      - params/models/${item.name}/spline_nf.yaml
+      params:
+      - params/models/${item.name}/spline_nf.yaml:
+      - data.data_format
+      - targets
+      - seed
+      - test_mode
+      - eval.n_samples
+      - log_level
+      - log_file
+      outs:
+      - results/${item.name}/spline_nf/evaluation/forecast.pdf
+      - results/${item.name}/spline_nf/evaluation/pit_histogram.pdf
+      - results/${item.name}/spline_nf/evaluation/calibration.pdf
+      metrics:
+      - results/${item.name}/spline_nf/evaluation/metrics.yaml

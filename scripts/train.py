@@ -1,24 +1,18 @@
 import argparse
 from pathlib import Path
 
+import dvc.api
 import mlflow
 import numpy as np
 import tensorflow as tf
 import yaml
+from hybrid_flows.models import DensityRegressionModel
 from hybrid_flows.utils.mlflow import (
     log_cfg,
     start_run_with_exception_logging,
 )
 
-from dcp_nf_forecast.models import (
-    create_bernstein_model,
-    create_spline_model,
-)
-from dcp_nf_forecast.utils import (
-    load_data,
-    load_model_params,
-    setup_logging,
-)
+from dcp_nf_forecast.utils import load_data, setup_logging
 
 
 def main() -> None:
@@ -27,81 +21,83 @@ def main() -> None:
     )
     parser.add_argument("--processed-dir", required=True, type=str)
     parser.add_argument("--target-name", required=True, type=str)
-    parser.add_argument(
-        "--model", required=True, type=str, choices=["bernstein_nf", "spline_nf"]
-    )
+    parser.add_argument("--model", required=True, type=str)
     parser.add_argument("--data-format", required=True, type=str)
     parser.add_argument("--prediction-horizon", required=True, type=int)
-    parser.add_argument("--epochs", required=True, type=int)
-    parser.add_argument("--early-stopping-patience", required=True, type=int)
+    parser.add_argument("--stage-name", required=True, type=str)
     parser.add_argument("--test-mode", required=True, type=str)
-    parser.add_argument("--test-epochs", required=True, type=int)
-    parser.add_argument("--test-batch-size", required=True, type=int)
     parser.add_argument("--log-level", required=True, type=str)
     parser.add_argument("--log-file", required=True, type=str)
     args = parser.parse_args()
 
     logger = setup_logging(args.log_level, args.log_file)
-
-    processed_dir = Path(args.processed_dir)
     test_mode = args.test_mode.lower() in ("true", "1", "yes")
     run_name = f"{args.model}_{args.target_name}"
     results_dir = Path("results") / args.target_name / args.model
     results_dir.mkdir(parents=True, exist_ok=True)
 
-    x_train, y_train = load_data(processed_dir, "train", args.data_format)
-    x_val, y_val = load_data(processed_dir, "val", args.data_format)
-    covariate_dim = x_train.shape[1]
-    model_cfg = load_model_params(args.target_name, args.model)
+    params = dvc.api.params_show(stages=args.stage_name)
+    prefix = f"params/models/{args.target_name}/{args.model}.yaml:"
+    compile_kwargs = params.get(f"{prefix}compile_kwargs", {})
+    fit_kwargs = params[f"{prefix}fit_kwargs"]
+    model_kwargs = params[f"{prefix}model_kwargs"]
 
-    epochs = args.test_epochs if test_mode else args.epochs
-    batch_size = args.test_batch_size if test_mode else model_cfg["batch_size"]
+    if test_mode:
+        fit_kwargs["epochs"] = 1
+
+    x_train, y_train = load_data(Path(args.processed_dir), "train", args.data_format)
+    x_val, y_val = load_data(Path(args.processed_dir), "val", args.data_format)
+    covariate_dim = x_train.shape[1]
+
+    dims = args.prediction_horizon
+
+    pk = model_kwargs["parameters_fn_kwargs"]
+    pk["conditional_event_shape"] = covariate_dim
+    model_kwargs["parameters_fn_kwargs"] = pk
 
     logger.info(
-        "Creating %s: dims=%d cov=%d cfg=%s",
+        "Creating %s: dims=%d cov=%d model_kwargs=%s",
         run_name,
-        args.prediction_horizon,
+        dims,
         covariate_dim,
-        model_cfg,
+        model_kwargs,
     )
 
     with start_run_with_exception_logging(run_name=run_name):
-        log_cfg(vars(args) | {"model_params": model_cfg})
+        log_cfg(
+            vars(args)
+            | {
+                f"{prefix}model_kwargs": model_kwargs,
+                f"{prefix}fit_kwargs": fit_kwargs,
+                f"{prefix}compile_kwargs": compile_kwargs,
+            }
+        )
         mlflow.tensorflow.autolog(checkpoint_save_weights_only=True)
 
-        if "bernstein" in args.model:
-            model = create_bernstein_model(
-                dims=args.prediction_horizon,
-                covariate_dim=covariate_dim,
-                cfg=model_cfg,
-            )
-        else:
-            model = create_spline_model(
-                dims=args.prediction_horizon,
-                covariate_dim=covariate_dim,
-                cfg=model_cfg,
-            )
+        model = DensityRegressionModel(dims=dims, **model_kwargs)
 
         model.compile(
             optimizer=tf.keras.optimizers.Adam(
-                learning_rate=model_cfg["learning_rate"]
+                learning_rate=fit_kwargs["learning_rate"]
             ),
             loss=lambda y, p_y: -p_y.log_prob(y),
+            **compile_kwargs,
         )
 
         logger.info(
             "Training %s: epochs=%d batch_size=%d test_mode=%s",
             run_name,
-            epochs,
-            batch_size,
+            fit_kwargs["epochs"],
+            fit_kwargs["batch_size"],
             test_mode,
         )
 
         callbacks: list[tf.keras.callbacks.Callback] = []
-        if not test_mode:
+        patience = fit_kwargs["early_stopping_patience"]
+        if not test_mode and patience > 0:
             callbacks.append(
                 tf.keras.callbacks.EarlyStopping(
-                    patience=args.early_stopping_patience,
+                    patience=patience,
                     restore_best_weights=True,
                 )
             )
@@ -110,10 +106,10 @@ def main() -> None:
             x=x_train,
             y=y_train,
             validation_data=(x_val, y_val),
-            epochs=epochs,
-            batch_size=batch_size,
+            epochs=fit_kwargs["epochs"],
+            batch_size=fit_kwargs["batch_size"],
             callbacks=callbacks,
-            verbose=1,
+            verbose=int(fit_kwargs["verbose"]),
         )
 
         model.save_weights(str(results_dir / "model_weights.h5"))
@@ -139,7 +135,6 @@ def main() -> None:
             yaml.dump(metrics, f)
 
         mlflow.log_artifacts(str(results_dir))
-
         logger.info("Saved weights + metrics to %s", results_dir)
 
 

@@ -5,6 +5,7 @@ from pathlib import Path
 import matplotlib
 
 matplotlib.use("Agg")
+import dvc.api
 import matplotlib.pyplot as plt
 import mlflow
 import numpy as np
@@ -17,15 +18,7 @@ from hybrid_flows.utils.mlflow import (
     start_run_with_exception_logging,
 )
 
-from dcp_nf_forecast.models import (
-    create_bernstein_model,
-    create_spline_model,
-)
-from dcp_nf_forecast.utils import (
-    load_data,
-    load_model_params,
-    setup_logging,
-)
+from dcp_nf_forecast.utils import load_data, setup_logging
 
 logger = logging.getLogger(__name__)
 
@@ -49,17 +42,26 @@ plt.rcParams.update(
 def sample_predictions(
     model: DensityRegressionModel,
     x: np.ndarray,
-    n_samples: int = 1000,
-    batch_size: int = 256,
+    n_samples: int,
+    batch_size: int,
 ) -> np.ndarray:
-    dist = model(x[:batch_size], training=False)
-    samples = dist.sample(n_samples)
-    all_samples = [np.array(samples)]
-    for i in range(batch_size, len(x), batch_size):
-        dist = model(x[i : i + batch_size], training=False)
+    n = len(x)
+    all_samples = []
+    pad = 0
+    remainder = n % batch_size
+    if remainder:
+        pad = batch_size - remainder
+        x = np.pad(x, ((0, pad), (0, 0)), mode="edge")
+    for i in range(0, len(x), batch_size):
+        batch = x[i : i + batch_size]
+        dist = model(batch, training=False)
         samples = dist.sample(n_samples)
-        all_samples.append(np.array(samples))
-    return np.concatenate(all_samples, axis=1)
+        all_samples.append(np.array(samples, dtype=np.float32))
+    result = np.concatenate(all_samples, axis=1)
+    if pad:
+        result = result[:, :n, :]
+    del all_samples
+    return result
 
 
 def plot_forecast_with_intervals(
@@ -157,7 +159,7 @@ def plot_pit_histogram(
     for j in range(n_steps, len(axes)):
         axes[j].set_visible(False)
 
-    fig.suptitle(f"PIT Histogram – {title}", fontsize=12)
+    fig.suptitle(f"PIT Histogram \u2013 {title}", fontsize=12)
     fig.tight_layout()
     return fig
 
@@ -196,7 +198,7 @@ def plot_calibration(
     for j in range(n_steps, len(axes)):
         axes[j].set_visible(False)
 
-    fig.suptitle(f"Calibration Plot – {title}", fontsize=12)
+    fig.suptitle(f"Calibration Plot \u2013 {title}", fontsize=12)
     fig.supxlabel("Nominal coverage")
     fig.supylabel("Empirical coverage")
     fig.tight_layout()
@@ -225,12 +227,11 @@ def main() -> None:
     )
     parser.add_argument("--processed-dir", required=True, type=str)
     parser.add_argument("--target-name", required=True, type=str)
-    parser.add_argument(
-        "--model", required=True, type=str, choices=["bernstein_nf", "spline_nf"]
-    )
+    parser.add_argument("--model", required=True, type=str)
     parser.add_argument("--data-format", required=True, type=str)
     parser.add_argument("--prediction-horizon", required=True, type=int)
     parser.add_argument("--n-samples", required=True, type=int)
+    parser.add_argument("--stage-name", required=True, type=str)
     parser.add_argument("--test-mode", required=True, type=str)
     parser.add_argument("--log-level", required=True, type=str)
     parser.add_argument("--log-file", required=True, type=str)
@@ -243,33 +244,31 @@ def main() -> None:
     processed_dir = Path(args.processed_dir)
     results_dir = Path("results") / args.target_name / args.model
 
-    model_cfg = load_model_params(args.target_name, args.model)
+    params = dvc.api.params_show(stages=args.stage_name)
+    prefix = f"params/models/{args.target_name}/{args.model}.yaml:"
+    model_kwargs = params[f"{prefix}model_kwargs"]
+
     x_test, y_test = load_data(processed_dir, "test", args.data_format)
     covariate_dim = x_test.shape[1]
 
-    n_eval = min(len(x_test), 100 if test_mode else 500)
+    pk = model_kwargs["parameters_fn_kwargs"]
+    pk["conditional_event_shape"] = covariate_dim
+    model_kwargs["parameters_fn_kwargs"] = pk
+
+    n_eval = min(len(x_test), 100 if test_mode else 150)
     x_test, y_test = x_test[:n_eval], y_test[:n_eval]
     n_samples = 50 if test_mode else args.n_samples
+    batch_size = min(n_eval, 16)
 
     logger.info(
         "Loaded test data: X=%s y=%s (n_eval=%d)", x_test.shape, y_test.shape, n_eval
     )
 
-    if "bernstein" in args.model:
-        model = create_bernstein_model(
-            dims=args.prediction_horizon,
-            covariate_dim=covariate_dim,
-            cfg=model_cfg,
-        )
-    else:
-        model = create_spline_model(
-            dims=args.prediction_horizon,
-            covariate_dim=covariate_dim,
-            cfg=model_cfg,
-        )
+    dims = args.prediction_horizon
+    model = DensityRegressionModel(dims=dims, **model_kwargs)
 
     model.compile(
-        optimizer=tf.keras.optimizers.Adam(learning_rate=model_cfg["learning_rate"]),
+        optimizer=tf.keras.optimizers.Adam(learning_rate=0.001),
         loss=lambda y, p_y: -p_y.log_prob(y),
     )
     model(x_test[:1], training=False)
@@ -277,11 +276,14 @@ def main() -> None:
     logger.info("Loaded weights from %s", results_dir)
 
     with start_run_with_exception_logging(run_name=run_name):
-        log_cfg(vars(args) | {"model_params": model_cfg})
+        log_cfg(vars(args))
+        mlflow.log_params({"model_kwargs": str(model_kwargs)})
         mlflow.tensorflow.autolog()
 
         logger.info("Sampling %d draws from predictive distribution ...", n_samples)
-        samples = sample_predictions(model, x_test, n_samples=n_samples)
+        samples = sample_predictions(
+            model, x_test, n_samples=n_samples, batch_size=batch_size
+        )
         logger.info("Sampled shape: %s", samples.shape)
 
         out_dir = results_dir / "evaluation"
@@ -292,7 +294,7 @@ def main() -> None:
             y_test,
             samples,
             n_show=48,
-            title=f"{args.model} – {args.target_name}",
+            title=f"{args.model} \u2013 {args.target_name}",
         )
         log_and_save_figure(fig, str(out_dir), "forecast", "pdf", dpi=300)
         log_and_save_figure(fig, str(out_dir), "forecast", "png", dpi=150)
@@ -303,7 +305,7 @@ def main() -> None:
             y_test,
             samples,
             n_bins=20,
-            title=f"{args.model} – {args.target_name}",
+            title=f"{args.model} \u2013 {args.target_name}",
         )
         log_and_save_figure(fig, str(out_dir), "pit_histogram", "pdf", dpi=300)
         log_and_save_figure(fig, str(out_dir), "pit_histogram", "png", dpi=150)
@@ -313,7 +315,7 @@ def main() -> None:
         fig = plot_calibration(
             y_test,
             samples,
-            title=f"{args.model} – {args.target_name}",
+            title=f"{args.model} \u2013 {args.target_name}",
         )
         log_and_save_figure(fig, str(out_dir), "calibration", "pdf", dpi=300)
         log_and_save_figure(fig, str(out_dir), "calibration", "png", dpi=150)
@@ -327,7 +329,6 @@ def main() -> None:
             yaml.dump(metrics, f)
 
         mlflow.log_artifacts(str(results_dir))
-
         logger.info("Evaluation saved to %s", out_dir)
 
 

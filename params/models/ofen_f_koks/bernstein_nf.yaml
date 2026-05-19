@@ -1,6 +1,28 @@
-num_layers: 1
-polynomial_order: 8
-hidden_units: [128, 128]
-activation: relu
-learning_rate: 0.001
-batch_size: 256
+compile_kwargs: {}
+fit_kwargs:
+  batch_size: 256
+  early_stopping_patience: 15
+  epochs: 5
+  learning_rate: 0.001
+  verbose: true
+model_kwargs:
+  distribution: masked_autoregressive_flow
+  num_layers: 1
+  bijector: BernsteinPolynomial
+  bijector_kwargs:
+    domain: [0, 1]
+    extrapolation: false
+  invert: true
+  base_distribution_kwargs:
+    distribution_name: lognormal
+  num_parameters: 96
+  parameters_constraint_fn: hybrid_flows.activations.get_thetas_constrain_fn
+  parameters_constraint_fn_kwargs:
+    allow_flexible_bounds: false
+    bounds: linear
+    low: -4
+    high: 4
+  parameters_fn_kwargs:
+    activation: relu
+    hidden_units: [128, 128]
+    conditional: true

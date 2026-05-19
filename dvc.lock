@@ -18,8 +18,8 @@ stages:
       size: 3178
     - path: src/dcp_nf_forecast/
       hash: md5
-      md5: dc038636e9897da79633b1030444b3d5.dir
-      size: 36235
+      md5: d302b1abedd23439c3a26601234f4cfd.dir
+      size: 31931
       nfiles: 8
     params:
       params.yaml:
@@ -37,22 +37,18 @@ stages:
           y_column: dla_stromverbrauch_kwh
           prediction_horizon: 12
           lag_columns: dla_stromverbrauch_kwh:96
-          eval_model: bernstein_nf
         - name: ofen_g_koks
           y_column: ofen_g_koks_kg
           prediction_horizon: 12
           lag_columns: ofen_g_koks_kg:96
-          eval_model: bernstein_nf
         - name: ofen_f_koks
           y_column: ofen_f_koks_kg
           prediction_horizon: 12
           lag_columns: ofen_f_koks_kg:96
-          eval_model: bernstein_nf
         - name: pl2
           y_column: pl2_stromverbrauch_kwh
           prediction_horizon: 12
           lag_columns: pl2_stromverbrauch_kwh:96
-          eval_model: bernstein_nf
     outs:
     - path: data/interim/dla/X.feather
       hash: md5
@@ -62,192 +58,6 @@ stages:
       hash: md5
       md5: b9840c20c86c91ee9c150ad883d43565
       size: 1345794
-  prepare@1:
-    cmd: "python scripts/prepare_features.py --raw-data-path ../dcp/norm_data/norm_fondium_15_min_data_2023.csv
-      --datetime-column new_time --fillna-method ffill --tabular-covariate-columns
-      none --time-components time,day_of_week,day_of_year --target-name ofen_g_koks
-      --y-column ofen_g_koks_kg --prediction-horizon 12 --lag-columns ofen_g_koks_kg:96
-      --output-dir data/interim/ofen_g_koks --data-format feather --log-level info
-      --log-file logs/pipeline.log\n"
-    deps:
-    - path: ../dcp/norm_data/norm_fondium_15_min_data_2023.csv
-      hash: md5
-      md5: eb8c9dbf528fea5a3334dfae8c6325a7
-      size: 7781885
-    - path: scripts/prepare_features.py
-      hash: md5
-      md5: 2d3c4c33cad24cb3b37023b7e1f2faed
-      size: 3178
-    - path: src/dcp_nf_forecast/
-      hash: md5
-      md5: dc038636e9897da79633b1030444b3d5.dir
-      size: 36235
-      nfiles: 8
-    params:
-      params.yaml:
-        data.data_format: feather
-        data.datetime_column: new_time
-        data.fillna_method: ffill
-        data.tabular_covariate_columns: none
-        data.time_components: time,day_of_week,day_of_year
-        log_file: logs/pipeline.log
-        log_level: info
-        paths.data_interim: data/interim
-        paths.raw_data: ../dcp/norm_data/norm_fondium_15_min_data_2023.csv
-        targets:
-        - name: dla
-          y_column: dla_stromverbrauch_kwh
-          prediction_horizon: 12
-          lag_columns: dla_stromverbrauch_kwh:96
-          eval_model: bernstein_nf
-        - name: ofen_g_koks
-          y_column: ofen_g_koks_kg
-          prediction_horizon: 12
-          lag_columns: ofen_g_koks_kg:96
-          eval_model: bernstein_nf
-        - name: ofen_f_koks
-          y_column: ofen_f_koks_kg
-          prediction_horizon: 12
-          lag_columns: ofen_f_koks_kg:96
-          eval_model: bernstein_nf
-        - name: pl2
-          y_column: pl2_stromverbrauch_kwh
-          prediction_horizon: 12
-          lag_columns: pl2_stromverbrauch_kwh:96
-          eval_model: bernstein_nf
-    outs:
-    - path: data/interim/ofen_g_koks/X.feather
-      hash: md5
-      md5: ad0e4bd838b9b5802b6bd568dd0c133e
-      size: 19022842
-    - path: data/interim/ofen_g_koks/y.feather
-      hash: md5
-      md5: dabece93d5925475705459861686a6fe
-      size: 2375378
-  prepare@2:
-    cmd: "python scripts/prepare_features.py --raw-data-path ../dcp/norm_data/norm_fondium_15_min_data_2023.csv
-      --datetime-column new_time --fillna-method ffill --tabular-covariate-columns
-      none --time-components time,day_of_week,day_of_year --target-name ofen_f_koks
-      --y-column ofen_f_koks_kg --prediction-horizon 12 --lag-columns ofen_f_koks_kg:96
-      --output-dir data/interim/ofen_f_koks --data-format feather --log-level info
-      --log-file logs/pipeline.log\n"
-    deps:
-    - path: ../dcp/norm_data/norm_fondium_15_min_data_2023.csv
-      hash: md5
-      md5: eb8c9dbf528fea5a3334dfae8c6325a7
-      size: 7781885
-    - path: scripts/prepare_features.py
-      hash: md5
-      md5: 2d3c4c33cad24cb3b37023b7e1f2faed
-      size: 3178
-    - path: src/dcp_nf_forecast/
-      hash: md5
-      md5: dc038636e9897da79633b1030444b3d5.dir
-      size: 36235
-      nfiles: 8
-    params:
-      params.yaml:
-        data.data_format: feather
-        data.datetime_column: new_time
-        data.fillna_method: ffill
-        data.tabular_covariate_columns: none
-        data.time_components: time,day_of_week,day_of_year
-        log_file: logs/pipeline.log
-        log_level: info
-        paths.data_interim: data/interim
-        paths.raw_data: ../dcp/norm_data/norm_fondium_15_min_data_2023.csv
-        targets:
-        - name: dla
-          y_column: dla_stromverbrauch_kwh
-          prediction_horizon: 12
-          lag_columns: dla_stromverbrauch_kwh:96
-          eval_model: bernstein_nf
-        - name: ofen_g_koks
-          y_column: ofen_g_koks_kg
-          prediction_horizon: 12
-          lag_columns: ofen_g_koks_kg:96
-          eval_model: bernstein_nf
-        - name: ofen_f_koks
-          y_column: ofen_f_koks_kg
-          prediction_horizon: 12
-          lag_columns: ofen_f_koks_kg:96
-          eval_model: bernstein_nf
-        - name: pl2
-          y_column: pl2_stromverbrauch_kwh
-          prediction_horizon: 12
-          lag_columns: pl2_stromverbrauch_kwh:96
-          eval_model: bernstein_nf
-    outs:
-    - path: data/interim/ofen_f_koks/X.feather
-      hash: md5
-      md5: 16a8d939ee01ad5f80053f47c612dec4
-      size: 18230394
-    - path: data/interim/ofen_f_koks/y.feather
-      hash: md5
-      md5: 7235c9f7c483942b0ccf2c830c51db9a
-      size: 2276642
-  prepare@3:
-    cmd: "python scripts/prepare_features.py --raw-data-path ../dcp/norm_data/norm_fondium_15_min_data_2023.csv
-      --datetime-column new_time --fillna-method ffill --tabular-covariate-columns
-      none --time-components time,day_of_week,day_of_year --target-name pl2 --y-column
-      pl2_stromverbrauch_kwh --prediction-horizon 12 --lag-columns pl2_stromverbrauch_kwh:96
-      --output-dir data/interim/pl2 --data-format feather --log-level info --log-file
-      logs/pipeline.log\n"
-    deps:
-    - path: ../dcp/norm_data/norm_fondium_15_min_data_2023.csv
-      hash: md5
-      md5: eb8c9dbf528fea5a3334dfae8c6325a7
-      size: 7781885
-    - path: scripts/prepare_features.py
-      hash: md5
-      md5: 2d3c4c33cad24cb3b37023b7e1f2faed
-      size: 3178
-    - path: src/dcp_nf_forecast/
-      hash: md5
-      md5: dc038636e9897da79633b1030444b3d5.dir
-      size: 36235
-      nfiles: 8
-    params:
-      params.yaml:
-        data.data_format: feather
-        data.datetime_column: new_time
-        data.fillna_method: ffill
-        data.tabular_covariate_columns: none
-        data.time_components: time,day_of_week,day_of_year
-        log_file: logs/pipeline.log
-        log_level: info
-        paths.data_interim: data/interim
-        paths.raw_data: ../dcp/norm_data/norm_fondium_15_min_data_2023.csv
-        targets:
-        - name: dla
-          y_column: dla_stromverbrauch_kwh
-          prediction_horizon: 12
-          lag_columns: dla_stromverbrauch_kwh:96
-          eval_model: bernstein_nf
-        - name: ofen_g_koks
-          y_column: ofen_g_koks_kg
-          prediction_horizon: 12
-          lag_columns: ofen_g_koks_kg:96
-          eval_model: bernstein_nf
-        - name: ofen_f_koks
-          y_column: ofen_f_koks_kg
-          prediction_horizon: 12
-          lag_columns: ofen_f_koks_kg:96
-          eval_model: bernstein_nf
-        - name: pl2
-          y_column: pl2_stromverbrauch_kwh
-          prediction_horizon: 12
-          lag_columns: pl2_stromverbrauch_kwh:96
-          eval_model: bernstein_nf
-    outs:
-    - path: data/interim/pl2/X.feather
-      hash: md5
-      md5: b2076641a8e5de5e1a8ee2af60ee495c
-      size: 22644906
-    - path: data/interim/pl2/y.feather
-      hash: md5
-      md5: 0b7908184a918ff210556612b4161fb4
-      size: 2822194
   split@0:
     cmd: "python scripts/split_data.py --input-dir data/interim/dla --output-dir data/processed/dla
       --train-ratio 0.8 --val-ratio 0.1 --test-ratio 0.1 --data-format feather --log-level
@@ -264,8 +74,8 @@ stages:
       size: 1858
     - path: src/dcp_nf_forecast/
       hash: md5
-      md5: dc038636e9897da79633b1030444b3d5.dir
-      size: 36235
+      md5: d302b1abedd23439c3a26601234f4cfd.dir
+      size: 31931
       nfiles: 8
     params:
       params.yaml:
@@ -303,6 +113,229 @@ stages:
       hash: md5
       md5: 2f086dc3aca6145f46e63d462b53334f
       size: 155018
+  train_bernstein@0:
+    cmd: "python scripts/train.py --processed-dir data/processed/dla --target-name
+      dla --model bernstein_nf --data-format feather --prediction-horizon 12 --stage-name
+      train_bernstein --test-mode true --log-level info --log-file logs/pipeline.log\n"
+    deps:
+    - path: data/processed/dla/
+      hash: md5
+      md5: 7f18d8e55de7ec41a4114b43b7a9d782.dir
+      size: 12546540
+      nfiles: 6
+    - path: params/models/dla/bernstein_nf.yaml
+      hash: md5
+      md5: e62ac3bc16cbc1578de151c45a2b8fab
+      size: 679
+    - path: scripts/train.py
+      hash: md5
+      md5: 10dc488b91aa9eff73d17cccbe4e4a17
+      size: 4702
+    - path: src/dcp_nf_forecast/
+      hash: md5
+      md5: d302b1abedd23439c3a26601234f4cfd.dir
+      size: 31931
+      nfiles: 8
+    params:
+      params.yaml:
+        data.data_format: feather
+        log_file: logs/pipeline.log
+        log_level: info
+        paths.data_processed: data/processed
+        seed: 42
+        targets:
+        - name: dla
+          y_column: dla_stromverbrauch_kwh
+          prediction_horizon: 12
+          lag_columns: dla_stromverbrauch_kwh:96
+        - name: ofen_g_koks
+          y_column: ofen_g_koks_kg
+          prediction_horizon: 12
+          lag_columns: ofen_g_koks_kg:96
+        - name: ofen_f_koks
+          y_column: ofen_f_koks_kg
+          prediction_horizon: 12
+          lag_columns: ofen_f_koks_kg:96
+        - name: pl2
+          y_column: pl2_stromverbrauch_kwh
+          prediction_horizon: 12
+          lag_columns: pl2_stromverbrauch_kwh:96
+        test_mode: true
+      params/models/dla/bernstein_nf.yaml:
+        compile_kwargs: {}
+        fit_kwargs:
+          batch_size: 256
+          early_stopping_patience: 15
+          epochs: 5
+          learning_rate: 0.001
+          verbose: true
+        model_kwargs:
+          distribution: masked_autoregressive_flow
+          num_layers: 1
+          bijector: BernsteinPolynomial
+          bijector_kwargs:
+            domain:
+            - 0
+            - 1
+            extrapolation: false
+          invert: true
+          base_distribution_kwargs:
+            distribution_name: lognormal
+          num_parameters: 96
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_thetas_constrain_fn
+          parameters_constraint_fn_kwargs:
+            allow_flexible_bounds: false
+            bounds: linear
+            low: -4
+            high: 4
+          parameters_fn_kwargs:
+            activation: relu
+            hidden_units:
+            - 128
+            - 128
+            conditional: true
+    outs:
+    - path: results/dla/bernstein_nf/metrics.yaml
+      hash: md5
+      md5: e287efa5902b8b38bc9aa5e6ec523f3c
+      size: 92
+    - path: results/dla/bernstein_nf/model_weights.h5
+      hash: md5
+      md5: ee9a40a5ba5ab26117bd4769a89cbd54
+      size: 683360
+  describe@0:
+    cmd: "python scripts/describe_data.py --processed-dir data/processed/dla --target-name
+      dla --data-format feather --log-level info --log-file logs/pipeline.log\n"
+    deps:
+    - path: data/processed/dla/
+      hash: md5
+      md5: 7f18d8e55de7ec41a4114b43b7a9d782.dir
+      size: 12546540
+      nfiles: 6
+    - path: scripts/describe_data.py
+      hash: md5
+      md5: 861e4eabbae9992e4a391498cea612b2
+      size: 8375
+    - path: src/dcp_nf_forecast/
+      hash: md5
+      md5: d302b1abedd23439c3a26601234f4cfd.dir
+      size: 31931
+      nfiles: 8
+    params:
+      params.yaml:
+        data.data_format: feather
+        log_file: logs/pipeline.log
+        log_level: info
+        paths.data_processed: data/processed
+        targets:
+        - name: dla
+          y_column: dla_stromverbrauch_kwh
+          prediction_horizon: 12
+          lag_columns: dla_stromverbrauch_kwh:96
+        - name: ofen_g_koks
+          y_column: ofen_g_koks_kg
+          prediction_horizon: 12
+          lag_columns: ofen_g_koks_kg:96
+        - name: ofen_f_koks
+          y_column: ofen_f_koks_kg
+          prediction_horizon: 12
+          lag_columns: ofen_f_koks_kg:96
+        - name: pl2
+          y_column: pl2_stromverbrauch_kwh
+          prediction_horizon: 12
+          lag_columns: pl2_stromverbrauch_kwh:96
+    outs:
+    - path: results/dla/data_description/correlation_train.pdf
+      hash: md5
+      md5: 45c7edb73154dbfc9fad7c0e0f5ccabc
+      size: 28668
+    - path: results/dla/data_description/correlation_val.pdf
+      hash: md5
+      md5: 501f5a341147e6745e5403523c294b5b
+      size: 32203
+    - path: results/dla/data_description/histograms_train.pdf
+      hash: md5
+      md5: 30fc6958dae94c1aaf5694ac3c93cfad
+      size: 33484
+    - path: results/dla/data_description/histograms_val.pdf
+      hash: md5
+      md5: 2c1044ef91b298f58fe2636b0cfe19fd
+      size: 36988
+    - path: results/dla/data_description/statistics_train.yaml
+      hash: md5
+      md5: b9e27a4f88fe6246131c04ebe097dad1
+      size: 15889
+    - path: results/dla/data_description/statistics_val.yaml
+      hash: md5
+      md5: 2cb9635c463229ced99b54d043deae57
+      size: 16462
+    - path: results/dla/data_description/timeseries_train.pdf
+      hash: md5
+      md5: 8f17319dc1dce9cfb481ee79ac0cef63
+      size: 180216
+    - path: results/dla/data_description/timeseries_val.pdf
+      hash: md5
+      md5: d722c7a96ac9669b13aee528381d77a2
+      size: 99142
+  prepare@1:
+    cmd: "python scripts/prepare_features.py --raw-data-path ../dcp/norm_data/norm_fondium_15_min_data_2023.csv
+      --datetime-column new_time --fillna-method ffill --tabular-covariate-columns
+      none --time-components time,day_of_week,day_of_year --target-name ofen_g_koks
+      --y-column ofen_g_koks_kg --prediction-horizon 12 --lag-columns ofen_g_koks_kg:96
+      --output-dir data/interim/ofen_g_koks --data-format feather --log-level info
+      --log-file logs/pipeline.log\n"
+    deps:
+    - path: ../dcp/norm_data/norm_fondium_15_min_data_2023.csv
+      hash: md5
+      md5: eb8c9dbf528fea5a3334dfae8c6325a7
+      size: 7781885
+    - path: scripts/prepare_features.py
+      hash: md5
+      md5: 2d3c4c33cad24cb3b37023b7e1f2faed
+      size: 3178
+    - path: src/dcp_nf_forecast/
+      hash: md5
+      md5: d302b1abedd23439c3a26601234f4cfd.dir
+      size: 31931
+      nfiles: 8
+    params:
+      params.yaml:
+        data.data_format: feather
+        data.datetime_column: new_time
+        data.fillna_method: ffill
+        data.tabular_covariate_columns: none
+        data.time_components: time,day_of_week,day_of_year
+        log_file: logs/pipeline.log
+        log_level: info
+        paths.data_interim: data/interim
+        paths.raw_data: ../dcp/norm_data/norm_fondium_15_min_data_2023.csv
+        targets:
+        - name: dla
+          y_column: dla_stromverbrauch_kwh
+          prediction_horizon: 12
+          lag_columns: dla_stromverbrauch_kwh:96
+        - name: ofen_g_koks
+          y_column: ofen_g_koks_kg
+          prediction_horizon: 12
+          lag_columns: ofen_g_koks_kg:96
+        - name: ofen_f_koks
+          y_column: ofen_f_koks_kg
+          prediction_horizon: 12
+          lag_columns: ofen_f_koks_kg:96
+        - name: pl2
+          y_column: pl2_stromverbrauch_kwh
+          prediction_horizon: 12
+          lag_columns: pl2_stromverbrauch_kwh:96
+    outs:
+    - path: data/interim/ofen_g_koks/X.feather
+      hash: md5
+      md5: ad0e4bd838b9b5802b6bd568dd0c133e
+      size: 19022842
+    - path: data/interim/ofen_g_koks/y.feather
+      hash: md5
+      md5: dabece93d5925475705459861686a6fe
+      size: 2375378
   split@1:
     cmd: "python scripts/split_data.py --input-dir data/interim/ofen_g_koks --output-dir
       data/processed/ofen_g_koks --train-ratio 0.8 --val-ratio 0.1 --test-ratio 0.1
@@ -319,8 +352,8 @@ stages:
       size: 1858
     - path: src/dcp_nf_forecast/
       hash: md5
-      md5: dc038636e9897da79633b1030444b3d5.dir
-      size: 36235
+      md5: d302b1abedd23439c3a26601234f4cfd.dir
+      size: 31931
       nfiles: 8
     params:
       params.yaml:
@@ -358,6 +391,139 @@ stages:
       hash: md5
       md5: ba5c66d8b48b2827efeba50ae39752c7
       size: 266602
+  describe@1:
+    cmd: "python scripts/describe_data.py --processed-dir data/processed/ofen_g_koks
+      --target-name ofen_g_koks --data-format feather --log-level info --log-file
+      logs/pipeline.log\n"
+    deps:
+    - path: data/processed/ofen_g_koks/
+      hash: md5
+      md5: 7fbc29c374cab5c194f30ba237aed55b.dir
+      size: 21508452
+      nfiles: 6
+    - path: scripts/describe_data.py
+      hash: md5
+      md5: 861e4eabbae9992e4a391498cea612b2
+      size: 8375
+    - path: src/dcp_nf_forecast/
+      hash: md5
+      md5: d302b1abedd23439c3a26601234f4cfd.dir
+      size: 31931
+      nfiles: 8
+    params:
+      params.yaml:
+        data.data_format: feather
+        log_file: logs/pipeline.log
+        log_level: info
+        paths.data_processed: data/processed
+        targets:
+        - name: dla
+          y_column: dla_stromverbrauch_kwh
+          prediction_horizon: 12
+          lag_columns: dla_stromverbrauch_kwh:96
+        - name: ofen_g_koks
+          y_column: ofen_g_koks_kg
+          prediction_horizon: 12
+          lag_columns: ofen_g_koks_kg:96
+        - name: ofen_f_koks
+          y_column: ofen_f_koks_kg
+          prediction_horizon: 12
+          lag_columns: ofen_f_koks_kg:96
+        - name: pl2
+          y_column: pl2_stromverbrauch_kwh
+          prediction_horizon: 12
+          lag_columns: pl2_stromverbrauch_kwh:96
+    outs:
+    - path: results/ofen_g_koks/data_description/correlation_train.pdf
+      hash: md5
+      md5: dfef26f168e726cb43677d8410b10518
+      size: 32866
+    - path: results/ofen_g_koks/data_description/correlation_val.pdf
+      hash: md5
+      md5: 77a4ce12878e8148716dc9425e330b8e
+      size: 32499
+    - path: results/ofen_g_koks/data_description/histograms_train.pdf
+      hash: md5
+      md5: 87becbc95e3e766acd96ada3ced84e6e
+      size: 39610
+    - path: results/ofen_g_koks/data_description/histograms_val.pdf
+      hash: md5
+      md5: 02f82820df66fcc40042a094923238bd
+      size: 39160
+    - path: results/ofen_g_koks/data_description/statistics_train.yaml
+      hash: md5
+      md5: 3cdb64e67dadf15cc0d4204e0162baef
+      size: 15389
+    - path: results/ofen_g_koks/data_description/statistics_val.yaml
+      hash: md5
+      md5: 087e8f8c336ac1f2cc939f1320a13a1f
+      size: 15955
+    - path: results/ofen_g_koks/data_description/timeseries_train.pdf
+      hash: md5
+      md5: 29d17509185caf5b49eeeeb7b34433c5
+      size: 201269
+    - path: results/ofen_g_koks/data_description/timeseries_val.pdf
+      hash: md5
+      md5: cfee48e4dc980d73c80ff938859a1646
+      size: 102981
+  prepare@2:
+    cmd: "python scripts/prepare_features.py --raw-data-path ../dcp/norm_data/norm_fondium_15_min_data_2023.csv
+      --datetime-column new_time --fillna-method ffill --tabular-covariate-columns
+      none --time-components time,day_of_week,day_of_year --target-name ofen_f_koks
+      --y-column ofen_f_koks_kg --prediction-horizon 12 --lag-columns ofen_f_koks_kg:96
+      --output-dir data/interim/ofen_f_koks --data-format feather --log-level info
+      --log-file logs/pipeline.log\n"
+    deps:
+    - path: ../dcp/norm_data/norm_fondium_15_min_data_2023.csv
+      hash: md5
+      md5: eb8c9dbf528fea5a3334dfae8c6325a7
+      size: 7781885
+    - path: scripts/prepare_features.py
+      hash: md5
+      md5: 2d3c4c33cad24cb3b37023b7e1f2faed
+      size: 3178
+    - path: src/dcp_nf_forecast/
+      hash: md5
+      md5: d302b1abedd23439c3a26601234f4cfd.dir
+      size: 31931
+      nfiles: 8
+    params:
+      params.yaml:
+        data.data_format: feather
+        data.datetime_column: new_time
+        data.fillna_method: ffill
+        data.tabular_covariate_columns: none
+        data.time_components: time,day_of_week,day_of_year
+        log_file: logs/pipeline.log
+        log_level: info
+        paths.data_interim: data/interim
+        paths.raw_data: ../dcp/norm_data/norm_fondium_15_min_data_2023.csv
+        targets:
+        - name: dla
+          y_column: dla_stromverbrauch_kwh
+          prediction_horizon: 12
+          lag_columns: dla_stromverbrauch_kwh:96
+        - name: ofen_g_koks
+          y_column: ofen_g_koks_kg
+          prediction_horizon: 12
+          lag_columns: ofen_g_koks_kg:96
+        - name: ofen_f_koks
+          y_column: ofen_f_koks_kg
+          prediction_horizon: 12
+          lag_columns: ofen_f_koks_kg:96
+        - name: pl2
+          y_column: pl2_stromverbrauch_kwh
+          prediction_horizon: 12
+          lag_columns: pl2_stromverbrauch_kwh:96
+    outs:
+    - path: data/interim/ofen_f_koks/X.feather
+      hash: md5
+      md5: 16a8d939ee01ad5f80053f47c612dec4
+      size: 18230394
+    - path: data/interim/ofen_f_koks/y.feather
+      hash: md5
+      md5: 7235c9f7c483942b0ccf2c830c51db9a
+      size: 2276642
   split@2:
     cmd: "python scripts/split_data.py --input-dir data/interim/ofen_f_koks --output-dir
       data/processed/ofen_f_koks --train-ratio 0.8 --val-ratio 0.1 --test-ratio 0.1
@@ -374,8 +540,8 @@ stages:
       size: 1858
     - path: src/dcp_nf_forecast/
       hash: md5
-      md5: dc038636e9897da79633b1030444b3d5.dir
-      size: 36235
+      md5: d302b1abedd23439c3a26601234f4cfd.dir
+      size: 31931
       nfiles: 8
     params:
       params.yaml:
@@ -413,6 +579,139 @@ stages:
       hash: md5
       md5: 43c13582e9ac15df4d8b23f742d5b8e1
       size: 263146
+  describe@2:
+    cmd: "python scripts/describe_data.py --processed-dir data/processed/ofen_f_koks
+      --target-name ofen_f_koks --data-format feather --log-level info --log-file
+      logs/pipeline.log\n"
+    deps:
+    - path: data/processed/ofen_f_koks/
+      hash: md5
+      md5: 0743791096c32c3f9441e542288d72e8.dir
+      size: 20612028
+      nfiles: 6
+    - path: scripts/describe_data.py
+      hash: md5
+      md5: 861e4eabbae9992e4a391498cea612b2
+      size: 8375
+    - path: src/dcp_nf_forecast/
+      hash: md5
+      md5: d302b1abedd23439c3a26601234f4cfd.dir
+      size: 31931
+      nfiles: 8
+    params:
+      params.yaml:
+        data.data_format: feather
+        log_file: logs/pipeline.log
+        log_level: info
+        paths.data_processed: data/processed
+        targets:
+        - name: dla
+          y_column: dla_stromverbrauch_kwh
+          prediction_horizon: 12
+          lag_columns: dla_stromverbrauch_kwh:96
+        - name: ofen_g_koks
+          y_column: ofen_g_koks_kg
+          prediction_horizon: 12
+          lag_columns: ofen_g_koks_kg:96
+        - name: ofen_f_koks
+          y_column: ofen_f_koks_kg
+          prediction_horizon: 12
+          lag_columns: ofen_f_koks_kg:96
+        - name: pl2
+          y_column: pl2_stromverbrauch_kwh
+          prediction_horizon: 12
+          lag_columns: pl2_stromverbrauch_kwh:96
+    outs:
+    - path: results/ofen_f_koks/data_description/correlation_train.pdf
+      hash: md5
+      md5: 1f19704aab89372406658eb35b187864
+      size: 28970
+    - path: results/ofen_f_koks/data_description/correlation_val.pdf
+      hash: md5
+      md5: 13584aaab8cb724acbad97e1da2a5f37
+      size: 29865
+    - path: results/ofen_f_koks/data_description/histograms_train.pdf
+      hash: md5
+      md5: c4c9dd345495433585b4b5c6aea987c7
+      size: 34725
+    - path: results/ofen_f_koks/data_description/histograms_val.pdf
+      hash: md5
+      md5: 003da0c44b4d6bd58b335b39f6d91a5d
+      size: 38648
+    - path: results/ofen_f_koks/data_description/statistics_train.yaml
+      hash: md5
+      md5: 180fda5809013f15b45413a6e6d309e6
+      size: 15421
+    - path: results/ofen_f_koks/data_description/statistics_val.yaml
+      hash: md5
+      md5: 16e7a2772df3167fddee8e0ead31f3aa
+      size: 16495
+    - path: results/ofen_f_koks/data_description/timeseries_train.pdf
+      hash: md5
+      md5: eace2c8a239d4a040ce591ad17b30ec6
+      size: 186597
+    - path: results/ofen_f_koks/data_description/timeseries_val.pdf
+      hash: md5
+      md5: d8b760c6adb22f6d6388e9b66ebafc92
+      size: 99878
+  prepare@3:
+    cmd: "python scripts/prepare_features.py --raw-data-path ../dcp/norm_data/norm_fondium_15_min_data_2023.csv
+      --datetime-column new_time --fillna-method ffill --tabular-covariate-columns
+      none --time-components time,day_of_week,day_of_year --target-name pl2 --y-column
+      pl2_stromverbrauch_kwh --prediction-horizon 12 --lag-columns pl2_stromverbrauch_kwh:96
+      --output-dir data/interim/pl2 --data-format feather --log-level info --log-file
+      logs/pipeline.log\n"
+    deps:
+    - path: ../dcp/norm_data/norm_fondium_15_min_data_2023.csv
+      hash: md5
+      md5: eb8c9dbf528fea5a3334dfae8c6325a7
+      size: 7781885
+    - path: scripts/prepare_features.py
+      hash: md5
+      md5: 2d3c4c33cad24cb3b37023b7e1f2faed
+      size: 3178
+    - path: src/dcp_nf_forecast/
+      hash: md5
+      md5: d302b1abedd23439c3a26601234f4cfd.dir
+      size: 31931
+      nfiles: 8
+    params:
+      params.yaml:
+        data.data_format: feather
+        data.datetime_column: new_time
+        data.fillna_method: ffill
+        data.tabular_covariate_columns: none
+        data.time_components: time,day_of_week,day_of_year
+        log_file: logs/pipeline.log
+        log_level: info
+        paths.data_interim: data/interim
+        paths.raw_data: ../dcp/norm_data/norm_fondium_15_min_data_2023.csv
+        targets:
+        - name: dla
+          y_column: dla_stromverbrauch_kwh
+          prediction_horizon: 12
+          lag_columns: dla_stromverbrauch_kwh:96
+        - name: ofen_g_koks
+          y_column: ofen_g_koks_kg
+          prediction_horizon: 12
+          lag_columns: ofen_g_koks_kg:96
+        - name: ofen_f_koks
+          y_column: ofen_f_koks_kg
+          prediction_horizon: 12
+          lag_columns: ofen_f_koks_kg:96
+        - name: pl2
+          y_column: pl2_stromverbrauch_kwh
+          prediction_horizon: 12
+          lag_columns: pl2_stromverbrauch_kwh:96
+    outs:
+    - path: data/interim/pl2/X.feather
+      hash: md5
+      md5: b2076641a8e5de5e1a8ee2af60ee495c
+      size: 22644906
+    - path: data/interim/pl2/y.feather
+      hash: md5
+      md5: 0b7908184a918ff210556612b4161fb4
+      size: 2822194
   split@3:
     cmd: "python scripts/split_data.py --input-dir data/interim/pl2 --output-dir data/processed/pl2
       --train-ratio 0.8 --val-ratio 0.1 --test-ratio 0.1 --data-format feather --log-level
@@ -429,8 +728,8 @@ stages:
       size: 1858
     - path: src/dcp_nf_forecast/
       hash: md5
-      md5: dc038636e9897da79633b1030444b3d5.dir
-      size: 36235
+      md5: d302b1abedd23439c3a26601234f4cfd.dir
+      size: 31931
       nfiles: 8
     params:
       params.yaml:
@@ -468,762 +767,6 @@ stages:
       hash: md5
       md5: 4992c0f9d8a2c7f55b7c9ddf6f640376
       size: 190794
-  train_bernstein@0:
-    cmd: "python scripts/train.py --processed-dir data/processed/dla --target-name
-      dla --model bernstein_nf --data-format feather --prediction-horizon 12 --epochs
-      5 --early-stopping-patience 15 --test-mode false --test-epochs 1 --test-batch-size
-      32 --log-level info --log-file logs/pipeline.log\n"
-    deps:
-    - path: data/processed/dla/
-      hash: md5
-      md5: 7f18d8e55de7ec41a4114b43b7a9d782.dir
-      size: 12546540
-      nfiles: 6
-    - path: params/models/dla/bernstein_nf.yaml
-      hash: md5
-      md5: db8e496fd64f5958f8dfb42141d39283
-      size: 113
-    - path: scripts/train.py
-      hash: md5
-      md5: a86afa963369f28aad11826a6245b8dc
-      size: 4806
-    - path: src/dcp_nf_forecast/
-      hash: md5
-      md5: dc038636e9897da79633b1030444b3d5.dir
-      size: 36235
-      nfiles: 8
-    params:
-      params.yaml:
-        data.data_format: feather
-        log_file: logs/pipeline.log
-        log_level: info
-        paths.data_processed: data/processed
-        targets:
-        - name: dla
-          y_column: dla_stromverbrauch_kwh
-          prediction_horizon: 12
-          lag_columns: dla_stromverbrauch_kwh:96
-          eval_model: bernstein_nf
-        - name: ofen_g_koks
-          y_column: ofen_g_koks_kg
-          prediction_horizon: 12
-          lag_columns: ofen_g_koks_kg:96
-          eval_model: bernstein_nf
-        - name: ofen_f_koks
-          y_column: ofen_f_koks_kg
-          prediction_horizon: 12
-          lag_columns: ofen_f_koks_kg:96
-          eval_model: bernstein_nf
-        - name: pl2
-          y_column: pl2_stromverbrauch_kwh
-          prediction_horizon: 12
-          lag_columns: pl2_stromverbrauch_kwh:96
-          eval_model: bernstein_nf
-        train.early_stopping_patience: 15
-        train.epochs: 5
-        train.test_batch_size: 32
-        train.test_epochs: 1
-        train.test_mode: false
-    outs:
-    - path: results/dla/bernstein_nf/metrics.yaml
-      hash: md5
-      md5: e287efa5902b8b38bc9aa5e6ec523f3c
-      size: 92
-    - path: results/dla/bernstein_nf/model_weights.h5
-      hash: md5
-      md5: 7fa1632f2e7212b303f5f560b33f0d5b
-      size: 683360
-  train_bernstein@1:
-    cmd: "python scripts/train.py --processed-dir data/processed/ofen_g_koks --target-name
-      ofen_g_koks --model bernstein_nf --data-format feather --prediction-horizon
-      12 --epochs 5 --early-stopping-patience 15 --test-mode false --test-epochs 1
-      --test-batch-size 32 --log-level info --log-file logs/pipeline.log\n"
-    deps:
-    - path: data/processed/ofen_g_koks/
-      hash: md5
-      md5: 7fbc29c374cab5c194f30ba237aed55b.dir
-      size: 21508452
-      nfiles: 6
-    - path: params/models/ofen_g_koks/bernstein_nf.yaml
-      hash: md5
-      md5: db8e496fd64f5958f8dfb42141d39283
-      size: 113
-    - path: scripts/train.py
-      hash: md5
-      md5: a86afa963369f28aad11826a6245b8dc
-      size: 4806
-    - path: src/dcp_nf_forecast/
-      hash: md5
-      md5: dc038636e9897da79633b1030444b3d5.dir
-      size: 36235
-      nfiles: 8
-    params:
-      params.yaml:
-        data.data_format: feather
-        log_file: logs/pipeline.log
-        log_level: info
-        paths.data_processed: data/processed
-        targets:
-        - name: dla
-          y_column: dla_stromverbrauch_kwh
-          prediction_horizon: 12
-          lag_columns: dla_stromverbrauch_kwh:96
-          eval_model: bernstein_nf
-        - name: ofen_g_koks
-          y_column: ofen_g_koks_kg
-          prediction_horizon: 12
-          lag_columns: ofen_g_koks_kg:96
-          eval_model: bernstein_nf
-        - name: ofen_f_koks
-          y_column: ofen_f_koks_kg
-          prediction_horizon: 12
-          lag_columns: ofen_f_koks_kg:96
-          eval_model: bernstein_nf
-        - name: pl2
-          y_column: pl2_stromverbrauch_kwh
-          prediction_horizon: 12
-          lag_columns: pl2_stromverbrauch_kwh:96
-          eval_model: bernstein_nf
-        train.early_stopping_patience: 15
-        train.epochs: 5
-        train.test_batch_size: 32
-        train.test_epochs: 1
-        train.test_mode: false
-    outs:
-    - path: results/ofen_g_koks/bernstein_nf/metrics.yaml
-      hash: md5
-      md5: e287efa5902b8b38bc9aa5e6ec523f3c
-      size: 92
-    - path: results/ofen_g_koks/bernstein_nf/model_weights.h5
-      hash: md5
-      md5: 8f97cc9ba774252f7dc529318a6b66aa
-      size: 683360
-  train_bernstein@2:
-    cmd: "python scripts/train.py --processed-dir data/processed/ofen_f_koks --target-name
-      ofen_f_koks --model bernstein_nf --data-format feather --prediction-horizon
-      12 --epochs 5 --early-stopping-patience 15 --test-mode false --test-epochs 1
-      --test-batch-size 32 --log-level info --log-file logs/pipeline.log\n"
-    deps:
-    - path: data/processed/ofen_f_koks/
-      hash: md5
-      md5: 0743791096c32c3f9441e542288d72e8.dir
-      size: 20612028
-      nfiles: 6
-    - path: params/models/ofen_f_koks/bernstein_nf.yaml
-      hash: md5
-      md5: db8e496fd64f5958f8dfb42141d39283
-      size: 113
-    - path: scripts/train.py
-      hash: md5
-      md5: a86afa963369f28aad11826a6245b8dc
-      size: 4806
-    - path: src/dcp_nf_forecast/
-      hash: md5
-      md5: dc038636e9897da79633b1030444b3d5.dir
-      size: 36235
-      nfiles: 8
-    params:
-      params.yaml:
-        data.data_format: feather
-        log_file: logs/pipeline.log
-        log_level: info
-        paths.data_processed: data/processed
-        targets:
-        - name: dla
-          y_column: dla_stromverbrauch_kwh
-          prediction_horizon: 12
-          lag_columns: dla_stromverbrauch_kwh:96
-          eval_model: bernstein_nf
-        - name: ofen_g_koks
-          y_column: ofen_g_koks_kg
-          prediction_horizon: 12
-          lag_columns: ofen_g_koks_kg:96
-          eval_model: bernstein_nf
-        - name: ofen_f_koks
-          y_column: ofen_f_koks_kg
-          prediction_horizon: 12
-          lag_columns: ofen_f_koks_kg:96
-          eval_model: bernstein_nf
-        - name: pl2
-          y_column: pl2_stromverbrauch_kwh
-          prediction_horizon: 12
-          lag_columns: pl2_stromverbrauch_kwh:96
-          eval_model: bernstein_nf
-        train.early_stopping_patience: 15
-        train.epochs: 5
-        train.test_batch_size: 32
-        train.test_epochs: 1
-        train.test_mode: false
-    outs:
-    - path: results/ofen_f_koks/bernstein_nf/metrics.yaml
-      hash: md5
-      md5: e287efa5902b8b38bc9aa5e6ec523f3c
-      size: 92
-    - path: results/ofen_f_koks/bernstein_nf/model_weights.h5
-      hash: md5
-      md5: ee9a40a5ba5ab26117bd4769a89cbd54
-      size: 683360
-  train_bernstein@3:
-    cmd: "python scripts/train.py --processed-dir data/processed/pl2 --target-name
-      pl2 --model bernstein_nf --data-format feather --prediction-horizon 12 --epochs
-      5 --early-stopping-patience 15 --test-mode false --test-epochs 1 --test-batch-size
-      32 --log-level info --log-file logs/pipeline.log\n"
-    deps:
-    - path: data/processed/pl2/
-      hash: md5
-      md5: b0c7f7a7748f15538109c9793ecbb15a.dir
-      size: 25567508
-      nfiles: 6
-    - path: params/models/pl2/bernstein_nf.yaml
-      hash: md5
-      md5: db8e496fd64f5958f8dfb42141d39283
-      size: 113
-    - path: scripts/train.py
-      hash: md5
-      md5: a86afa963369f28aad11826a6245b8dc
-      size: 4806
-    - path: src/dcp_nf_forecast/
-      hash: md5
-      md5: dc038636e9897da79633b1030444b3d5.dir
-      size: 36235
-      nfiles: 8
-    params:
-      params.yaml:
-        data.data_format: feather
-        log_file: logs/pipeline.log
-        log_level: info
-        paths.data_processed: data/processed
-        targets:
-        - name: dla
-          y_column: dla_stromverbrauch_kwh
-          prediction_horizon: 12
-          lag_columns: dla_stromverbrauch_kwh:96
-          eval_model: bernstein_nf
-        - name: ofen_g_koks
-          y_column: ofen_g_koks_kg
-          prediction_horizon: 12
-          lag_columns: ofen_g_koks_kg:96
-          eval_model: bernstein_nf
-        - name: ofen_f_koks
-          y_column: ofen_f_koks_kg
-          prediction_horizon: 12
-          lag_columns: ofen_f_koks_kg:96
-          eval_model: bernstein_nf
-        - name: pl2
-          y_column: pl2_stromverbrauch_kwh
-          prediction_horizon: 12
-          lag_columns: pl2_stromverbrauch_kwh:96
-          eval_model: bernstein_nf
-        train.early_stopping_patience: 15
-        train.epochs: 5
-        train.test_batch_size: 32
-        train.test_epochs: 1
-        train.test_mode: false
-    outs:
-    - path: results/pl2/bernstein_nf/metrics.yaml
-      hash: md5
-      md5: e287efa5902b8b38bc9aa5e6ec523f3c
-      size: 92
-    - path: results/pl2/bernstein_nf/model_weights.h5
-      hash: md5
-      md5: 0f8d943bf4a8517ddbb541aae8a7b4b4
-      size: 683360
-  train_spline@0:
-    cmd: "python scripts/train.py --processed-dir data/processed/dla --target-name
-      dla --model spline_nf --data-format feather --prediction-horizon 12 --epochs
-      5 --early-stopping-patience 15 --test-mode false --test-epochs 1 --test-batch-size
-      32 --log-level info --log-file logs/pipeline.log\n"
-    deps:
-    - path: data/processed/dla/
-      hash: md5
-      md5: b3508eef0a362407249338ca0826cc15.dir
-      size: 12631860
-      nfiles: 6
-    - path: params/models/dla/spline_nf.yaml
-      hash: md5
-      md5: ea594fabc7c04dbb99cf0cda6c4b51f8
-      size: 106
-    - path: scripts/train.py
-      hash: md5
-      md5: a86afa963369f28aad11826a6245b8dc
-      size: 4806
-    - path: src/dcp_nf_forecast/
-      hash: md5
-      md5: e3e4184b62069261d6806865018e4f5f.dir
-      size: 37741
-      nfiles: 8
-    params:
-      params.yaml:
-        data.data_format: feather
-        log_file: logs/pipeline.log
-        log_level: info
-        paths.data_processed: data/processed
-        targets:
-        - name: dla
-          y_column: dla_stromverbrauch_kwh
-          prediction_horizon: 12
-          lag_columns: dla_stromverbrauch_kwh:96
-          eval_model: bernstein_nf
-        - name: ofen_g_koks
-          y_column: ofen_g_koks_kg
-          prediction_horizon: 12
-          lag_columns: ofen_g_koks_kg:96
-          eval_model: bernstein_nf
-        - name: ofen_f_koks
-          y_column: ofen_f_koks_kg
-          prediction_horizon: 12
-          lag_columns: ofen_f_koks_kg:96
-          eval_model: bernstein_nf
-        - name: pl2
-          y_column: pl2_stromverbrauch_kwh
-          prediction_horizon: 12
-          lag_columns: pl2_stromverbrauch_kwh:96
-          eval_model: bernstein_nf
-        train.early_stopping_patience: 15
-        train.epochs: 5
-        train.test_batch_size: 32
-        train.test_epochs: 1
-        train.test_mode: false
-    outs:
-    - path: results/dla/spline_nf/metrics.yaml
-      hash: md5
-      md5: e287efa5902b8b38bc9aa5e6ec523f3c
-      size: 92
-    - path: results/dla/spline_nf/model_weights.h5
-      hash: md5
-      md5: 5135f31e0d48611cd5314dec83aa3402
-      size: 677168
-  train_spline@1:
-    cmd: "python scripts/train.py --processed-dir data/processed/ofen_g_koks --target-name
-      ofen_g_koks --model spline_nf --data-format feather --prediction-horizon 12
-      --epochs 5 --early-stopping-patience 15 --test-mode false --test-epochs 1 --test-batch-size
-      32 --log-level info --log-file logs/pipeline.log\n"
-    deps:
-    - path: data/processed/ofen_g_koks/
-      hash: md5
-      md5: f39a85979f577c29c3da679b22e4d8e8.dir
-      size: 21593772
-      nfiles: 6
-    - path: params/models/ofen_g_koks/spline_nf.yaml
-      hash: md5
-      md5: ea594fabc7c04dbb99cf0cda6c4b51f8
-      size: 106
-    - path: scripts/train.py
-      hash: md5
-      md5: a86afa963369f28aad11826a6245b8dc
-      size: 4806
-    - path: src/dcp_nf_forecast/
-      hash: md5
-      md5: e3e4184b62069261d6806865018e4f5f.dir
-      size: 37741
-      nfiles: 8
-    params:
-      params.yaml:
-        data.data_format: feather
-        log_file: logs/pipeline.log
-        log_level: info
-        paths.data_processed: data/processed
-        targets:
-        - name: dla
-          y_column: dla_stromverbrauch_kwh
-          prediction_horizon: 12
-          lag_columns: dla_stromverbrauch_kwh:96
-          eval_model: bernstein_nf
-        - name: ofen_g_koks
-          y_column: ofen_g_koks_kg
-          prediction_horizon: 12
-          lag_columns: ofen_g_koks_kg:96
-          eval_model: bernstein_nf
-        - name: ofen_f_koks
-          y_column: ofen_f_koks_kg
-          prediction_horizon: 12
-          lag_columns: ofen_f_koks_kg:96
-          eval_model: bernstein_nf
-        - name: pl2
-          y_column: pl2_stromverbrauch_kwh
-          prediction_horizon: 12
-          lag_columns: pl2_stromverbrauch_kwh:96
-          eval_model: bernstein_nf
-        train.early_stopping_patience: 15
-        train.epochs: 5
-        train.test_batch_size: 32
-        train.test_epochs: 1
-        train.test_mode: false
-    outs:
-    - path: results/ofen_g_koks/spline_nf/metrics.yaml
-      hash: md5
-      md5: e287efa5902b8b38bc9aa5e6ec523f3c
-      size: 92
-    - path: results/ofen_g_koks/spline_nf/model_weights.h5
-      hash: md5
-      md5: 80f620125c226b62c5a046a580e80dba
-      size: 677168
-  train_spline@2:
-    cmd: "python scripts/train.py --processed-dir data/processed/ofen_f_koks --target-name
-      ofen_f_koks --model spline_nf --data-format feather --prediction-horizon 12
-      --epochs 5 --early-stopping-patience 15 --test-mode false --test-epochs 1 --test-batch-size
-      32 --log-level info --log-file logs/pipeline.log\n"
-    deps:
-    - path: data/processed/ofen_f_koks/
-      hash: md5
-      md5: 1035546674dd829ccd9eff3168aeedb1.dir
-      size: 20697348
-      nfiles: 6
-    - path: params/models/ofen_f_koks/spline_nf.yaml
-      hash: md5
-      md5: ea594fabc7c04dbb99cf0cda6c4b51f8
-      size: 106
-    - path: scripts/train.py
-      hash: md5
-      md5: a86afa963369f28aad11826a6245b8dc
-      size: 4806
-    - path: src/dcp_nf_forecast/
-      hash: md5
-      md5: e3e4184b62069261d6806865018e4f5f.dir
-      size: 37741
-      nfiles: 8
-    params:
-      params.yaml:
-        data.data_format: feather
-        log_file: logs/pipeline.log
-        log_level: info
-        paths.data_processed: data/processed
-        targets:
-        - name: dla
-          y_column: dla_stromverbrauch_kwh
-          prediction_horizon: 12
-          lag_columns: dla_stromverbrauch_kwh:96
-          eval_model: bernstein_nf
-        - name: ofen_g_koks
-          y_column: ofen_g_koks_kg
-          prediction_horizon: 12
-          lag_columns: ofen_g_koks_kg:96
-          eval_model: bernstein_nf
-        - name: ofen_f_koks
-          y_column: ofen_f_koks_kg
-          prediction_horizon: 12
-          lag_columns: ofen_f_koks_kg:96
-          eval_model: bernstein_nf
-        - name: pl2
-          y_column: pl2_stromverbrauch_kwh
-          prediction_horizon: 12
-          lag_columns: pl2_stromverbrauch_kwh:96
-          eval_model: bernstein_nf
-        train.early_stopping_patience: 15
-        train.epochs: 5
-        train.test_batch_size: 32
-        train.test_epochs: 1
-        train.test_mode: false
-    outs:
-    - path: results/ofen_f_koks/spline_nf/metrics.yaml
-      hash: md5
-      md5: e287efa5902b8b38bc9aa5e6ec523f3c
-      size: 92
-    - path: results/ofen_f_koks/spline_nf/model_weights.h5
-      hash: md5
-      md5: 09b777a059268261277ce374ea3a55c7
-      size: 677168
-  train_spline@3:
-    cmd: "python scripts/train.py --processed-dir data/processed/pl2 --target-name
-      pl2 --model spline_nf --data-format feather --prediction-horizon 12 --epochs
-      5 --early-stopping-patience 15 --test-mode false --test-epochs 1 --test-batch-size
-      32 --log-level info --log-file logs/pipeline.log\n"
-    deps:
-    - path: data/processed/pl2/
-      hash: md5
-      md5: c6bfd4b5636e6ec8934835ac5d4f017b.dir
-      size: 25652828
-      nfiles: 6
-    - path: params/models/pl2/spline_nf.yaml
-      hash: md5
-      md5: ea594fabc7c04dbb99cf0cda6c4b51f8
-      size: 106
-    - path: scripts/train.py
-      hash: md5
-      md5: a86afa963369f28aad11826a6245b8dc
-      size: 4806
-    - path: src/dcp_nf_forecast/
-      hash: md5
-      md5: e3e4184b62069261d6806865018e4f5f.dir
-      size: 37741
-      nfiles: 8
-    params:
-      params.yaml:
-        data.data_format: feather
-        log_file: logs/pipeline.log
-        log_level: info
-        paths.data_processed: data/processed
-        targets:
-        - name: dla
-          y_column: dla_stromverbrauch_kwh
-          prediction_horizon: 12
-          lag_columns: dla_stromverbrauch_kwh:96
-          eval_model: bernstein_nf
-        - name: ofen_g_koks
-          y_column: ofen_g_koks_kg
-          prediction_horizon: 12
-          lag_columns: ofen_g_koks_kg:96
-          eval_model: bernstein_nf
-        - name: ofen_f_koks
-          y_column: ofen_f_koks_kg
-          prediction_horizon: 12
-          lag_columns: ofen_f_koks_kg:96
-          eval_model: bernstein_nf
-        - name: pl2
-          y_column: pl2_stromverbrauch_kwh
-          prediction_horizon: 12
-          lag_columns: pl2_stromverbrauch_kwh:96
-          eval_model: bernstein_nf
-        train.early_stopping_patience: 15
-        train.epochs: 5
-        train.test_batch_size: 32
-        train.test_epochs: 1
-        train.test_mode: false
-    outs:
-    - path: results/pl2/spline_nf/metrics.yaml
-      hash: md5
-      md5: e287efa5902b8b38bc9aa5e6ec523f3c
-      size: 92
-    - path: results/pl2/spline_nf/model_weights.h5
-      hash: md5
-      md5: 7011a7962f1b6d60517049257a0dcfff
-      size: 677168
-  describe@0:
-    cmd: "python scripts/describe_data.py --processed-dir data/processed/dla --target-name
-      dla --data-format feather --log-level info --log-file logs/pipeline.log\n"
-    deps:
-    - path: data/processed/dla/
-      hash: md5
-      md5: 7f18d8e55de7ec41a4114b43b7a9d782.dir
-      size: 12546540
-      nfiles: 6
-    - path: scripts/describe_data.py
-      hash: md5
-      md5: 861e4eabbae9992e4a391498cea612b2
-      size: 8375
-    - path: src/dcp_nf_forecast/
-      hash: md5
-      md5: dc038636e9897da79633b1030444b3d5.dir
-      size: 36235
-      nfiles: 8
-    params:
-      params.yaml:
-        data.data_format: feather
-        log_file: logs/pipeline.log
-        log_level: info
-        paths.data_processed: data/processed
-        targets:
-        - name: dla
-          y_column: dla_stromverbrauch_kwh
-          prediction_horizon: 12
-          lag_columns: dla_stromverbrauch_kwh:96
-          eval_model: bernstein_nf
-        - name: ofen_g_koks
-          y_column: ofen_g_koks_kg
-          prediction_horizon: 12
-          lag_columns: ofen_g_koks_kg:96
-          eval_model: bernstein_nf
-        - name: ofen_f_koks
-          y_column: ofen_f_koks_kg
-          prediction_horizon: 12
-          lag_columns: ofen_f_koks_kg:96
-          eval_model: bernstein_nf
-        - name: pl2
-          y_column: pl2_stromverbrauch_kwh
-          prediction_horizon: 12
-          lag_columns: pl2_stromverbrauch_kwh:96
-          eval_model: bernstein_nf
-    outs:
-    - path: results/dla/data_description/correlation_train.pdf
-      hash: md5
-      md5: 5e25ebf39ce582ed0f77d0b08c378ff4
-      size: 28668
-    - path: results/dla/data_description/correlation_val.pdf
-      hash: md5
-      md5: 8b9f08e860c5d0112e0f9f05754e2474
-      size: 32203
-    - path: results/dla/data_description/histograms_train.pdf
-      hash: md5
-      md5: d4e03f570bb3117551d292773e88419c
-      size: 33484
-    - path: results/dla/data_description/histograms_val.pdf
-      hash: md5
-      md5: de9a661870e156604f16f7d56114bcef
-      size: 36988
-    - path: results/dla/data_description/statistics_train.yaml
-      hash: md5
-      md5: b9e27a4f88fe6246131c04ebe097dad1
-      size: 15889
-    - path: results/dla/data_description/statistics_val.yaml
-      hash: md5
-      md5: 2cb9635c463229ced99b54d043deae57
-      size: 16462
-    - path: results/dla/data_description/timeseries_train.pdf
-      hash: md5
-      md5: 5a36c758688ecf0652ac58a5e9a5e926
-      size: 180216
-    - path: results/dla/data_description/timeseries_val.pdf
-      hash: md5
-      md5: fd57a97699c4c385fe8ca84d75b5a6f1
-      size: 99142
-  describe@1:
-    cmd: "python scripts/describe_data.py --processed-dir data/processed/ofen_g_koks
-      --target-name ofen_g_koks --data-format feather --log-level info --log-file
-      logs/pipeline.log\n"
-    deps:
-    - path: data/processed/ofen_g_koks/
-      hash: md5
-      md5: 7fbc29c374cab5c194f30ba237aed55b.dir
-      size: 21508452
-      nfiles: 6
-    - path: scripts/describe_data.py
-      hash: md5
-      md5: 861e4eabbae9992e4a391498cea612b2
-      size: 8375
-    - path: src/dcp_nf_forecast/
-      hash: md5
-      md5: dc038636e9897da79633b1030444b3d5.dir
-      size: 36235
-      nfiles: 8
-    params:
-      params.yaml:
-        data.data_format: feather
-        log_file: logs/pipeline.log
-        log_level: info
-        paths.data_processed: data/processed
-        targets:
-        - name: dla
-          y_column: dla_stromverbrauch_kwh
-          prediction_horizon: 12
-          lag_columns: dla_stromverbrauch_kwh:96
-          eval_model: bernstein_nf
-        - name: ofen_g_koks
-          y_column: ofen_g_koks_kg
-          prediction_horizon: 12
-          lag_columns: ofen_g_koks_kg:96
-          eval_model: bernstein_nf
-        - name: ofen_f_koks
-          y_column: ofen_f_koks_kg
-          prediction_horizon: 12
-          lag_columns: ofen_f_koks_kg:96
-          eval_model: bernstein_nf
-        - name: pl2
-          y_column: pl2_stromverbrauch_kwh
-          prediction_horizon: 12
-          lag_columns: pl2_stromverbrauch_kwh:96
-          eval_model: bernstein_nf
-    outs:
-    - path: results/ofen_g_koks/data_description/correlation_train.pdf
-      hash: md5
-      md5: 62bf1b10d46c34f8380c880f5d3d769c
-      size: 32866
-    - path: results/ofen_g_koks/data_description/correlation_val.pdf
-      hash: md5
-      md5: 3b68c531a98c546e17c5e94a00ce90e1
-      size: 32499
-    - path: results/ofen_g_koks/data_description/histograms_train.pdf
-      hash: md5
-      md5: fe74ed2c7b4358d2c7090ef1282548bb
-      size: 39610
-    - path: results/ofen_g_koks/data_description/histograms_val.pdf
-      hash: md5
-      md5: 83c1e59e42c26378f72ef2e94f41d70b
-      size: 39160
-    - path: results/ofen_g_koks/data_description/statistics_train.yaml
-      hash: md5
-      md5: 3cdb64e67dadf15cc0d4204e0162baef
-      size: 15389
-    - path: results/ofen_g_koks/data_description/statistics_val.yaml
-      hash: md5
-      md5: 087e8f8c336ac1f2cc939f1320a13a1f
-      size: 15955
-    - path: results/ofen_g_koks/data_description/timeseries_train.pdf
-      hash: md5
-      md5: 2f70453dfc11ca54032e6bacaf9ecb56
-      size: 201269
-    - path: results/ofen_g_koks/data_description/timeseries_val.pdf
-      hash: md5
-      md5: abc154e96547a2ebcc5bf737ab598d72
-      size: 102981
-  describe@2:
-    cmd: "python scripts/describe_data.py --processed-dir data/processed/ofen_f_koks
-      --target-name ofen_f_koks --data-format feather --log-level info --log-file
-      logs/pipeline.log\n"
-    deps:
-    - path: data/processed/ofen_f_koks/
-      hash: md5
-      md5: 0743791096c32c3f9441e542288d72e8.dir
-      size: 20612028
-      nfiles: 6
-    - path: scripts/describe_data.py
-      hash: md5
-      md5: 861e4eabbae9992e4a391498cea612b2
-      size: 8375
-    - path: src/dcp_nf_forecast/
-      hash: md5
-      md5: dc038636e9897da79633b1030444b3d5.dir
-      size: 36235
-      nfiles: 8
-    params:
-      params.yaml:
-        data.data_format: feather
-        log_file: logs/pipeline.log
-        log_level: info
-        paths.data_processed: data/processed
-        targets:
-        - name: dla
-          y_column: dla_stromverbrauch_kwh
-          prediction_horizon: 12
-          lag_columns: dla_stromverbrauch_kwh:96
-          eval_model: bernstein_nf
-        - name: ofen_g_koks
-          y_column: ofen_g_koks_kg
-          prediction_horizon: 12
-          lag_columns: ofen_g_koks_kg:96
-          eval_model: bernstein_nf
-        - name: ofen_f_koks
-          y_column: ofen_f_koks_kg
-          prediction_horizon: 12
-          lag_columns: ofen_f_koks_kg:96
-          eval_model: bernstein_nf
-        - name: pl2
-          y_column: pl2_stromverbrauch_kwh
-          prediction_horizon: 12
-          lag_columns: pl2_stromverbrauch_kwh:96
-          eval_model: bernstein_nf
-    outs:
-    - path: results/ofen_f_koks/data_description/correlation_train.pdf
-      hash: md5
-      md5: b906e928787e128040dade1d6dd15eb8
-      size: 28970
-    - path: results/ofen_f_koks/data_description/correlation_val.pdf
-      hash: md5
-      md5: 30ff5dbfc8fa3214d1b598730273a2df
-      size: 29865
-    - path: results/ofen_f_koks/data_description/histograms_train.pdf
-      hash: md5
-      md5: bbfdc9745e0dfc1de47a7f7c1ba18bea
-      size: 34725
-    - path: results/ofen_f_koks/data_description/histograms_val.pdf
-      hash: md5
-      md5: 8664224841a69f058c9a0d6117b4b366
-      size: 38648
-    - path: results/ofen_f_koks/data_description/statistics_train.yaml
-      hash: md5
-      md5: 180fda5809013f15b45413a6e6d309e6
-      size: 15421
-    - path: results/ofen_f_koks/data_description/statistics_val.yaml
-      hash: md5
-      md5: 16e7a2772df3167fddee8e0ead31f3aa
-      size: 16495
-    - path: results/ofen_f_koks/data_description/timeseries_train.pdf
-      hash: md5
-      md5: c7265956360cf5e005ceccfb1a4528ad
-      size: 186597
-    - path: results/ofen_f_koks/data_description/timeseries_val.pdf
-      hash: md5
-      md5: eda1d96a70bfbf9a05b14bb4dae41441
-      size: 99878
   describe@3:
     cmd: "python scripts/describe_data.py --processed-dir data/processed/pl2 --target-name
       pl2 --data-format feather --log-level info --log-file logs/pipeline.log\n"
@@ -1239,8 +782,8 @@ stages:
       size: 8375
     - path: src/dcp_nf_forecast/
       hash: md5
-      md5: dc038636e9897da79633b1030444b3d5.dir
-      size: 36235
+      md5: d302b1abedd23439c3a26601234f4cfd.dir
+      size: 31931
       nfiles: 8
     params:
       params.yaml:
@@ -1253,38 +796,34 @@ stages:
           y_column: dla_stromverbrauch_kwh
           prediction_horizon: 12
           lag_columns: dla_stromverbrauch_kwh:96
-          eval_model: bernstein_nf
         - name: ofen_g_koks
           y_column: ofen_g_koks_kg
           prediction_horizon: 12
           lag_columns: ofen_g_koks_kg:96
-          eval_model: bernstein_nf
         - name: ofen_f_koks
           y_column: ofen_f_koks_kg
           prediction_horizon: 12
           lag_columns: ofen_f_koks_kg:96
-          eval_model: bernstein_nf
         - name: pl2
           y_column: pl2_stromverbrauch_kwh
           prediction_horizon: 12
           lag_columns: pl2_stromverbrauch_kwh:96
-          eval_model: bernstein_nf
     outs:
     - path: results/pl2/data_description/correlation_train.pdf
       hash: md5
-      md5: b528022f56e152582628022fb84c2fce
+      md5: 8614e470d5ec5de7fef3e13c28096454
       size: 28781
     - path: results/pl2/data_description/correlation_val.pdf
       hash: md5
-      md5: 75444c81c35ef216c760abdc5865385f
+      md5: 749bcfb1ddf5b6fefa9c69feeb6bab35
       size: 29515
     - path: results/pl2/data_description/histograms_train.pdf
       hash: md5
-      md5: a700caaf8a69402494c8b120db864fb8
+      md5: 0c26dd8cafb526722f6a07a0dcbae4d0
       size: 33736
     - path: results/pl2/data_description/histograms_val.pdf
       hash: md5
-      md5: ef5148c0fd96bb03bf932cc2be955fd0
+      md5: bd21a31693935d457920990034a7456b
       size: 41516
     - path: results/pl2/data_description/statistics_train.yaml
       hash: md5
@@ -1296,9 +835,736 @@ stages:
       size: 16514
     - path: results/pl2/data_description/timeseries_train.pdf
       hash: md5
-      md5: b5db05d279436a4f8de890c55463ebc4
+      md5: d52715c104eaf7ba2e1efdd08e0dffde
       size: 220553
     - path: results/pl2/data_description/timeseries_val.pdf
       hash: md5
-      md5: 5e6d6b6e621319e4a3d606cc98512cab
+      md5: 168f94d5b5bc8a4d61b32c6c37427937
       size: 82568
+  train_bernstein@1:
+    cmd: "python scripts/train.py --processed-dir data/processed/ofen_g_koks --target-name
+      ofen_g_koks --model bernstein_nf --data-format feather --prediction-horizon
+      12 --stage-name train_bernstein --test-mode true --log-level info --log-file
+      logs/pipeline.log\n"
+    deps:
+    - path: data/processed/ofen_g_koks/
+      hash: md5
+      md5: 7fbc29c374cab5c194f30ba237aed55b.dir
+      size: 21508452
+      nfiles: 6
+    - path: params/models/ofen_g_koks/bernstein_nf.yaml
+      hash: md5
+      md5: e62ac3bc16cbc1578de151c45a2b8fab
+      size: 679
+    - path: scripts/train.py
+      hash: md5
+      md5: 10dc488b91aa9eff73d17cccbe4e4a17
+      size: 4702
+    - path: src/dcp_nf_forecast/
+      hash: md5
+      md5: d302b1abedd23439c3a26601234f4cfd.dir
+      size: 31931
+      nfiles: 8
+    params:
+      params.yaml:
+        data.data_format: feather
+        log_file: logs/pipeline.log
+        log_level: info
+        paths.data_processed: data/processed
+        seed: 42
+        targets:
+        - name: dla
+          y_column: dla_stromverbrauch_kwh
+          prediction_horizon: 12
+          lag_columns: dla_stromverbrauch_kwh:96
+        - name: ofen_g_koks
+          y_column: ofen_g_koks_kg
+          prediction_horizon: 12
+          lag_columns: ofen_g_koks_kg:96
+        - name: ofen_f_koks
+          y_column: ofen_f_koks_kg
+          prediction_horizon: 12
+          lag_columns: ofen_f_koks_kg:96
+        - name: pl2
+          y_column: pl2_stromverbrauch_kwh
+          prediction_horizon: 12
+          lag_columns: pl2_stromverbrauch_kwh:96
+        test_mode: true
+      params/models/ofen_g_koks/bernstein_nf.yaml:
+        compile_kwargs: {}
+        fit_kwargs:
+          batch_size: 256
+          early_stopping_patience: 15
+          epochs: 5
+          learning_rate: 0.001
+          verbose: true
+        model_kwargs:
+          distribution: masked_autoregressive_flow
+          num_layers: 1
+          bijector: BernsteinPolynomial
+          bijector_kwargs:
+            domain:
+            - 0
+            - 1
+            extrapolation: false
+          invert: true
+          base_distribution_kwargs:
+            distribution_name: lognormal
+          num_parameters: 96
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_thetas_constrain_fn
+          parameters_constraint_fn_kwargs:
+            allow_flexible_bounds: false
+            bounds: linear
+            low: -4
+            high: 4
+          parameters_fn_kwargs:
+            activation: relu
+            hidden_units:
+            - 128
+            - 128
+            conditional: true
+    outs:
+    - path: results/ofen_g_koks/bernstein_nf/metrics.yaml
+      hash: md5
+      md5: e287efa5902b8b38bc9aa5e6ec523f3c
+      size: 92
+    - path: results/ofen_g_koks/bernstein_nf/model_weights.h5
+      hash: md5
+      md5: ee9a40a5ba5ab26117bd4769a89cbd54
+      size: 683360
+  train_bernstein@2:
+    cmd: "python scripts/train.py --processed-dir data/processed/ofen_f_koks --target-name
+      ofen_f_koks --model bernstein_nf --data-format feather --prediction-horizon
+      12 --stage-name train_bernstein --test-mode true --log-level info --log-file
+      logs/pipeline.log\n"
+    deps:
+    - path: data/processed/ofen_f_koks/
+      hash: md5
+      md5: 0743791096c32c3f9441e542288d72e8.dir
+      size: 20612028
+      nfiles: 6
+    - path: params/models/ofen_f_koks/bernstein_nf.yaml
+      hash: md5
+      md5: e62ac3bc16cbc1578de151c45a2b8fab
+      size: 679
+    - path: scripts/train.py
+      hash: md5
+      md5: 10dc488b91aa9eff73d17cccbe4e4a17
+      size: 4702
+    - path: src/dcp_nf_forecast/
+      hash: md5
+      md5: d302b1abedd23439c3a26601234f4cfd.dir
+      size: 31931
+      nfiles: 8
+    params:
+      params.yaml:
+        data.data_format: feather
+        log_file: logs/pipeline.log
+        log_level: info
+        paths.data_processed: data/processed
+        seed: 42
+        targets:
+        - name: dla
+          y_column: dla_stromverbrauch_kwh
+          prediction_horizon: 12
+          lag_columns: dla_stromverbrauch_kwh:96
+        - name: ofen_g_koks
+          y_column: ofen_g_koks_kg
+          prediction_horizon: 12
+          lag_columns: ofen_g_koks_kg:96
+        - name: ofen_f_koks
+          y_column: ofen_f_koks_kg
+          prediction_horizon: 12
+          lag_columns: ofen_f_koks_kg:96
+        - name: pl2
+          y_column: pl2_stromverbrauch_kwh
+          prediction_horizon: 12
+          lag_columns: pl2_stromverbrauch_kwh:96
+        test_mode: true
+      params/models/ofen_f_koks/bernstein_nf.yaml:
+        compile_kwargs: {}
+        fit_kwargs:
+          batch_size: 256
+          early_stopping_patience: 15
+          epochs: 5
+          learning_rate: 0.001
+          verbose: true
+        model_kwargs:
+          distribution: masked_autoregressive_flow
+          num_layers: 1
+          bijector: BernsteinPolynomial
+          bijector_kwargs:
+            domain:
+            - 0
+            - 1
+            extrapolation: false
+          invert: true
+          base_distribution_kwargs:
+            distribution_name: lognormal
+          num_parameters: 96
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_thetas_constrain_fn
+          parameters_constraint_fn_kwargs:
+            allow_flexible_bounds: false
+            bounds: linear
+            low: -4
+            high: 4
+          parameters_fn_kwargs:
+            activation: relu
+            hidden_units:
+            - 128
+            - 128
+            conditional: true
+    outs:
+    - path: results/ofen_f_koks/bernstein_nf/metrics.yaml
+      hash: md5
+      md5: e287efa5902b8b38bc9aa5e6ec523f3c
+      size: 92
+    - path: results/ofen_f_koks/bernstein_nf/model_weights.h5
+      hash: md5
+      md5: ee9a40a5ba5ab26117bd4769a89cbd54
+      size: 683360
+  train_bernstein@3:
+    cmd: "python scripts/train.py --processed-dir data/processed/pl2 --target-name
+      pl2 --model bernstein_nf --data-format feather --prediction-horizon 12 --stage-name
+      train_bernstein --test-mode true --log-level info --log-file logs/pipeline.log\n"
+    deps:
+    - path: data/processed/pl2/
+      hash: md5
+      md5: b0c7f7a7748f15538109c9793ecbb15a.dir
+      size: 25567508
+      nfiles: 6
+    - path: params/models/pl2/bernstein_nf.yaml
+      hash: md5
+      md5: e62ac3bc16cbc1578de151c45a2b8fab
+      size: 679
+    - path: scripts/train.py
+      hash: md5
+      md5: 10dc488b91aa9eff73d17cccbe4e4a17
+      size: 4702
+    - path: src/dcp_nf_forecast/
+      hash: md5
+      md5: d302b1abedd23439c3a26601234f4cfd.dir
+      size: 31931
+      nfiles: 8
+    params:
+      params.yaml:
+        data.data_format: feather
+        log_file: logs/pipeline.log
+        log_level: info
+        paths.data_processed: data/processed
+        seed: 42
+        targets:
+        - name: dla
+          y_column: dla_stromverbrauch_kwh
+          prediction_horizon: 12
+          lag_columns: dla_stromverbrauch_kwh:96
+        - name: ofen_g_koks
+          y_column: ofen_g_koks_kg
+          prediction_horizon: 12
+          lag_columns: ofen_g_koks_kg:96
+        - name: ofen_f_koks
+          y_column: ofen_f_koks_kg
+          prediction_horizon: 12
+          lag_columns: ofen_f_koks_kg:96
+        - name: pl2
+          y_column: pl2_stromverbrauch_kwh
+          prediction_horizon: 12
+          lag_columns: pl2_stromverbrauch_kwh:96
+        test_mode: true
+      params/models/pl2/bernstein_nf.yaml:
+        compile_kwargs: {}
+        fit_kwargs:
+          batch_size: 256
+          early_stopping_patience: 15
+          epochs: 5
+          learning_rate: 0.001
+          verbose: true
+        model_kwargs:
+          distribution: masked_autoregressive_flow
+          num_layers: 1
+          bijector: BernsteinPolynomial
+          bijector_kwargs:
+            domain:
+            - 0
+            - 1
+            extrapolation: false
+          invert: true
+          base_distribution_kwargs:
+            distribution_name: lognormal
+          num_parameters: 96
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_thetas_constrain_fn
+          parameters_constraint_fn_kwargs:
+            allow_flexible_bounds: false
+            bounds: linear
+            low: -4
+            high: 4
+          parameters_fn_kwargs:
+            activation: relu
+            hidden_units:
+            - 128
+            - 128
+            conditional: true
+    outs:
+    - path: results/pl2/bernstein_nf/metrics.yaml
+      hash: md5
+      md5: e287efa5902b8b38bc9aa5e6ec523f3c
+      size: 92
+    - path: results/pl2/bernstein_nf/model_weights.h5
+      hash: md5
+      md5: ee9a40a5ba5ab26117bd4769a89cbd54
+      size: 683360
+  train_spline@0:
+    cmd: "python scripts/train.py --processed-dir data/processed/dla --target-name
+      dla --model spline_nf --data-format feather --prediction-horizon 12 --stage-name
+      train_spline --test-mode true --log-level info --log-file logs/pipeline.log\n"
+    deps:
+    - path: data/processed/dla/
+      hash: md5
+      md5: 7f18d8e55de7ec41a4114b43b7a9d782.dir
+      size: 12546540
+      nfiles: 6
+    - path: params/models/dla/spline_nf.yaml
+      hash: md5
+      md5: ebe8e4c4622789cfd72df0fe923c29de
+      size: 654
+    - path: scripts/train.py
+      hash: md5
+      md5: 10dc488b91aa9eff73d17cccbe4e4a17
+      size: 4702
+    - path: src/dcp_nf_forecast/
+      hash: md5
+      md5: d302b1abedd23439c3a26601234f4cfd.dir
+      size: 31931
+      nfiles: 8
+    params:
+      params.yaml:
+        data.data_format: feather
+        log_file: logs/pipeline.log
+        log_level: info
+        paths.data_processed: data/processed
+        seed: 42
+        targets:
+        - name: dla
+          y_column: dla_stromverbrauch_kwh
+          prediction_horizon: 12
+          lag_columns: dla_stromverbrauch_kwh:96
+        - name: ofen_g_koks
+          y_column: ofen_g_koks_kg
+          prediction_horizon: 12
+          lag_columns: ofen_g_koks_kg:96
+        - name: ofen_f_koks
+          y_column: ofen_f_koks_kg
+          prediction_horizon: 12
+          lag_columns: ofen_f_koks_kg:96
+        - name: pl2
+          y_column: pl2_stromverbrauch_kwh
+          prediction_horizon: 12
+          lag_columns: pl2_stromverbrauch_kwh:96
+        test_mode: true
+      params/models/dla/spline_nf.yaml:
+        compile_kwargs: {}
+        fit_kwargs:
+          batch_size: 256
+          early_stopping_patience: 15
+          epochs: 5
+          learning_rate: 0.001
+          verbose: true
+        model_kwargs:
+          distribution: masked_autoregressive_flow
+          num_layers: 1
+          bijector: RationalQuadraticSpline
+          bijector_kwargs:
+            range_min: -4
+          base_distribution_kwargs:
+            distribution_name: lognormal
+          num_parameters: 95
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_spline_param_constrain_fn
+          parameters_constraint_fn_kwargs:
+            interval_width: 8
+            min_slope: 0.001
+            min_bin_width: 0.001
+            nbins: 32
+          parameters_fn_kwargs:
+            activation: relu
+            hidden_units:
+            - 128
+            - 128
+            conditional: true
+    outs:
+    - path: results/dla/spline_nf/metrics.yaml
+      hash: md5
+      md5: e287efa5902b8b38bc9aa5e6ec523f3c
+      size: 92
+    - path: results/dla/spline_nf/model_weights.h5
+      hash: md5
+      md5: 3b0646df39d12f0fdfd3166b3aad6817
+      size: 677168
+  train_spline@1:
+    cmd: "python scripts/train.py --processed-dir data/processed/ofen_g_koks --target-name
+      ofen_g_koks --model spline_nf --data-format feather --prediction-horizon 12
+      --stage-name train_spline --test-mode true --log-level info --log-file logs/pipeline.log\n"
+    deps:
+    - path: data/processed/ofen_g_koks/
+      hash: md5
+      md5: 7fbc29c374cab5c194f30ba237aed55b.dir
+      size: 21508452
+      nfiles: 6
+    - path: params/models/ofen_g_koks/spline_nf.yaml
+      hash: md5
+      md5: ebe8e4c4622789cfd72df0fe923c29de
+      size: 654
+    - path: scripts/train.py
+      hash: md5
+      md5: 10dc488b91aa9eff73d17cccbe4e4a17
+      size: 4702
+    - path: src/dcp_nf_forecast/
+      hash: md5
+      md5: d302b1abedd23439c3a26601234f4cfd.dir
+      size: 31931
+      nfiles: 8
+    params:
+      params.yaml:
+        data.data_format: feather
+        log_file: logs/pipeline.log
+        log_level: info
+        paths.data_processed: data/processed
+        seed: 42
+        targets:
+        - name: dla
+          y_column: dla_stromverbrauch_kwh
+          prediction_horizon: 12
+          lag_columns: dla_stromverbrauch_kwh:96
+        - name: ofen_g_koks
+          y_column: ofen_g_koks_kg
+          prediction_horizon: 12
+          lag_columns: ofen_g_koks_kg:96
+        - name: ofen_f_koks
+          y_column: ofen_f_koks_kg
+          prediction_horizon: 12
+          lag_columns: ofen_f_koks_kg:96
+        - name: pl2
+          y_column: pl2_stromverbrauch_kwh
+          prediction_horizon: 12
+          lag_columns: pl2_stromverbrauch_kwh:96
+        test_mode: true
+      params/models/ofen_g_koks/spline_nf.yaml:
+        compile_kwargs: {}
+        fit_kwargs:
+          batch_size: 256
+          early_stopping_patience: 15
+          epochs: 5
+          learning_rate: 0.001
+          verbose: true
+        model_kwargs:
+          distribution: masked_autoregressive_flow
+          num_layers: 1
+          bijector: RationalQuadraticSpline
+          bijector_kwargs:
+            range_min: -4
+          base_distribution_kwargs:
+            distribution_name: lognormal
+          num_parameters: 95
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_spline_param_constrain_fn
+          parameters_constraint_fn_kwargs:
+            interval_width: 8
+            min_slope: 0.001
+            min_bin_width: 0.001
+            nbins: 32
+          parameters_fn_kwargs:
+            activation: relu
+            hidden_units:
+            - 128
+            - 128
+            conditional: true
+    outs:
+    - path: results/ofen_g_koks/spline_nf/metrics.yaml
+      hash: md5
+      md5: e287efa5902b8b38bc9aa5e6ec523f3c
+      size: 92
+    - path: results/ofen_g_koks/spline_nf/model_weights.h5
+      hash: md5
+      md5: 2e5fea999609647936e44fff3b3b92e7
+      size: 677168
+  train_spline@2:
+    cmd: "python scripts/train.py --processed-dir data/processed/ofen_f_koks --target-name
+      ofen_f_koks --model spline_nf --data-format feather --prediction-horizon 12
+      --stage-name train_spline --test-mode true --log-level info --log-file logs/pipeline.log\n"
+    deps:
+    - path: data/processed/ofen_f_koks/
+      hash: md5
+      md5: 0743791096c32c3f9441e542288d72e8.dir
+      size: 20612028
+      nfiles: 6
+    - path: params/models/ofen_f_koks/spline_nf.yaml
+      hash: md5
+      md5: ebe8e4c4622789cfd72df0fe923c29de
+      size: 654
+    - path: scripts/train.py
+      hash: md5
+      md5: 10dc488b91aa9eff73d17cccbe4e4a17
+      size: 4702
+    - path: src/dcp_nf_forecast/
+      hash: md5
+      md5: d302b1abedd23439c3a26601234f4cfd.dir
+      size: 31931
+      nfiles: 8
+    params:
+      params.yaml:
+        data.data_format: feather
+        log_file: logs/pipeline.log
+        log_level: info
+        paths.data_processed: data/processed
+        seed: 42
+        targets:
+        - name: dla
+          y_column: dla_stromverbrauch_kwh
+          prediction_horizon: 12
+          lag_columns: dla_stromverbrauch_kwh:96
+        - name: ofen_g_koks
+          y_column: ofen_g_koks_kg
+          prediction_horizon: 12
+          lag_columns: ofen_g_koks_kg:96
+        - name: ofen_f_koks
+          y_column: ofen_f_koks_kg
+          prediction_horizon: 12
+          lag_columns: ofen_f_koks_kg:96
+        - name: pl2
+          y_column: pl2_stromverbrauch_kwh
+          prediction_horizon: 12
+          lag_columns: pl2_stromverbrauch_kwh:96
+        test_mode: true
+      params/models/ofen_f_koks/spline_nf.yaml:
+        compile_kwargs: {}
+        fit_kwargs:
+          batch_size: 256
+          early_stopping_patience: 15
+          epochs: 5
+          learning_rate: 0.001
+          verbose: true
+        model_kwargs:
+          distribution: masked_autoregressive_flow
+          num_layers: 1
+          bijector: RationalQuadraticSpline
+          bijector_kwargs:
+            range_min: -4
+          base_distribution_kwargs:
+            distribution_name: lognormal
+          num_parameters: 95
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_spline_param_constrain_fn
+          parameters_constraint_fn_kwargs:
+            interval_width: 8
+            min_slope: 0.001
+            min_bin_width: 0.001
+            nbins: 32
+          parameters_fn_kwargs:
+            activation: relu
+            hidden_units:
+            - 128
+            - 128
+            conditional: true
+    outs:
+    - path: results/ofen_f_koks/spline_nf/metrics.yaml
+      hash: md5
+      md5: e287efa5902b8b38bc9aa5e6ec523f3c
+      size: 92
+    - path: results/ofen_f_koks/spline_nf/model_weights.h5
+      hash: md5
+      md5: 5a6d08c9138262a56846fdef68738ea9
+      size: 677168
+  train_spline@3:
+    cmd: "python scripts/train.py --processed-dir data/processed/pl2 --target-name
+      pl2 --model spline_nf --data-format feather --prediction-horizon 12 --stage-name
+      train_spline --test-mode true --log-level info --log-file logs/pipeline.log\n"
+    deps:
+    - path: data/processed/pl2/
+      hash: md5
+      md5: b0c7f7a7748f15538109c9793ecbb15a.dir
+      size: 25567508
+      nfiles: 6
+    - path: params/models/pl2/spline_nf.yaml
+      hash: md5
+      md5: ebe8e4c4622789cfd72df0fe923c29de
+      size: 654
+    - path: scripts/train.py
+      hash: md5
+      md5: 10dc488b91aa9eff73d17cccbe4e4a17
+      size: 4702
+    - path: src/dcp_nf_forecast/
+      hash: md5
+      md5: d302b1abedd23439c3a26601234f4cfd.dir
+      size: 31931
+      nfiles: 8
+    params:
+      params.yaml:
+        data.data_format: feather
+        log_file: logs/pipeline.log
+        log_level: info
+        paths.data_processed: data/processed
+        seed: 42
+        targets:
+        - name: dla
+          y_column: dla_stromverbrauch_kwh
+          prediction_horizon: 12
+          lag_columns: dla_stromverbrauch_kwh:96
+        - name: ofen_g_koks
+          y_column: ofen_g_koks_kg
+          prediction_horizon: 12
+          lag_columns: ofen_g_koks_kg:96
+        - name: ofen_f_koks
+          y_column: ofen_f_koks_kg
+          prediction_horizon: 12
+          lag_columns: ofen_f_koks_kg:96
+        - name: pl2
+          y_column: pl2_stromverbrauch_kwh
+          prediction_horizon: 12
+          lag_columns: pl2_stromverbrauch_kwh:96
+        test_mode: true
+      params/models/pl2/spline_nf.yaml:
+        compile_kwargs: {}
+        fit_kwargs:
+          batch_size: 256
+          early_stopping_patience: 15
+          epochs: 5
+          learning_rate: 0.001
+          verbose: true
+        model_kwargs:
+          distribution: masked_autoregressive_flow
+          num_layers: 1
+          bijector: RationalQuadraticSpline
+          bijector_kwargs:
+            range_min: -4
+          base_distribution_kwargs:
+            distribution_name: lognormal
+          num_parameters: 95
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_spline_param_constrain_fn
+          parameters_constraint_fn_kwargs:
+            interval_width: 8
+            min_slope: 0.001
+            min_bin_width: 0.001
+            nbins: 32
+          parameters_fn_kwargs:
+            activation: relu
+            hidden_units:
+            - 128
+            - 128
+            conditional: true
+    outs:
+    - path: results/pl2/spline_nf/metrics.yaml
+      hash: md5
+      md5: e287efa5902b8b38bc9aa5e6ec523f3c
+      size: 92
+    - path: results/pl2/spline_nf/model_weights.h5
+      hash: md5
+      md5: b5efd55603ccbb0d9c4f2253677719eb
+      size: 677168
+  evaluate_bernstein@0:
+    cmd: "python scripts/evaluate.py --processed-dir data/processed/dla --target-name
+      dla --model bernstein_nf --data-format feather --prediction-horizon 12 --n-samples
+      1000 --stage-name evaluate_bernstein --test-mode true --log-level info --log-file
+      logs/pipeline.log\n"
+    deps:
+    - path: data/processed/dla/
+      hash: md5
+      md5: 7f18d8e55de7ec41a4114b43b7a9d782.dir
+      size: 12546540
+      nfiles: 6
+    - path: params/models/dla/bernstein_nf.yaml
+      hash: md5
+      md5: e62ac3bc16cbc1578de151c45a2b8fab
+      size: 679
+    - path: results/dla/bernstein_nf/model_weights.h5
+      hash: md5
+      md5: ee9a40a5ba5ab26117bd4769a89cbd54
+      size: 683360
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: cd5c79cee2e2d28db6056fc0e0eb62a2
+      size: 10088
+    - path: src/dcp_nf_forecast/
+      hash: md5
+      md5: d302b1abedd23439c3a26601234f4cfd.dir
+      size: 31931
+      nfiles: 8
+    params:
+      params.yaml:
+        data.data_format: feather
+        eval.n_samples: 1000
+        log_file: logs/pipeline.log
+        log_level: info
+        seed: 42
+        targets:
+        - name: dla
+          y_column: dla_stromverbrauch_kwh
+          prediction_horizon: 12
+          lag_columns: dla_stromverbrauch_kwh:96
+        - name: ofen_g_koks
+          y_column: ofen_g_koks_kg
+          prediction_horizon: 12
+          lag_columns: ofen_g_koks_kg:96
+        - name: ofen_f_koks
+          y_column: ofen_f_koks_kg
+          prediction_horizon: 12
+          lag_columns: ofen_f_koks_kg:96
+        - name: pl2
+          y_column: pl2_stromverbrauch_kwh
+          prediction_horizon: 12
+          lag_columns: pl2_stromverbrauch_kwh:96
+        test_mode: true
+      params/models/dla/bernstein_nf.yaml:
+        compile_kwargs: {}
+        fit_kwargs:
+          batch_size: 256
+          early_stopping_patience: 15
+          epochs: 5
+          learning_rate: 0.001
+          verbose: true
+        model_kwargs:
+          distribution: masked_autoregressive_flow
+          num_layers: 1
+          bijector: BernsteinPolynomial
+          bijector_kwargs:
+            domain:
+            - 0
+            - 1
+            extrapolation: false
+          invert: true
+          base_distribution_kwargs:
+            distribution_name: lognormal
+          num_parameters: 96
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_thetas_constrain_fn
+          parameters_constraint_fn_kwargs:
+            allow_flexible_bounds: false
+            bounds: linear
+            low: -4
+            high: 4
+          parameters_fn_kwargs:
+            activation: relu
+            hidden_units:
+            - 128
+            - 128
+            conditional: true
+    outs:
+    - path: results/dla/bernstein_nf/evaluation/calibration.pdf
+      hash: md5
+      md5: e9cfb007aa2ca97124dba49fdab313c6
+      size: 22312
+    - path: results/dla/bernstein_nf/evaluation/forecast.pdf
+      hash: md5
+      md5: bd98c0f31de177cb63329780ad284447
+      size: 21276
+    - path: results/dla/bernstein_nf/evaluation/metrics.yaml
+      hash: md5
+      md5: b1d6ca6b6c3c250dea6b81b2b79b8933
+      size: 44
+    - path: results/dla/bernstein_nf/evaluation/pit_histogram.pdf
+      hash: md5
+      md5: 58ded1f336449a2bf8c621f09c806d0e
+      size: 19826
