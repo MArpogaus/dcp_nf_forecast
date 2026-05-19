@@ -41,30 +41,21 @@ def load_raw_data(
 
 def cyclical_encode(
     values: np.ndarray,
-    n_freqs: int,
 ) -> np.ndarray:
-    """Generate sin/cos cyclical features at multiple frequencies.
+    """Generate sin/cos cyclical features at base frequency.
 
     Parameters
     ----------
     values : np.ndarray
         1-D array of normalized values in ``[0, 1]``.
-    n_freqs : int
-        Number of frequency multiples to encode (each produces sin + cos).
 
     Returns
     -------
     np.ndarray
-        Shape ``(len(values), 2 * n_freqs)`` with sin/cos pairs per frequency.
+        Shape ``(len(values), 2)`` with sin and cos of the base frequency.
     """
-    if n_freqs <= 0:
-        return np.empty((len(values), 0))
-    features: list[np.ndarray] = []
-    for freq in range(1, n_freqs + 1):
-        angular = 2 * np.pi * freq * values
-        features.append(np.sin(angular))
-        features.append(np.cos(angular))
-    return np.column_stack(features)
+    angular = 2 * np.pi * values
+    return np.column_stack([np.sin(angular), np.cos(angular)])
 
 
 def _normalize_time_component(
@@ -103,7 +94,7 @@ def _normalize_time_component(
 
 def encode_time_features(
     df: pd.DataFrame,
-    components_n_freqs: dict[str, int],
+    components: list[str],
 ) -> pd.DataFrame:
     """Create sin/cos encoded time features from a datetime index.
 
@@ -111,28 +102,23 @@ def encode_time_features(
     ----------
     df : pd.DataFrame
         Data with a ``DatetimeIndex``.
-    components_n_freqs : dict[str, int]
-        Maps component names (``"time"``, ``"day_of_week"``,
-        ``"day_of_year"``) to their number of frequency multiples.
+    components : list[str]
+        Component names (``"time"``, ``"day_of_week"``, ``"day_of_year"``).
 
     Returns
     -------
     pd.DataFrame
-        Columns named ``{component}_f{freq}_{sin,cos}``, same index as *df*.
+        Columns named ``{component}_sin`` and ``{component}_cos``,
+        same index as *df*.
     """
-    if not components_n_freqs:
+    if not components:
         return pd.DataFrame(index=df.index)
     columns: dict[str, pd.Series] = {}
-    for component, n_freqs in components_n_freqs.items():
+    for component in components:
         normalized = _normalize_time_component(df, component)
-        encoded = cyclical_encode(normalized, n_freqs)
-        for freq in range(1, n_freqs + 1):
-            columns[f"{component}_f{freq}_sin"] = pd.Series(
-                encoded[:, (freq - 1) * 2], index=df.index
-            )
-            columns[f"{component}_f{freq}_cos"] = pd.Series(
-                encoded[:, (freq - 1) * 2 + 1], index=df.index
-            )
+        sin_val, cos_val = cyclical_encode(normalized).T
+        columns[f"{component}_sin"] = pd.Series(sin_val, index=df.index)
+        columns[f"{component}_cos"] = pd.Series(cos_val, index=df.index)
     return pd.DataFrame(columns, index=df.index)
 
 
@@ -201,7 +187,7 @@ def build_target(
 def build_features_and_target(
     df: pd.DataFrame,
     tabular_covariate_columns: list[str],
-    components_n_freqs: dict[str, int],
+    time_components: list[str],
     column_lags: dict[str, int],
     target_column: str,
     prediction_horizon: int,
@@ -218,8 +204,8 @@ def build_features_and_target(
         Source data with a ``DatetimeIndex``.
     tabular_covariate_columns : list[str]
         Columns to include as-is (current-timestep values).
-    components_n_freqs : dict[str, int]
-        Time-component / frequency mapping for sin/cos encoding.
+    time_components : list[str]
+        Time-component names for sin/cos encoding.
     column_lags : dict[str, int]
         Column / lag-count mapping for lag features.
     target_column : str
@@ -234,7 +220,7 @@ def build_features_and_target(
         of the original index after dropping leading and trailing ``NaN``
         rows from lag and shift operations.
     """
-    parts: list[pd.DataFrame] = [encode_time_features(df, components_n_freqs)]
+    parts: list[pd.DataFrame] = [encode_time_features(df, time_components)]
     lag_df = create_lag_features(df, column_lags)
     if not lag_df.empty:
         parts.append(lag_df)

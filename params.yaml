@@ -11,13 +11,13 @@ data:
   datetime_column: new_time
   data_format: feather
   fillna_method: ffill
-  tabular_covariate_columns: ofen_g_koks_kg,ofen_f_koks_kg,pl2_stromverbrauch_kwh
-  time_components: time:4,day_of_week:4,day_of_year:4
+  tabular_covariate_columns: none
+  time_components: time,day_of_week,day_of_year
 
 train:
-  epochs: 100
+  epochs: 5
   early_stopping_patience: 15
-  test_mode: true
+  test_mode: false
   test_epochs: 1
   test_batch_size: 32
 
@@ -25,28 +25,28 @@ eval:
   n_samples: 1000
 
 splits:
-  train: 0.70
-  val: 0.15
-  test: 0.15
+  train: 0.80
+  val: 0.10
+  test: 0.10
 
 targets:
 - name: dla
   y_column: dla_stromverbrauch_kwh
   prediction_horizon: 12
-  lag_columns: dla_stromverbrauch_kwh:96,ofen_g_koks_kg:48
+  lag_columns: dla_stromverbrauch_kwh:96
   eval_model: bernstein_nf
 - name: ofen_g_koks
   y_column: ofen_g_koks_kg
   prediction_horizon: 12
-  lag_columns: ofen_g_koks_kg:96,dla_stromverbrauch_kwh:48
+  lag_columns: ofen_g_koks_kg:96
   eval_model: bernstein_nf
 - name: ofen_f_koks
   y_column: ofen_f_koks_kg
   prediction_horizon: 12
-  lag_columns: ofen_f_koks_kg:96,dla_stromverbrauch_kwh:48
+  lag_columns: ofen_f_koks_kg:96
   eval_model: bernstein_nf
 - name: pl2
   y_column: pl2_stromverbrauch_kwh
   prediction_horizon: 12
-  lag_columns: pl2_stromverbrauch_kwh:96,ofen_g_koks_kg:48
+  lag_columns: pl2_stromverbrauch_kwh:96
   eval_model: bernstein_nf

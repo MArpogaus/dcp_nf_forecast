@@ -31,6 +31,7 @@ def create_bernstein_model(
         bijector="BernsteinPolynomial",
         bijector_kwargs={"domain": [0, 1], "extrapolation": False},
         invert=True,
+        base_distribution_kwargs={"distribution_name": "lognormal"},
         parameters_constraint_fn="hybrid_flows.activations.get_thetas_constrain_fn",
         parameters_constraint_fn_kwargs={
             "allow_flexible_bounds": False,
@@ -76,6 +77,7 @@ def create_spline_model(
         num_parameters=cfg["num_bins"] * 3 - 1,
         bijector="RationalQuadraticSpline",
         bijector_kwargs={"range_min": -4},
+        base_distribution_kwargs={"distribution_name": "lognormal"},
         parameters_constraint_fn="hybrid_flows.activations.get_spline_param_constrain_fn",
         parameters_constraint_fn_kwargs={
             "interval_width": 8,

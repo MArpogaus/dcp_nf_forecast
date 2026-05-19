@@ -12,19 +12,7 @@ from dcp_nf_forecast.utils import save_dataframe, setup_logging
 
 
 def _parse_csv(s: str) -> list[str]:
-    """Split a comma-separated string into a list of trimmed tokens.
-
-    Parameters
-    ----------
-    s : str
-        Comma-separated values, e.g. ``"a, b, c"``.
-
-    Returns
-    -------
-    list[str]
-        Non-empty trimmed tokens.
-    """
-    return [x.strip() for x in s.split(",") if x.strip()]
+    return [x.strip() for x in s.split(",") if x.strip() and x.strip() != "none"]
 
 
 def _parse_kv_csv(s: str) -> dict[str, int]:
@@ -77,20 +65,20 @@ def main() -> None:
     logger.info("Loaded %d rows with columns %s", len(df), list(df.columns))
 
     tab_cov = _parse_csv(args.tabular_covariate_columns)
-    time_spec = _parse_kv_csv(args.time_components)
+    time_comps = _parse_csv(args.time_components)
     lag_cols = _parse_kv_csv(args.lag_columns)
 
     logger.info(
         "Target '%s': time=%s lags=%s covariates=%s",
         args.target_name,
-        time_spec,
+        time_comps,
         lag_cols,
         tab_cov,
     )
     df_x, df_y = build_features_and_target(
         df=df,
         tabular_covariate_columns=tab_cov,
-        components_n_freqs=time_spec,
+        time_components=time_comps,
         column_lags=lag_cols,
         target_column=args.y_column,
         prediction_horizon=args.prediction_horizon,

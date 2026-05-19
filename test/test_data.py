@@ -53,18 +53,17 @@ class TestLoadRawData:
 class TestCyclicalEncode:
     def test_sin_cos_in_bounds(self):
         values = np.linspace(0, 1, 100)
-        encoded = cyclical_encode(values, n_freqs=2)
+        encoded = cyclical_encode(values)
         assert np.all(np.abs(encoded) <= 1.0 + 1e-15)
 
-    @pytest.mark.parametrize("n_freqs", [1, 2, 4, 8])
-    def test_output_shape(self, n_freqs):
+    def test_output_shape(self):
         values = np.array([0.0, 0.5, 1.0])
-        encoded = cyclical_encode(values, n_freqs=n_freqs)
-        assert encoded.shape == (3, 2 * n_freqs)
+        encoded = cyclical_encode(values)
+        assert encoded.shape == (3, 2)
 
     def test_periodicity(self):
         values = np.array([0.25, 0.75])
-        encoded = cyclical_encode(values, n_freqs=1)
+        encoded = cyclical_encode(values)
         assert abs(encoded[0, 0]) > 0
         assert encoded[0, 1] > 0
 
@@ -114,26 +113,33 @@ class TestNormalizeTimeComponent:
 
 
 class TestEncodeTimeFeatures:
-    def test_returns_empty_for_empty_specs(self, sample_df):
-        result = encode_time_features(sample_df, {})
+    def test_no_components(self, sample_df):
+        df = sample_df
+        result = encode_time_features(df, components=[])
         assert result.empty
-        assert list(result.index) == list(sample_df.index)
+        assert list(result.columns) == []
 
-    def test_returns_empty_for_zero_freqs(self, sample_df):
-        result = encode_time_features(sample_df, {"time": 0})
-        assert result.empty
-
-    def test_single_component_correct_columns(self, sample_df):
-        result = encode_time_features(sample_df, {"time": 2})
-        expected_cols = ["time_f1_sin", "time_f1_cos", "time_f2_sin", "time_f2_cos"]
+    def test_single_component(self, sample_df):
+        df = sample_df
+        result = encode_time_features(df, components=["time"])
+        expected_cols = ["time_sin", "time_cos"]
         assert list(result.columns) == expected_cols
+        assert np.all(np.abs(result.values) <= 1.0 + 1e-15)
 
     def test_multiple_components(self, sample_df):
-        result = encode_time_features(sample_df, {"time": 1, "day_of_week": 2})
-        assert result.shape[1] == 2 + 4
+        df = sample_df
+        components = ["time", "day_of_week"]
+        result = encode_time_features(df, components=components)
+        expected_cols = [
+            "time_sin",
+            "time_cos",
+            "day_of_week_sin",
+            "day_of_week_cos",
+        ]
+        assert list(result.columns) == expected_cols
 
     def test_index_preserved(self, sample_df):
-        result = encode_time_features(sample_df, {"time": 2})
+        result = encode_time_features(sample_df, components=["time"])
         assert result.index.equals(sample_df.index)
 
 
@@ -192,12 +198,13 @@ class TestBuildFeaturesAndTarget:
         df_x, df_y = build_features_and_target(
             df=sample_df,
             tabular_covariate_columns=["cov_a", "cov_b"],
-            components_n_freqs={"time": 2},
+            time_components=["time"],
             column_lags={"target": 4},
             target_column="target",
             prediction_horizon=3,
         )
-        assert "time_f1_sin" in df_x.columns
+        assert "time_sin" in df_x.columns
+        assert "time_cos" in df_x.columns
         assert "target_lag_1" in df_x.columns
         assert "cov_a" in df_x.columns
         assert "target_1" in df_y.columns
@@ -206,7 +213,7 @@ class TestBuildFeaturesAndTarget:
         df_x, df_y = build_features_and_target(
             df=sample_df,
             tabular_covariate_columns=["cov_a", "cov_b"],
-            components_n_freqs={"time": 2},
+            time_components={"time": 2},
             column_lags={"target": 4},
             target_column="target",
             prediction_horizon=3,
@@ -221,7 +228,7 @@ class TestBuildFeaturesAndTarget:
         df_x, df_y = build_features_and_target(
             df=sample_df,
             tabular_covariate_columns=["cov_a"],
-            components_n_freqs={},
+            time_components={},
             column_lags={"target": max_lag},
             target_column="target",
             prediction_horizon=horizon,
@@ -233,7 +240,7 @@ class TestBuildFeaturesAndTarget:
         df_x, df_y = build_features_and_target(
             df=sample_df,
             tabular_covariate_columns=[],
-            components_n_freqs={},
+            time_components={},
             column_lags={"target": 2},
             target_column="target",
             prediction_horizon=1,
@@ -245,7 +252,7 @@ class TestBuildFeaturesAndTarget:
         df_x, df_y = build_features_and_target(
             df=sample_df,
             tabular_covariate_columns=["cov_a"],
-            components_n_freqs={},
+            time_components={},
             column_lags={},
             target_column="target",
             prediction_horizon=1,
@@ -258,18 +265,18 @@ class TestBuildFeaturesAndTarget:
         df_x, df_y = build_features_and_target(
             df=sample_df,
             tabular_covariate_columns=["cov_a"],
-            components_n_freqs={},
+            time_components={},
             column_lags={"target": 2},
             target_column="target",
             prediction_horizon=1,
         )
-        assert "time_f1_sin" not in df_x.columns
+        assert "time_sin" not in df_x.columns
 
     def test_x_and_y_aligned(self, sample_df):
         df_x, df_y = build_features_and_target(
             df=sample_df,
             tabular_covariate_columns=["cov_a"],
-            components_n_freqs={"time": 1},
+            time_components={"time": 1},
             column_lags={"target": 2},
             target_column="target",
             prediction_horizon=1,
@@ -303,7 +310,7 @@ class TestSplitTemporal:
         df_x, df_y = build_features_and_target(
             df=sample_df,
             tabular_covariate_columns=["cov_a"],
-            components_n_freqs={},
+            time_components={},
             column_lags={"target": 2},
             target_column="target",
             prediction_horizon=1,
@@ -324,7 +331,7 @@ class TestSplitTemporal:
         df_x, df_y = build_features_and_target(
             df=sample_df,
             tabular_covariate_columns=["cov_a"],
-            components_n_freqs={},
+            time_components={},
             column_lags={"target": 2},
             target_column="target",
             prediction_horizon=1,
@@ -347,7 +354,7 @@ class TestSplitTemporal:
         df_x, df_y = build_features_and_target(
             df=sample_df,
             tabular_covariate_columns=[],
-            components_n_freqs={},
+            time_components={},
             column_lags={},
             target_column="target",
             prediction_horizon=1,
@@ -365,7 +372,7 @@ class TestSplitTemporal:
         df_x, df_y = build_features_and_target(
             df=sample_df,
             tabular_covariate_columns=["cov_a"],
-            components_n_freqs={},
+            time_components={},
             column_lags={"target": 2},
             target_column="target",
             prediction_horizon=1,
