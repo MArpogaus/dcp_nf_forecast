@@ -116,7 +116,8 @@ stages:
   train_bernstein@0:
     cmd: "python scripts/train.py --processed-dir data/processed/dla --target-name
       dla --model bernstein_nf --data-format feather --prediction-horizon 12 --stage-name
-      train_bernstein --test-mode false --log-level info --log-file logs/pipeline.log\n"
+      train_bernstein --experiment-name dcp_nf_forecast-dla --test-mode false --log-level
+      info --log-file logs/pipeline.log\n"
     deps:
     - path: data/processed/dla/
       hash: md5
@@ -125,12 +126,12 @@ stages:
       nfiles: 6
     - path: params/models/dla/bernstein_nf.yaml
       hash: md5
-      md5: b0c96bf14b2a4c1d0b7354ec38759a05
-      size: 685
+      md5: 95589e669aff324cb98813cc772cb57d
+      size: 687
     - path: scripts/train.py
       hash: md5
-      md5: 13dfe8ad62898b2c597a5b144ecda4e7
-      size: 4776
+      md5: 3cdf1e59436ec663b29459265373cb14
+      size: 5553
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: d302b1abedd23439c3a26601234f4cfd.dir
@@ -139,6 +140,7 @@ stages:
     params:
       params.yaml:
         data.data_format: feather
+        experiment_name: dcp_nf_forecast
         log_file: logs/pipeline.log
         log_level: info
         paths.data_processed: data/processed
@@ -166,8 +168,8 @@ stages:
         fit_kwargs:
           batch_size: 256
           early_stopping_patience: 10
-          epochs: 10
-          learning_rate: 0.001
+          epochs: 100
+          learning_rate: 0.0005
           verbose: true
         model_kwargs:
           distribution: masked_autoregressive_flow
@@ -199,12 +201,16 @@ stages:
     outs:
     - path: results/dla/bernstein_nf/metrics.yaml
       hash: md5
-      md5: e91299d2e3ffe99201bde7a7547d531d
-      size: 146
+      md5: 5913a62470dc307fdd8e0506a5c63fe1
+      size: 147
     - path: results/dla/bernstein_nf/model_weights.h5
       hash: md5
-      md5: a1e808af7cdbc477ab7a91e4bb0602b7
+      md5: 49531b0ef4888f9898f77103862f49bb
       size: 1742216
+    - path: results/dla/bernstein_nf/parent_run_id.txt
+      hash: md5
+      md5: 8f037eefdbc5906a568d1323ef29295f
+      size: 32
   describe@0:
     cmd: "python scripts/describe_data.py --processed-dir data/processed/dla --target-name
       dla --data-format feather --log-level info --log-file logs/pipeline.log\n"
