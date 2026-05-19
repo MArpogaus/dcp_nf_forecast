@@ -1,3 +1,5 @@
+"""Split feature/target data into temporally ordered train/val/test sets."""
+
 import argparse
 from pathlib import Path
 
@@ -6,6 +8,7 @@ from dcp_nf_forecast.utils import read_dataframe, save_dataframe, setup_logging
 
 
 def main() -> None:
+    """Entry point: parse CLI args, split, save splits to disk."""
     parser = argparse.ArgumentParser(
         description="Split feature/target data into train/val/test sets"
     )
@@ -38,12 +41,7 @@ def main() -> None:
     out.mkdir(parents=True, exist_ok=True)
 
     for name, (x, y) in datasets.items():
-        logger.info(
-            "Split %s: X=%s Y=%s",
-            name,
-            x.shape,
-            y.shape,
-        )
+        logger.info("Split %s: X=%s Y=%s", name, x.shape, y.shape)
         save_dataframe(x, out / f"X_{name}", args.data_format)
         save_dataframe(y, out / f"y_{name}", args.data_format)
 

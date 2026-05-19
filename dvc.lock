@@ -1,25 +1,21 @@
 schema: '2.0'
 stages:
-  prepare@dla:
+  prepare@0:
     cmd: "python scripts/prepare_features.py --raw-data-path ../dcp/norm_data/norm_fondium_15_min_data_2023.csv
       --datetime-column new_time --fillna-method ffill --tabular-covariate-columns
-      ofen_g_koks_kg ofen_f_koks_kg pl2_stromverbrauch_kwh --time-component time:4
-      --time-component day_of_week:4 --time-component day_of_year:4 --target-config
-      params/targets/dla.yaml --output-dir data/interim/dla --data-format feather
-      --log-level info --log-file logs/pipeline.log\n"
+      ofen_g_koks_kg,ofen_f_koks_kg,pl2_stromverbrauch_kwh --time-components time:4,day_of_week:4,day_of_year:4
+      --target-name dla --y-column dla_stromverbrauch_kwh --prediction-horizon 12
+      --lag-columns dla_stromverbrauch_kwh:96,ofen_g_koks_kg:48 --output-dir data/interim/dla
+      --data-format feather --log-level info --log-file logs/pipeline.log\n"
     deps:
     - path: ../dcp/norm_data/norm_fondium_15_min_data_2023.csv
       hash: md5
       md5: eb8c9dbf528fea5a3334dfae8c6325a7
       size: 7781885
-    - path: params/targets/dla.yaml
-      hash: md5
-      md5: 46b4974f7bd3e26f696948c42f4c0258
-      size: 119
     - path: scripts/prepare_features.py
       hash: md5
-      md5: 5a14fd1300701503558f0e758eb8fed2
-      size: 2810
+      md5: a6464bb4b7751dcbe9acd4eb8094d7a3
+      size: 2761
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: 629a1be920729285b28f7d40c681afb9.dir
@@ -31,17 +27,29 @@ stages:
         data.datetime_column: new_time
         data.fillna_method: ffill
         data.tabular_covariate_columns:
-        - ofen_g_koks_kg
-        - ofen_f_koks_kg
-        - pl2_stromverbrauch_kwh
-        data.time_feature_components:
-          time: 4
-          day_of_week: 4
-          day_of_year: 4
+          ofen_g_koks_kg,ofen_f_koks_kg,pl2_stromverbrauch_kwh
+        data.time_components: time:4,day_of_week:4,day_of_year:4
         log_file: logs/pipeline.log
         log_level: info
         paths.data_interim: data/interim
         paths.raw_data: ../dcp/norm_data/norm_fondium_15_min_data_2023.csv
+        targets:
+        - name: dla
+          y_column: dla_stromverbrauch_kwh
+          prediction_horizon: 12
+          lag_columns: dla_stromverbrauch_kwh:96,ofen_g_koks_kg:48
+        - name: ofen_g_koks
+          y_column: ofen_g_koks_kg
+          prediction_horizon: 12
+          lag_columns: ofen_g_koks_kg:96,dla_stromverbrauch_kwh:48
+        - name: ofen_f_koks
+          y_column: ofen_f_koks_kg
+          prediction_horizon: 12
+          lag_columns: ofen_f_koks_kg:96,dla_stromverbrauch_kwh:48
+        - name: pl2
+          y_column: pl2_stromverbrauch_kwh
+          prediction_horizon: 12
+          lag_columns: pl2_stromverbrauch_kwh:96,ofen_g_koks_kg:48
     outs:
     - path: data/interim/dla/X.feather
       hash: md5
@@ -51,26 +59,22 @@ stages:
       hash: md5
       md5: b9840c20c86c91ee9c150ad883d43565
       size: 1345794
-  prepare@ofen_g_koks:
+  prepare@1:
     cmd: "python scripts/prepare_features.py --raw-data-path ../dcp/norm_data/norm_fondium_15_min_data_2023.csv
       --datetime-column new_time --fillna-method ffill --tabular-covariate-columns
-      ofen_g_koks_kg ofen_f_koks_kg pl2_stromverbrauch_kwh --time-component time:4
-      --time-component day_of_week:4 --time-component day_of_year:4 --target-config
-      params/targets/ofen_g_koks.yaml --output-dir data/interim/ofen_g_koks --data-format
-      feather --log-level info --log-file logs/pipeline.log\n"
+      ofen_g_koks_kg,ofen_f_koks_kg,pl2_stromverbrauch_kwh --time-components time:4,day_of_week:4,day_of_year:4
+      --target-name ofen_g_koks --y-column ofen_g_koks_kg --prediction-horizon 12
+      --lag-columns ofen_g_koks_kg:96,dla_stromverbrauch_kwh:48 --output-dir data/interim/ofen_g_koks
+      --data-format feather --log-level info --log-file logs/pipeline.log\n"
     deps:
     - path: ../dcp/norm_data/norm_fondium_15_min_data_2023.csv
       hash: md5
       md5: eb8c9dbf528fea5a3334dfae8c6325a7
       size: 7781885
-    - path: params/targets/ofen_g_koks.yaml
-      hash: md5
-      md5: 20f8a22e081e9f8661be752eec4c6284
-      size: 111
     - path: scripts/prepare_features.py
       hash: md5
-      md5: 5a14fd1300701503558f0e758eb8fed2
-      size: 2810
+      md5: a6464bb4b7751dcbe9acd4eb8094d7a3
+      size: 2761
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: 629a1be920729285b28f7d40c681afb9.dir
@@ -82,17 +86,29 @@ stages:
         data.datetime_column: new_time
         data.fillna_method: ffill
         data.tabular_covariate_columns:
-        - ofen_g_koks_kg
-        - ofen_f_koks_kg
-        - pl2_stromverbrauch_kwh
-        data.time_feature_components:
-          time: 4
-          day_of_week: 4
-          day_of_year: 4
+          ofen_g_koks_kg,ofen_f_koks_kg,pl2_stromverbrauch_kwh
+        data.time_components: time:4,day_of_week:4,day_of_year:4
         log_file: logs/pipeline.log
         log_level: info
         paths.data_interim: data/interim
         paths.raw_data: ../dcp/norm_data/norm_fondium_15_min_data_2023.csv
+        targets:
+        - name: dla
+          y_column: dla_stromverbrauch_kwh
+          prediction_horizon: 12
+          lag_columns: dla_stromverbrauch_kwh:96,ofen_g_koks_kg:48
+        - name: ofen_g_koks
+          y_column: ofen_g_koks_kg
+          prediction_horizon: 12
+          lag_columns: ofen_g_koks_kg:96,dla_stromverbrauch_kwh:48
+        - name: ofen_f_koks
+          y_column: ofen_f_koks_kg
+          prediction_horizon: 12
+          lag_columns: ofen_f_koks_kg:96,dla_stromverbrauch_kwh:48
+        - name: pl2
+          y_column: pl2_stromverbrauch_kwh
+          prediction_horizon: 12
+          lag_columns: pl2_stromverbrauch_kwh:96,ofen_g_koks_kg:48
     outs:
     - path: data/interim/ofen_g_koks/X.feather
       hash: md5
@@ -102,26 +118,22 @@ stages:
       hash: md5
       md5: dabece93d5925475705459861686a6fe
       size: 2375378
-  prepare@ofen_f_koks:
+  prepare@2:
     cmd: "python scripts/prepare_features.py --raw-data-path ../dcp/norm_data/norm_fondium_15_min_data_2023.csv
       --datetime-column new_time --fillna-method ffill --tabular-covariate-columns
-      ofen_g_koks_kg ofen_f_koks_kg pl2_stromverbrauch_kwh --time-component time:4
-      --time-component day_of_week:4 --time-component day_of_year:4 --target-config
-      params/targets/ofen_f_koks.yaml --output-dir data/interim/ofen_f_koks --data-format
-      feather --log-level info --log-file logs/pipeline.log\n"
+      ofen_g_koks_kg,ofen_f_koks_kg,pl2_stromverbrauch_kwh --time-components time:4,day_of_week:4,day_of_year:4
+      --target-name ofen_f_koks --y-column ofen_f_koks_kg --prediction-horizon 12
+      --lag-columns ofen_f_koks_kg:96,dla_stromverbrauch_kwh:48 --output-dir data/interim/ofen_f_koks
+      --data-format feather --log-level info --log-file logs/pipeline.log\n"
     deps:
     - path: ../dcp/norm_data/norm_fondium_15_min_data_2023.csv
       hash: md5
       md5: eb8c9dbf528fea5a3334dfae8c6325a7
       size: 7781885
-    - path: params/targets/ofen_f_koks.yaml
-      hash: md5
-      md5: 2eb84844ad26c46d225c0d31566a83b9
-      size: 111
     - path: scripts/prepare_features.py
       hash: md5
-      md5: 5a14fd1300701503558f0e758eb8fed2
-      size: 2810
+      md5: a6464bb4b7751dcbe9acd4eb8094d7a3
+      size: 2761
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: 629a1be920729285b28f7d40c681afb9.dir
@@ -133,17 +145,29 @@ stages:
         data.datetime_column: new_time
         data.fillna_method: ffill
         data.tabular_covariate_columns:
-        - ofen_g_koks_kg
-        - ofen_f_koks_kg
-        - pl2_stromverbrauch_kwh
-        data.time_feature_components:
-          time: 4
-          day_of_week: 4
-          day_of_year: 4
+          ofen_g_koks_kg,ofen_f_koks_kg,pl2_stromverbrauch_kwh
+        data.time_components: time:4,day_of_week:4,day_of_year:4
         log_file: logs/pipeline.log
         log_level: info
         paths.data_interim: data/interim
         paths.raw_data: ../dcp/norm_data/norm_fondium_15_min_data_2023.csv
+        targets:
+        - name: dla
+          y_column: dla_stromverbrauch_kwh
+          prediction_horizon: 12
+          lag_columns: dla_stromverbrauch_kwh:96,ofen_g_koks_kg:48
+        - name: ofen_g_koks
+          y_column: ofen_g_koks_kg
+          prediction_horizon: 12
+          lag_columns: ofen_g_koks_kg:96,dla_stromverbrauch_kwh:48
+        - name: ofen_f_koks
+          y_column: ofen_f_koks_kg
+          prediction_horizon: 12
+          lag_columns: ofen_f_koks_kg:96,dla_stromverbrauch_kwh:48
+        - name: pl2
+          y_column: pl2_stromverbrauch_kwh
+          prediction_horizon: 12
+          lag_columns: pl2_stromverbrauch_kwh:96,ofen_g_koks_kg:48
     outs:
     - path: data/interim/ofen_f_koks/X.feather
       hash: md5
@@ -153,26 +177,22 @@ stages:
       hash: md5
       md5: 7235c9f7c483942b0ccf2c830c51db9a
       size: 2276642
-  prepare@pl2:
+  prepare@3:
     cmd: "python scripts/prepare_features.py --raw-data-path ../dcp/norm_data/norm_fondium_15_min_data_2023.csv
       --datetime-column new_time --fillna-method ffill --tabular-covariate-columns
-      ofen_g_koks_kg ofen_f_koks_kg pl2_stromverbrauch_kwh --time-component time:4
-      --time-component day_of_week:4 --time-component day_of_year:4 --target-config
-      params/targets/pl2.yaml --output-dir data/interim/pl2 --data-format feather
-      --log-level info --log-file logs/pipeline.log\n"
+      ofen_g_koks_kg,ofen_f_koks_kg,pl2_stromverbrauch_kwh --time-components time:4,day_of_week:4,day_of_year:4
+      --target-name pl2 --y-column pl2_stromverbrauch_kwh --prediction-horizon 12
+      --lag-columns pl2_stromverbrauch_kwh:96,ofen_g_koks_kg:48 --output-dir data/interim/pl2
+      --data-format feather --log-level info --log-file logs/pipeline.log\n"
     deps:
     - path: ../dcp/norm_data/norm_fondium_15_min_data_2023.csv
       hash: md5
       md5: eb8c9dbf528fea5a3334dfae8c6325a7
       size: 7781885
-    - path: params/targets/pl2.yaml
-      hash: md5
-      md5: 35b220a413077f40ef2cbb00fef78a67
-      size: 119
     - path: scripts/prepare_features.py
       hash: md5
-      md5: 5a14fd1300701503558f0e758eb8fed2
-      size: 2810
+      md5: a6464bb4b7751dcbe9acd4eb8094d7a3
+      size: 2761
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: 629a1be920729285b28f7d40c681afb9.dir
@@ -184,17 +204,29 @@ stages:
         data.datetime_column: new_time
         data.fillna_method: ffill
         data.tabular_covariate_columns:
-        - ofen_g_koks_kg
-        - ofen_f_koks_kg
-        - pl2_stromverbrauch_kwh
-        data.time_feature_components:
-          time: 4
-          day_of_week: 4
-          day_of_year: 4
+          ofen_g_koks_kg,ofen_f_koks_kg,pl2_stromverbrauch_kwh
+        data.time_components: time:4,day_of_week:4,day_of_year:4
         log_file: logs/pipeline.log
         log_level: info
         paths.data_interim: data/interim
         paths.raw_data: ../dcp/norm_data/norm_fondium_15_min_data_2023.csv
+        targets:
+        - name: dla
+          y_column: dla_stromverbrauch_kwh
+          prediction_horizon: 12
+          lag_columns: dla_stromverbrauch_kwh:96,ofen_g_koks_kg:48
+        - name: ofen_g_koks
+          y_column: ofen_g_koks_kg
+          prediction_horizon: 12
+          lag_columns: ofen_g_koks_kg:96,dla_stromverbrauch_kwh:48
+        - name: ofen_f_koks
+          y_column: ofen_f_koks_kg
+          prediction_horizon: 12
+          lag_columns: ofen_f_koks_kg:96,dla_stromverbrauch_kwh:48
+        - name: pl2
+          y_column: pl2_stromverbrauch_kwh
+          prediction_horizon: 12
+          lag_columns: pl2_stromverbrauch_kwh:96,ofen_g_koks_kg:48
     outs:
     - path: data/interim/pl2/X.feather
       hash: md5
@@ -204,7 +236,7 @@ stages:
       hash: md5
       md5: 0b7908184a918ff210556612b4161fb4
       size: 2822194
-  split@dla:
+  split@0:
     cmd: "python scripts/split_data.py --input-dir data/interim/dla --output-dir data/processed/dla
       --train-ratio 0.7 --val-ratio 0.15 --test-ratio 0.15 --data-format feather --log-level
       info --log-file logs/pipeline.log\n"
@@ -216,8 +248,8 @@ stages:
       nfiles: 2
     - path: scripts/split_data.py
       hash: md5
-      md5: 7a92e1de490029ace6fff3fb47227dc6
-      size: 1772
+      md5: d8ec98fa4067526f6c45dfec1a810281
+      size: 1713
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: 629a1be920729285b28f7d40c681afb9.dir
@@ -259,7 +291,7 @@ stages:
       hash: md5
       md5: 7f17fa586c9a7fb1875d8ac563af9d7c
       size: 220330
-  split@ofen_g_koks:
+  split@1:
     cmd: "python scripts/split_data.py --input-dir data/interim/ofen_g_koks --output-dir
       data/processed/ofen_g_koks --train-ratio 0.7 --val-ratio 0.15 --test-ratio 0.15
       --data-format feather --log-level info --log-file logs/pipeline.log\n"
@@ -271,8 +303,8 @@ stages:
       nfiles: 2
     - path: scripts/split_data.py
       hash: md5
-      md5: 7a92e1de490029ace6fff3fb47227dc6
-      size: 1772
+      md5: d8ec98fa4067526f6c45dfec1a810281
+      size: 1713
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: 629a1be920729285b28f7d40c681afb9.dir
@@ -314,7 +346,7 @@ stages:
       hash: md5
       md5: 229806e48c2a4d79566f9be3667c6095
       size: 393658
-  split@ofen_f_koks:
+  split@2:
     cmd: "python scripts/split_data.py --input-dir data/interim/ofen_f_koks --output-dir
       data/processed/ofen_f_koks --train-ratio 0.7 --val-ratio 0.15 --test-ratio 0.15
       --data-format feather --log-level info --log-file logs/pipeline.log\n"
@@ -326,8 +358,8 @@ stages:
       nfiles: 2
     - path: scripts/split_data.py
       hash: md5
-      md5: 7a92e1de490029ace6fff3fb47227dc6
-      size: 1772
+      md5: d8ec98fa4067526f6c45dfec1a810281
+      size: 1713
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: 629a1be920729285b28f7d40c681afb9.dir
@@ -369,7 +401,7 @@ stages:
       hash: md5
       md5: 5569c95f2dfde9768cecdbbbc3d0ef02
       size: 383098
-  split@pl2:
+  split@3:
     cmd: "python scripts/split_data.py --input-dir data/interim/pl2 --output-dir data/processed/pl2
       --train-ratio 0.7 --val-ratio 0.15 --test-ratio 0.15 --data-format feather --log-level
       info --log-file logs/pipeline.log\n"
@@ -381,8 +413,8 @@ stages:
       nfiles: 2
     - path: scripts/split_data.py
       hash: md5
-      md5: 7a92e1de490029ace6fff3fb47227dc6
-      size: 1772
+      md5: d8ec98fa4067526f6c45dfec1a810281
+      size: 1713
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: 629a1be920729285b28f7d40c681afb9.dir

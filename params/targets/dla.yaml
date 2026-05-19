@@ -1,5 +1,0 @@
-y_column: dla_stromverbrauch_kwh
-prediction_horizon: 12
-lag_columns:
-  dla_stromverbrauch_kwh: 96
-  ofen_g_koks_kg: 48
