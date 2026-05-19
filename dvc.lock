@@ -1574,7 +1574,7 @@ stages:
     cmd: "python scripts/train.py --processed-dir data/processed/dla --target-name
       dla --model bernstein_nf_lognormal --data-format feather --prediction-horizon
       12 --stage-name train_bernstein_lognormal --experiment-name dcp_nf_forecast-dla
-      --test-mode true --log-level info --log-file logs/pipeline.log\n"
+      --test-mode false --log-level info --log-file logs/pipeline.log\n"
     deps:
     - path: data/processed/dla/
       hash: md5
@@ -1619,7 +1619,7 @@ stages:
           y_column: pl2_stromverbrauch_kwh
           prediction_horizon: 12
           lag_columns: pl2_stromverbrauch_kwh:96
-        test_mode: true
+        test_mode: false
       params/models/dla/bernstein_nf_lognormal.yaml:
         compile_kwargs: {}
         fit_kwargs:
@@ -1658,15 +1658,15 @@ stages:
     outs:
     - path: results/dla/bernstein_nf_lognormal/metrics.yaml
       hash: md5
-      md5: 9d19c25132cbcec83bd8fa578b1cbc49
-      size: 150
+      md5: 8eefaffbee6aefac912a5ffd10efccb0
+      size: 149
     - path: results/dla/bernstein_nf_lognormal/model_weights.h5
       hash: md5
-      md5: 161f1bcd6812a53837b5cc4968769c14
+      md5: b8eabc0b772e8b5927df2c9323c1ba13
       size: 1742216
     - path: results/dla/bernstein_nf_lognormal/parent_run_id.txt
       hash: md5
-      md5: b6ce320961c75df9eafd5e07550f9f4c
+      md5: b2c23d6cc0eafa553b6b6b0aabb75352
       size: 32
   train_spline_lognormal@0:
     cmd: "python scripts/train.py --processed-dir data/processed/dla --target-name
