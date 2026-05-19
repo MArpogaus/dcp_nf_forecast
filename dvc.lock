@@ -1128,12 +1128,12 @@ stages:
       nfiles: 6
     - path: params/models/dla/spline_nf.yaml
       hash: md5
-      md5: ebe8e4c4622789cfd72df0fe923c29de
-      size: 654
+      md5: f87a735c62c68547067362d70344ad34
+      size: 657
     - path: scripts/train.py
       hash: md5
-      md5: 10dc488b91aa9eff73d17cccbe4e4a17
-      size: 4702
+      md5: 13dfe8ad62898b2c597a5b144ecda4e7
+      size: 4776
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: d302b1abedd23439c3a26601234f4cfd.dir
@@ -1168,8 +1168,8 @@ stages:
         compile_kwargs: {}
         fit_kwargs:
           batch_size: 256
-          early_stopping_patience: 15
-          epochs: 5
+          early_stopping_patience: 10
+          epochs: 50
           learning_rate: 0.001
           verbose: true
         model_kwargs:
@@ -1179,7 +1179,7 @@ stages:
           bijector_kwargs:
             range_min: -4
           base_distribution_kwargs:
-            distribution_name: lognormal
+            distribution_name: normal
           num_parameters: 95
           parameters_constraint_fn:
             hybrid_flows.activations.get_spline_param_constrain_fn
@@ -1191,18 +1191,19 @@ stages:
           parameters_fn_kwargs:
             activation: relu
             hidden_units:
-            - 128
-            - 128
+            - 256
+            - 256
+            - 256
             conditional: true
     outs:
     - path: results/dla/spline_nf/metrics.yaml
       hash: md5
-      md5: e287efa5902b8b38bc9aa5e6ec523f3c
-      size: 92
+      md5: 308f6a10a137f604e1fb77f8dd7cc464
+      size: 150
     - path: results/dla/spline_nf/model_weights.h5
       hash: md5
-      md5: 3b0646df39d12f0fdfd3166b3aad6817
-      size: 677168
+      md5: 2bd1b2ef1e389da0ffb0639837e7ba59
+      size: 1729880
   train_spline@1:
     cmd: "python scripts/train.py --processed-dir data/processed/ofen_g_koks --target-name
       ofen_g_koks --model spline_nf --data-format feather --prediction-horizon 12
