@@ -1,1 +1,146 @@
- I want to start a new forecasting project using my multivariate normalizing flows. Data can be found in ../dcp/norm_data/norm_fondium_15_min_data_2023.csv. A Previous forecasting project is in ../ai4grids/bnf_scenario_generator/. Pleas helpt mi initialize the project in a similar style. lets begin by layoing out the basic file structure ang generating a script to load and prepare the data. it should read in the csv data in generate two seperate data frame one conating the covaraites and one conatining the target variables. it should also use cos/sin embedings for circular variables like time and date. This is different from the previous project where we used a external package for thet. we want a palin pyton file here to generat the csv files for us. a second pyton script should then be used to split thes into train, validation and test splits. all hyperparameters and configuration should be put in params.yam including all file paths, splitsizes. column names for x and y. pleas begin by laing aout a plan to setup the project and draft these two scripts. thy should be later included in a dvc pipline (dvc.yaml). draft this one as well
+#+TITLE: DCP NF Forecast
+#+OPTIONS: toc:nil
+
+[[https://img.shields.io/github/license/MArpogaus/dcp-nf-forecast.svg?style=flat-square]]
+[[https://img.shields.io/badge/pre--commit-enabled-brightgreen.svg?logo=pre-commit&style=flat-square]]
+[[https://img.shields.io/pypi/pyversions/dcp-nf-forecast.svg?style=flat-square]]
+
+* DCP NF Forecast
+
+#+TOC: headlines 2 local
+
+** About The Project
+
+Probabilistic multi-step time series forecasting using normalizing flows.
+Each target variable gets its own univariate model (Bernstein polynomial or
+rational quadratic spline MAF). The data pipeline supports configurable lag
+features, sin/cos time encoding, and temporal train/val/test splits.
+
+#+begin_src bash
+.
+├── .envrc                          # direnv venv activation
+├── .gitignore
+├── .pre-commit-config.yaml         # ruff, pre-commit-hooks, commitizen
+├── dvc.lock                        # DVC pipeline lock file
+├── dvc.yaml                        # DVC pipeline definition
+├── params.yaml                     # global pipeline configuration
+├── params
+│   ├── models                      # per-target per-model hyperparameters
+│   │   ├── dla
+│   │   ├── ofen_f_koks
+│   │   ├── ofen_g_koks
+│   │   └── pl2
+│   └── targets                     # per-target data configuration
+│       ├── dla.yaml
+│       ├── ofen_f_koks.yaml
+│       ├── ofen_g_koks.yaml
+│       └── pl2.yaml
+├── pyproject.toml
+├── scripts
+│   ├── prepare_features.py         # build X (features) and Y (target)
+│   ├── split_data.py               # temporal train/val/test split
+│   └── train.py                    # train normalizing flow model
+├── src
+│   └── dcp_nf_forecast
+│       ├── __init__.py
+│       ├── data.py                 # core data pipeline functions
+│       └── utils.py                # logging, I/O helpers
+└── test
+    ├── conftest.py
+    ├── test_data.py
+    └── test_utils.py
+#+end_src
+
+*** Input Data (X)
+- *Arbitrary tabular covariates* – static per-timestep columns passed through as-is.
+- *Sin/cos encoded time/date variables* – configurable frequencies for time-of-day, day-of-week, day-of-year.
+- *Configurable lag features* – independent history lengths per column, e.g. 96 steps of the target + 48 steps of a related covariate.
+
+*** Output Data (Y)
+- *Multi-step forecast horizon* – future values of a single target column, configurable horizon length.
+
+The pipeline is orchestrated with *DVC* using =foreach= over the four
+targets (=dla=, =ofen_g_koks=, =ofen_f_koks=, =pl2=). All intermediate and
+processed data uses the feather format for fast I/O.
+
+** Getting Started
+
+*** Installation
+
+This project uses [[https://docs.astral.sh/uv/][uv]] for dependency management
+and [[https://direnv.net/][direnv]] for automatic virtual environment activation.
+
+#+begin_src bash
+# clone the repository
+git clone <repo-url>
+cd dcp-nf-forecast
+
+# allow direnv to activate the venv
+direnv allow
+
+# install the package and all dependencies
+uv sync
+#+end_src
+
+*** Running the Pipeline
+
+The DVC pipeline consists of two stages per target (8 total):
+
+#+begin_src bash
+dvc repro
+#+end_src
+
+This executes:
+
+1. *prepare* – loads the raw CSV, builds time features, lag features, and
+   target matrix, validates, saves to =data/interim/<target>/=.
+2. *split* – loads interim X/y, splits temporally into train/val/test,
+   saves to =data/processed/<target>/=.
+
+Each stage can also be run directly:
+
+#+begin_src bash
+python scripts/prepare_features.py \
+  --raw-data-path <path> \
+  --datetime-column new_time \
+  --fillna-method ffill \
+  --tabular-covariate-columns ofen_g_koks_kg ofen_f_koks_kg pl2_stromverbrauch_kwh \
+  --time-component time:4 \
+  --time-component day_of_week:4 \
+  --time-component day_of_year:4 \
+  --target-config params/targets/dla.yaml \
+  --output-dir data/interim/dla \
+  --data-format feather \
+  --log-level info \
+  --log-file logs/pipeline.log
+#+end_src
+
+All CLI arguments are mandatory and carry no defaults. The scripts are fully
+decoupled from the DVC API – they read no params files internally.
+
+*** Running Tests
+
+#+begin_src bash
+# run all tests with coverage
+uv run pytest --cov
+
+# run tests with 6 workers (default)
+uv run pytest -n auto
+#+end_src
+
+Current coverage: >98%.
+
+** Contributing
+
+Any Contributions are greatly appreciated! If you have a question, an issue or
+would like to contribute, please read our [[file:CONTRIBUTING.md][contributing guidelines]].
+
+** License
+
+Distributed under the MIT License. See [[file:LICENSE][LICENSE]] for more information.
+
+** Contact
+
+[[https://github.com/MArpogaus/][Marcel Arpogaus]]
+
+Project Link: [[https://github.com/MArpogaus/dcp-nf-forecast]]

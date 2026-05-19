@@ -1,6 +1,6 @@
 [build-system]
 build-backend = "setuptools.build_meta"
-requires = ["setuptools>=61"]
+requires = ["setuptools >= 61", "setuptools_scm>=7"]
 
 [project]
 dependencies = [
@@ -10,30 +10,26 @@ dependencies = [
   "hybrid-flows @ git+https://github.com/MArpogaus/hybrid-flows.git@v0.1.0",
   "tensorflow>=2.15",
   "tensorflow-probability>=0.23",
-  "dvc>=3.67.1",
-  "pyarrow>=14.0"
+  "pyarrow==23.*"
 ]
 description = "Forecasting with multivariate normalizing flows"
+dynamic = ["version"]
 name = "dcp-nf-forecast"
 requires-python = ">=3.11"
-version = "0.1.0"
 
 [project.optional-dependencies]
 dev = [
-  "ruff>=0.5",
-  "mypy>=1.10",
-  "pre-commit>=3.0",
-  "commitizen>=3.0",
-  "pytest>=8.0",
-  "pytest-cov>=4.0",
-  "pytest-xdist>=3.0"
-]
-dvc = [
-  "dvc>=3.0",
-  "dvc-stage>=1.0"
+  "ruff",
+  "mypy",
+  "pre-commit",
+  "commitizen",
+  "pytest",
+  "pytest-cov",
+  "pytest-xdist"
 ]
 train = [
-  "mlflow>=2.0"
+  "dvc[webdav,ssh]==3.*",
+  "mlflow==3.*"
 ]
 
 [tool.commitizen]
@@ -70,3 +66,8 @@ select = ["I", "E", "F", "UP"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools_scm]
+# https://stackoverflow.com/a/74404703
+# omits local version, useful because pypi does not support it
+local_scheme = "no-local-version"
