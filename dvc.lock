@@ -1677,8 +1677,8 @@ stages:
   train_spline_lognormal@0:
     cmd: "python scripts/train.py --processed-dir data/processed/dla --target-name
       dla --model spline_nf_lognormal --data-format feather --prediction-horizon 12
-      --stage-name train_spline_lognormal --test-mode true --log-level info --log-file
-      logs/pipeline.log\n"
+      --stage-name train_spline_lognormal --experiment-name dcp_nf_forecast-dla --test-mode
+      false --log-level info --log-file logs/pipeline.log\n"
     deps:
     - path: data/processed/dla/
       hash: md5
@@ -1687,12 +1687,12 @@ stages:
       nfiles: 6
     - path: params/models/dla/spline_nf_lognormal.yaml
       hash: md5
-      md5: 4b8b0db733744e18ff51c6ea590869a7
-      size: 659
+      md5: 04bbebaf8344f80ed33811a7daee7729
+      size: 661
     - path: scripts/train.py
       hash: md5
-      md5: 13dfe8ad62898b2c597a5b144ecda4e7
-      size: 4776
+      md5: 3cdf1e59436ec663b29459265373cb14
+      size: 5553
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: d302b1abedd23439c3a26601234f4cfd.dir
@@ -1701,6 +1701,7 @@ stages:
     params:
       params.yaml:
         data.data_format: feather
+        experiment_name: dcp_nf_forecast
         log_file: logs/pipeline.log
         log_level: info
         paths.data_processed: data/processed
@@ -1722,14 +1723,14 @@ stages:
           y_column: pl2_stromverbrauch_kwh
           prediction_horizon: 12
           lag_columns: pl2_stromverbrauch_kwh:96
-        test_mode: true
+        test_mode: false
       params/models/dla/spline_nf_lognormal.yaml:
         compile_kwargs: {}
         fit_kwargs:
           batch_size: 256
           early_stopping_patience: 10
-          epochs: 10
-          learning_rate: 0.001
+          epochs: 100
+          learning_rate: 0.0005
           verbose: true
         model_kwargs:
           distribution: masked_autoregressive_flow
@@ -1757,12 +1758,16 @@ stages:
     outs:
     - path: results/dla/spline_nf_lognormal/metrics.yaml
       hash: md5
-      md5: 801243e6c9d066e8d7fb0652b42fbec7
-      size: 148
+      md5: 811673eabd3fdf86888c704b1a5d59bd
+      size: 147
     - path: results/dla/spline_nf_lognormal/model_weights.h5
       hash: md5
-      md5: 421f676fa9eb80cef303796a1f44fb35
+      md5: d777cbae0bdf6a0cc407e8f267d0d81a
       size: 1729880
+    - path: results/dla/spline_nf_lognormal/parent_run_id.txt
+      hash: md5
+      md5: 61682433529fd8623cde252976affabd
+      size: 32
   evaluate_bernstein_lognormal@0:
     cmd: "python scripts/evaluate.py --processed-dir data/processed/dla --target-name
       dla --model bernstein_nf_lognormal --data-format feather --prediction-horizon
