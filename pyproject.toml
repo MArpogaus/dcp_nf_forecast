@@ -19,17 +19,18 @@ requires-python = ">=3.11"
 
 [project.optional-dependencies]
 dev = [
-  "ruff",
+  "commitizen",
   "mypy",
   "pre-commit",
-  "commitizen",
   "pytest",
   "pytest-cov",
-  "pytest-xdist"
+  "pytest-xdist",
+  "python-lsp-ruff",
+  "python-lsp-server",
+  "ruff"
 ]
 train = [
-  "dvc[webdav,ssh]==3.*",
-  "mlflow==3.*"
+  "dvc[webdav,ssh]==3.*"
 ]
 
 [tool.commitizen]
