@@ -67,3 +67,79 @@ stages:
       - data/processed/${item.name}/y_val.feather
       - data/processed/${item.name}/X_test.feather
       - data/processed/${item.name}/y_test.feather
+
+  train_bernstein:
+    foreach: ${targets}
+    do:
+      cmd: >
+        python scripts/train.py
+        --processed-dir ${paths.data_processed}/${item.name}
+        --target-name ${item.name}
+        --model bernstein_nf
+        --data-format ${data.data_format}
+        --prediction-horizon ${item.prediction_horizon}
+        --epochs ${train.epochs}
+        --early-stopping-patience ${train.early_stopping_patience}
+        --test-mode ${train.test_mode}
+        --test-epochs ${train.test_epochs}
+        --test-batch-size ${train.test_batch_size}
+        --log-level ${log_level}
+        --log-file ${log_file}
+      deps:
+      - scripts/train.py
+      - src/dcp_nf_forecast/
+      - data/processed/${item.name}/
+      - params/models/${item.name}/bernstein_nf.yaml
+      params:
+      - paths.data_processed
+      - data.data_format
+      - targets
+      - train.epochs
+      - train.early_stopping_patience
+      - train.test_mode
+      - train.test_epochs
+      - train.test_batch_size
+      - log_level
+      - log_file
+      outs:
+      - results/${item.name}/bernstein_nf/model_weights.h5
+      metrics:
+      - results/${item.name}/bernstein_nf/metrics.yaml
+
+  train_spline:
+    foreach: ${targets}
+    do:
+      cmd: >
+        python scripts/train.py
+        --processed-dir ${paths.data_processed}/${item.name}
+        --target-name ${item.name}
+        --model spline_nf
+        --data-format ${data.data_format}
+        --prediction-horizon ${item.prediction_horizon}
+        --epochs ${train.epochs}
+        --early-stopping-patience ${train.early_stopping_patience}
+        --test-mode ${train.test_mode}
+        --test-epochs ${train.test_epochs}
+        --test-batch-size ${train.test_batch_size}
+        --log-level ${log_level}
+        --log-file ${log_file}
+      deps:
+      - scripts/train.py
+      - src/dcp_nf_forecast/
+      - data/processed/${item.name}/
+      - params/models/${item.name}/spline_nf.yaml
+      params:
+      - paths.data_processed
+      - data.data_format
+      - targets
+      - train.epochs
+      - train.early_stopping_patience
+      - train.test_mode
+      - train.test_epochs
+      - train.test_batch_size
+      - log_level
+      - log_file
+      outs:
+      - results/${item.name}/spline_nf/model_weights.h5
+      metrics:
+      - results/${item.name}/spline_nf/metrics.yaml

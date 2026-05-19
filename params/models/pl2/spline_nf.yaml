@@ -1,0 +1,6 @@
+num_layers: 1
+num_bins: 32
+hidden_units: [128, 128]
+activation: relu
+learning_rate: 0.001
+batch_size: 256
