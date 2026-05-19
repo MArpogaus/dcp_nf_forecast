@@ -30,11 +30,6 @@ features, sin/cos time encoding, and temporal train/val/test splits.
 │   │   ├── ofen_f_koks
 │   │   ├── ofen_g_koks
 │   │   └── pl2
-│   └── targets                     # per-target data configuration
-│       ├── dla.yaml
-│       ├── ofen_f_koks.yaml
-│       ├── ofen_g_koks.yaml
-│       └── pl2.yaml
 ├── pyproject.toml
 ├── scripts
 │   ├── prepare_features.py         # build X (features) and Y (target)
@@ -84,7 +79,7 @@ uv sync
 
 *** Running the Pipeline
 
-The DVC pipeline consists of two stages per target (8 total):
+The DVC pipeline consists of four stages per target (16 total):
 
 #+begin_src bash
 dvc repro
@@ -96,6 +91,8 @@ This executes:
    target matrix, validates, saves to =data/interim/<target>/=.
 2. *split* – loads interim X/y, splits temporally into train/val/test,
    saves to =data/processed/<target>/=.
+3. *train_bernstein* / *train_spline* – trains a normalizing flow model,
+   saves weights to =results/<target>/<model>/=.
 
 Each stage can also be run directly:
 
@@ -104,11 +101,12 @@ python scripts/prepare_features.py \
   --raw-data-path <path> \
   --datetime-column new_time \
   --fillna-method ffill \
-  --tabular-covariate-columns ofen_g_koks_kg ofen_f_koks_kg pl2_stromverbrauch_kwh \
-  --time-component time:4 \
-  --time-component day_of_week:4 \
-  --time-component day_of_year:4 \
-  --target-config params/targets/dla.yaml \
+  --tabular-covariate-columns "ofen_g_koks_kg,ofen_f_koks_kg,pl2_stromverbrauch_kwh" \
+  --time-components "time:4,day_of_week:4,day_of_year:4" \
+  --target-name dla \
+  --y-column dla_stromverbrauch_kwh \
+  --prediction-horizon 12 \
+  --lag-columns "dla_stromverbrauch_kwh:96,ofen_g_koks_kg:48" \
   --output-dir data/interim/dla \
   --data-format feather \
   --log-level info \
