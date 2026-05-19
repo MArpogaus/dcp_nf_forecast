@@ -1,6 +1,7 @@
 import logging
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 import yaml
 
@@ -23,6 +24,32 @@ def load_model_params(target: str, model: str) -> dict:
     path = Path("params/models") / target / f"{model}.yaml"
     with open(path) as f:
         return yaml.safe_load(f)
+
+
+def load_data(
+    processed_dir: Path,
+    split: str,
+    data_format: str,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Load pre-processed split data as numpy arrays.
+
+    Parameters
+    ----------
+    processed_dir : Path
+        Directory containing ``X_{split}`` and ``y_{split}`` files.
+    split : str
+        Split name (``"train"``, ``"val"``, ``"test"``).
+    data_format : str
+        ``"feather"`` or ``"csv"``.
+
+    Returns
+    -------
+    tuple[np.ndarray, np.ndarray]
+        ``(X, y)`` as ``float32`` arrays.
+    """
+    x = read_dataframe(processed_dir / f"X_{split}", data_format)
+    y = read_dataframe(processed_dir / f"y_{split}", data_format)
+    return x.values.astype(np.float32), y.values.astype(np.float32)
 
 
 def setup_logging(log_level: str, log_file: str) -> logging.Logger:
