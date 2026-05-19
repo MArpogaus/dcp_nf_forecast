@@ -164,6 +164,72 @@ stages:
       metrics:
       - results/${item.name}/spline_nf/metrics.yaml
 
+  train_bernstein_lognormal:
+    foreach: ${targets}
+    do:
+      cmd: >
+        python scripts/train.py
+        --processed-dir ${paths.data_processed}/${item.name}
+        --target-name ${item.name}
+        --model bernstein_nf_lognormal
+        --data-format ${data.data_format}
+        --prediction-horizon ${item.prediction_horizon}
+        --stage-name train_bernstein_lognormal
+        --test-mode ${test_mode}
+        --log-level ${log_level}
+        --log-file ${log_file}
+      deps:
+      - scripts/train.py
+      - src/dcp_nf_forecast/
+      - data/processed/${item.name}/
+      - params/models/${item.name}/bernstein_nf_lognormal.yaml
+      params:
+      - params/models/${item.name}/bernstein_nf_lognormal.yaml:
+      - paths.data_processed
+      - data.data_format
+      - targets
+      - seed
+      - test_mode
+      - log_level
+      - log_file
+      outs:
+      - results/${item.name}/bernstein_nf_lognormal/model_weights.h5
+      metrics:
+      - results/${item.name}/bernstein_nf_lognormal/metrics.yaml
+
+  train_spline_lognormal:
+    foreach: ${targets}
+    do:
+      cmd: >
+        python scripts/train.py
+        --processed-dir ${paths.data_processed}/${item.name}
+        --target-name ${item.name}
+        --model spline_nf_lognormal
+        --data-format ${data.data_format}
+        --prediction-horizon ${item.prediction_horizon}
+        --stage-name train_spline_lognormal
+        --test-mode ${test_mode}
+        --log-level ${log_level}
+        --log-file ${log_file}
+      deps:
+      - scripts/train.py
+      - src/dcp_nf_forecast/
+      - data/processed/${item.name}/
+      - params/models/${item.name}/spline_nf_lognormal.yaml
+      params:
+      - params/models/${item.name}/spline_nf_lognormal.yaml:
+      - paths.data_processed
+      - data.data_format
+      - targets
+      - seed
+      - test_mode
+      - log_level
+      - log_file
+      outs:
+      - results/${item.name}/spline_nf_lognormal/model_weights.h5
+      metrics:
+      - results/${item.name}/spline_nf_lognormal/metrics.yaml
+
   evaluate_bernstein:
     foreach: ${targets}
     do:

@@ -1569,3 +1569,185 @@ stages:
       hash: md5
       md5: 58ded1f336449a2bf8c621f09c806d0e
       size: 19826
+  train_bernstein_lognormal@0:
+    cmd: "python scripts/train.py --processed-dir data/processed/dla --target-name
+      dla --model bernstein_nf_lognormal --data-format feather --prediction-horizon
+      12 --stage-name train_bernstein_lognormal --test-mode true --log-level info
+      --log-file logs/pipeline.log\n"
+    deps:
+    - path: data/processed/dla/
+      hash: md5
+      md5: 7f18d8e55de7ec41a4114b43b7a9d782.dir
+      size: 12546540
+      nfiles: 6
+    - path: params/models/dla/bernstein_nf_lognormal.yaml
+      hash: md5
+      md5: b5a067358d9ea147f56abf152a49c606
+      size: 688
+    - path: scripts/train.py
+      hash: md5
+      md5: 13dfe8ad62898b2c597a5b144ecda4e7
+      size: 4776
+    - path: src/dcp_nf_forecast/
+      hash: md5
+      md5: d302b1abedd23439c3a26601234f4cfd.dir
+      size: 31931
+      nfiles: 8
+    params:
+      params.yaml:
+        data.data_format: feather
+        log_file: logs/pipeline.log
+        log_level: info
+        paths.data_processed: data/processed
+        seed: 42
+        targets:
+        - name: dla
+          y_column: dla_stromverbrauch_kwh
+          prediction_horizon: 12
+          lag_columns: dla_stromverbrauch_kwh:96
+        - name: ofen_g_koks
+          y_column: ofen_g_koks_kg
+          prediction_horizon: 12
+          lag_columns: ofen_g_koks_kg:96
+        - name: ofen_f_koks
+          y_column: ofen_f_koks_kg
+          prediction_horizon: 12
+          lag_columns: ofen_f_koks_kg:96
+        - name: pl2
+          y_column: pl2_stromverbrauch_kwh
+          prediction_horizon: 12
+          lag_columns: pl2_stromverbrauch_kwh:96
+        test_mode: true
+      params/models/dla/bernstein_nf_lognormal.yaml:
+        compile_kwargs: {}
+        fit_kwargs:
+          batch_size: 256
+          early_stopping_patience: 10
+          epochs: 10
+          learning_rate: 0.001
+          verbose: true
+        model_kwargs:
+          distribution: masked_autoregressive_flow
+          num_layers: 1
+          bijector: BernsteinPolynomial
+          bijector_kwargs:
+            domain:
+            - 0
+            - 1
+            extrapolation: false
+          invert: true
+          base_distribution_kwargs:
+            distribution_name: lognormal
+          num_parameters: 96
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_thetas_constrain_fn
+          parameters_constraint_fn_kwargs:
+            allow_flexible_bounds: false
+            bounds: none
+            low: 0.007
+            high: 148
+          parameters_fn_kwargs:
+            activation: relu
+            hidden_units:
+            - 256
+            - 256
+            - 256
+            conditional: true
+    outs:
+    - path: results/dla/bernstein_nf_lognormal/metrics.yaml
+      hash: md5
+      md5: 74c12ce41ac177e94482703d22a1a961
+      size: 150
+    - path: results/dla/bernstein_nf_lognormal/model_weights.h5
+      hash: md5
+      md5: 95d57ebf8593d2b018d2c57cfaf66e95
+      size: 1742216
+  train_spline_lognormal@0:
+    cmd: "python scripts/train.py --processed-dir data/processed/dla --target-name
+      dla --model spline_nf_lognormal --data-format feather --prediction-horizon 12
+      --stage-name train_spline_lognormal --test-mode true --log-level info --log-file
+      logs/pipeline.log\n"
+    deps:
+    - path: data/processed/dla/
+      hash: md5
+      md5: 7f18d8e55de7ec41a4114b43b7a9d782.dir
+      size: 12546540
+      nfiles: 6
+    - path: params/models/dla/spline_nf_lognormal.yaml
+      hash: md5
+      md5: 4b8b0db733744e18ff51c6ea590869a7
+      size: 659
+    - path: scripts/train.py
+      hash: md5
+      md5: 13dfe8ad62898b2c597a5b144ecda4e7
+      size: 4776
+    - path: src/dcp_nf_forecast/
+      hash: md5
+      md5: d302b1abedd23439c3a26601234f4cfd.dir
+      size: 31931
+      nfiles: 8
+    params:
+      params.yaml:
+        data.data_format: feather
+        log_file: logs/pipeline.log
+        log_level: info
+        paths.data_processed: data/processed
+        seed: 42
+        targets:
+        - name: dla
+          y_column: dla_stromverbrauch_kwh
+          prediction_horizon: 12
+          lag_columns: dla_stromverbrauch_kwh:96
+        - name: ofen_g_koks
+          y_column: ofen_g_koks_kg
+          prediction_horizon: 12
+          lag_columns: ofen_g_koks_kg:96
+        - name: ofen_f_koks
+          y_column: ofen_f_koks_kg
+          prediction_horizon: 12
+          lag_columns: ofen_f_koks_kg:96
+        - name: pl2
+          y_column: pl2_stromverbrauch_kwh
+          prediction_horizon: 12
+          lag_columns: pl2_stromverbrauch_kwh:96
+        test_mode: true
+      params/models/dla/spline_nf_lognormal.yaml:
+        compile_kwargs: {}
+        fit_kwargs:
+          batch_size: 256
+          early_stopping_patience: 10
+          epochs: 10
+          learning_rate: 0.001
+          verbose: true
+        model_kwargs:
+          distribution: masked_autoregressive_flow
+          num_layers: 1
+          bijector: RationalQuadraticSpline
+          bijector_kwargs:
+            range_min: 0
+          base_distribution_kwargs:
+            distribution_name: lognormal
+          num_parameters: 95
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_spline_param_constrain_fn
+          parameters_constraint_fn_kwargs:
+            interval_width: 4
+            min_slope: 0.001
+            min_bin_width: 0.001
+            nbins: 32
+          parameters_fn_kwargs:
+            activation: relu
+            hidden_units:
+            - 256
+            - 256
+            - 256
+            conditional: true
+    outs:
+    - path: results/dla/spline_nf_lognormal/metrics.yaml
+      hash: md5
+      md5: 801243e6c9d066e8d7fb0652b42fbec7
+      size: 148
+    - path: results/dla/spline_nf_lognormal/model_weights.h5
+      hash: md5
+      md5: 421f676fa9eb80cef303796a1f44fb35
+      size: 1729880

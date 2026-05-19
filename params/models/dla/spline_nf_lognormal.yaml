@@ -1,8 +1,8 @@
 compile_kwargs: {}
 fit_kwargs:
   batch_size: 256
-  early_stopping_patience: 15
-  epochs: 5
+  early_stopping_patience: 10
+  epochs: 10
   learning_rate: 0.001
   verbose: true
 model_kwargs:
@@ -10,13 +10,13 @@ model_kwargs:
   num_layers: 1
   bijector: RationalQuadraticSpline
   bijector_kwargs:
-    range_min: -4
+    range_min: 0
   base_distribution_kwargs:
-    distribution_name: normal
+    distribution_name: lognormal
   num_parameters: 95
   parameters_constraint_fn: hybrid_flows.activations.get_spline_param_constrain_fn
   parameters_constraint_fn_kwargs:
-    interval_width: 8
+    interval_width: 4
     min_slope: 0.001
     min_bin_width: 0.001
     nbins: 32
