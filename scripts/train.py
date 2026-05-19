@@ -1,139 +1,27 @@
-"""Train a normalizing flow model for a given target."""
-
 import argparse
 from pathlib import Path
 
+import mlflow
 import numpy as np
 import tensorflow as tf
 import yaml
-from hybrid_flows.models import DensityRegressionModel
+from hybrid_flows.utils.mlflow import (
+    log_cfg,
+    start_run_with_exception_logging,
+)
 
+from dcp_nf_forecast.models import (
+    create_bernstein_model,
+    create_spline_model,
+)
 from dcp_nf_forecast.utils import (
+    load_data,
     load_model_params,
-    read_dataframe,
     setup_logging,
 )
 
 
-def create_bernstein_model(
-    dims: int,
-    covariate_dim: int,
-    cfg: dict,
-) -> DensityRegressionModel:
-    """Build a Bernstein-polynomial normalizing flow model.
-
-    Parameters
-    ----------
-    dims : int
-        Output dimensionality (prediction horizon).
-    covariate_dim : int
-        Number of conditional input features.
-    cfg : dict
-        Model configuration (``num_layers``, ``polynomial_order``,
-        ``hidden_units``, ``activation``).
-
-    Returns
-    -------
-    DensityRegressionModel
-        Uncompiled Keras model.
-    """
-    return DensityRegressionModel(
-        distribution="masked_autoregressive_flow",
-        dims=dims,
-        num_layers=cfg["num_layers"],
-        num_parameters=cfg["polynomial_order"] * dims,
-        bijector="BernsteinPolynomial",
-        bijector_kwargs={"domain": [0, 1], "extrapolation": False},
-        invert=True,
-        parameters_constraint_fn="hybrid_flows.activations.get_thetas_constrain_fn",
-        parameters_constraint_fn_kwargs={
-            "allow_flexible_bounds": False,
-            "bounds": "linear",
-            "high": -4,
-            "low": 4,
-        },
-        parameters_fn_kwargs={
-            "hidden_units": cfg["hidden_units"],
-            "activation": cfg["activation"],
-            "conditional": True,
-            "conditional_event_shape": [covariate_dim],
-        },
-    )
-
-
-def create_spline_model(
-    dims: int,
-    covariate_dim: int,
-    cfg: dict,
-) -> DensityRegressionModel:
-    """Build a rational-quadratic-spline normalizing flow model.
-
-    Parameters
-    ----------
-    dims : int
-        Output dimensionality (prediction horizon).
-    covariate_dim : int
-        Number of conditional input features.
-    cfg : dict
-        Model configuration (``num_layers``, ``num_bins``,
-        ``hidden_units``, ``activation``).
-
-    Returns
-    -------
-    DensityRegressionModel
-        Uncompiled Keras model.
-    """
-    return DensityRegressionModel(
-        distribution="masked_autoregressive_flow",
-        dims=dims,
-        num_layers=cfg["num_layers"],
-        num_parameters=cfg["num_bins"] * 3 - 1,
-        bijector="RationalQuadraticSpline",
-        bijector_kwargs={"range_min": -4},
-        parameters_constraint_fn="hybrid_flows.activations.get_spline_param_constrain_fn",
-        parameters_constraint_fn_kwargs={
-            "interval_width": 8,
-            "min_slope": 0.001,
-            "min_bin_width": 0.001,
-            "nbins": cfg["num_bins"],
-        },
-        parameters_fn_kwargs={
-            "hidden_units": cfg["hidden_units"],
-            "activation": cfg["activation"],
-            "conditional": True,
-            "conditional_event_shape": [covariate_dim],
-        },
-    )
-
-
-def load_data(
-    processed_dir: Path,
-    split: str,
-    data_format: str,
-) -> tuple[np.ndarray, np.ndarray]:
-    """Load pre-processed split data as numpy arrays.
-
-    Parameters
-    ----------
-    processed_dir : Path
-        Directory containing X_{split} and y_{split} files.
-    split : str
-        Split name (``"train"``, ``"val"``, ``"test"``).
-    data_format : str
-        ``"feather"`` or ``"csv"``.
-
-    Returns
-    -------
-    tuple[np.ndarray, np.ndarray]
-        (X, y) as float32 arrays.
-    """
-    x = read_dataframe(processed_dir / f"X_{split}", data_format)
-    y = read_dataframe(processed_dir / f"y_{split}", data_format)
-    return x.values.astype(np.float32), y.values.astype(np.float32)
-
-
 def main() -> None:
-    """Entry point: parse CLI args, build model, train, save weights + metrics."""
     parser = argparse.ArgumentParser(
         description="Train a normalizing flow forecasting model"
     )
@@ -157,85 +45,102 @@ def main() -> None:
 
     processed_dir = Path(args.processed_dir)
     test_mode = args.test_mode.lower() in ("true", "1", "yes")
+    run_name = f"{args.model}_{args.target_name}"
+    results_dir = Path("results") / args.target_name / args.model
+    results_dir.mkdir(parents=True, exist_ok=True)
 
     x_train, y_train = load_data(processed_dir, "train", args.data_format)
     x_val, y_val = load_data(processed_dir, "val", args.data_format)
     covariate_dim = x_train.shape[1]
-
     model_cfg = load_model_params(args.target_name, args.model)
-
-    logger.info(
-        "Creating %s_%s: dims=%d cov=%d cfg=%s",
-        args.model,
-        args.target_name,
-        args.prediction_horizon,
-        covariate_dim,
-        model_cfg,
-    )
-
-    if "bernstein" in args.model:
-        model = create_bernstein_model(
-            dims=args.prediction_horizon,
-            covariate_dim=covariate_dim,
-            cfg=model_cfg,
-        )
-    else:
-        model = create_spline_model(
-            dims=args.prediction_horizon,
-            covariate_dim=covariate_dim,
-            cfg=model_cfg,
-        )
-
-    model.compile(
-        optimizer=tf.keras.optimizers.Adam(learning_rate=model_cfg["learning_rate"]),
-        loss=lambda y, p_y: -p_y.log_prob(y),
-    )
 
     epochs = args.test_epochs if test_mode else args.epochs
     batch_size = args.test_batch_size if test_mode else model_cfg["batch_size"]
 
     logger.info(
-        "Training %s_%s: epochs=%d batch_size=%d test_mode=%s",
-        args.model,
-        args.target_name,
-        epochs,
-        batch_size,
-        test_mode,
+        "Creating %s: dims=%d cov=%d cfg=%s",
+        run_name,
+        args.prediction_horizon,
+        covariate_dim,
+        model_cfg,
     )
 
-    callbacks: list[tf.keras.callbacks.Callback] = []
-    if not test_mode:
-        callbacks.append(
-            tf.keras.callbacks.EarlyStopping(
-                patience=args.early_stopping_patience,
-                restore_best_weights=True,
+    with start_run_with_exception_logging(run_name=run_name):
+        log_cfg(vars(args) | {"model_params": model_cfg})
+        mlflow.tensorflow.autolog(checkpoint_save_weights_only=True)
+
+        if "bernstein" in args.model:
+            model = create_bernstein_model(
+                dims=args.prediction_horizon,
+                covariate_dim=covariate_dim,
+                cfg=model_cfg,
             )
+        else:
+            model = create_spline_model(
+                dims=args.prediction_horizon,
+                covariate_dim=covariate_dim,
+                cfg=model_cfg,
+            )
+
+        model.compile(
+            optimizer=tf.keras.optimizers.Adam(
+                learning_rate=model_cfg["learning_rate"]
+            ),
+            loss=lambda y, p_y: -p_y.log_prob(y),
         )
 
-    history = model.fit(
-        x=x_train,
-        y=y_train,
-        validation_data=(x_val, y_val),
-        epochs=epochs,
-        batch_size=batch_size,
-        callbacks=callbacks,
-        verbose=1,
-    )
+        logger.info(
+            "Training %s: epochs=%d batch_size=%d test_mode=%s",
+            run_name,
+            epochs,
+            batch_size,
+            test_mode,
+        )
 
-    results_dir = Path("results") / args.target_name / args.model
-    results_dir.mkdir(parents=True, exist_ok=True)
-    model.save_weights(str(results_dir / "model_weights.h5"))
+        callbacks: list[tf.keras.callbacks.Callback] = []
+        if not test_mode:
+            callbacks.append(
+                tf.keras.callbacks.EarlyStopping(
+                    patience=args.early_stopping_patience,
+                    restore_best_weights=True,
+                )
+            )
 
-    metrics: dict[str, float] = {
-        "final_train_loss": float(history.history["loss"][-1]),
-    }
-    if "val_loss" in history.history:
-        metrics["final_val_loss"] = float(history.history["val_loss"][-1])
+        history = model.fit(
+            x=x_train,
+            y=y_train,
+            validation_data=(x_val, y_val),
+            epochs=epochs,
+            batch_size=batch_size,
+            callbacks=callbacks,
+            verbose=1,
+        )
 
-    with open(results_dir / "metrics.yaml", "w") as f:
-        yaml.dump(metrics, f)
+        model.save_weights(str(results_dir / "model_weights.h5"))
 
-    logger.info("Saved weights + metrics to %s", results_dir)
+        hist = history.history
+        min_idx = int(np.argmin(hist["val_loss"]))
+        min_loss = float(hist["loss"][min_idx])
+        min_val_loss = float(hist["val_loss"][min_idx])
+
+        mlflow.log_metric("best_epoch", min_idx)
+        mlflow.log_metric("final_epoch", len(hist["loss"]))
+        mlflow.log_metric("min_loss", min_loss)
+        mlflow.log_metric("min_val_loss", min_val_loss)
+
+        metrics = {
+            "final_train_loss": float(hist["loss"][-1]),
+            "final_val_loss": float(hist["val_loss"][-1]),
+            "best_epoch": min_idx,
+            "min_loss": min_loss,
+            "min_val_loss": min_val_loss,
+        }
+        with open(results_dir / "metrics.yaml", "w") as f:
+            yaml.dump(metrics, f)
+
+        mlflow.log_artifacts(str(results_dir))
+
+        logger.info("Saved weights + metrics to %s", results_dir)
 
 
 if __name__ == "__main__":

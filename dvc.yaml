@@ -143,3 +143,39 @@ stages:
       - results/${item.name}/spline_nf/model_weights.h5
       metrics:
       - results/${item.name}/spline_nf/metrics.yaml
+
+  evaluate:
+    foreach: ${targets}
+    do:
+      cmd: >
+        python scripts/evaluate.py
+        --processed-dir ${paths.data_processed}/${item.name}
+        --target-name ${item.name}
+        --model ${item.eval_model}
+        --data-format ${data.data_format}
+        --prediction-horizon ${item.prediction_horizon}
+        --n-samples ${eval.n_samples}
+        --test-mode ${train.test_mode}
+        --log-level ${log_level}
+        --log-file ${log_file}
+      deps:
+      - scripts/evaluate.py
+      - scripts/train.py
+      - src/dcp_nf_forecast/
+      - data/processed/${item.name}/
+      - results/${item.name}/${item.eval_model}/model_weights.h5
+      - params/models/${item.name}/${item.eval_model}.yaml
+      params:
+      - paths.data_processed
+      - data.data_format
+      - targets
+      - eval.n_samples
+      - train.test_mode
+      - log_level
+      - log_file
+      outs:
+      - results/${item.name}/${item.eval_model}/evaluation/forecast.pdf
+      - results/${item.name}/${item.eval_model}/evaluation/pit_histogram.pdf
+      - results/${item.name}/${item.eval_model}/evaluation/calibration.pdf
+      metrics:
+      - results/${item.name}/${item.eval_model}/evaluation/metrics.yaml

@@ -10,7 +10,8 @@ dependencies = [
   "hybrid-flows @ git+https://github.com/MArpogaus/hybrid-flows.git@v0.1.0",
   "tensorflow>=2.15",
   "tensorflow-probability>=0.23",
-  "pyarrow==23.*"
+  "pyarrow==23.*",
+  "mlflow>=3,<4"
 ]
 description = "Forecasting with multivariate normalizing flows"
 dynamic = ["version"]
