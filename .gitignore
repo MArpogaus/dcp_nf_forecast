@@ -311,3 +311,4 @@ data/interim/
 data/processed/
 !data/.gitkeep
 /uv.lock
+mlflow.db
