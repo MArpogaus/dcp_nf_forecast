@@ -7,7 +7,7 @@ fit_kwargs:
   learning_rate: 0.0005
   verbose: true
 model_kwargs:
-  distribution: multivariate_lognormal_diag
+  distribution: multivariate_lognormal
   parameters_fn_kwargs:
     activation: relu
     batch_norm: false
