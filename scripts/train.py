@@ -33,7 +33,7 @@ def main() -> None:
 
     test_mode = params["test_mode"]
     experiment_name = "-".join(
-        [params["experiment_name"], args.target_name] + ["test"] if test_mode else []
+        [params["experiment_name"], args.target_name] + (["test"] if test_mode else [])
     )
     compile_kwargs = params.get("compile_kwargs", {})
     fit_kwargs = params["fit_kwargs"]
