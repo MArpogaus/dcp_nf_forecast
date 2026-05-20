@@ -45,6 +45,8 @@ targets:
   # TODO: Feiertage einfügen
 
 models:
+- normal_baseline
+- lognormal_baseline
 - bernstein_nf
 - spline_nf
 - bernstein_nf_lognormal

@@ -1,0 +1,18 @@
+compile_kwargs:
+  jit_compile: false
+fit_kwargs:
+  batch_size: 256
+  early_stopping_patience: 10
+  epochs: 200
+  learning_rate: 0.001
+  verbose: true
+model_kwargs:
+  distribution: multivariate_normal_diag
+  parameters_fn_kwargs:
+    activation: relu
+    batch_norm: true
+    conditional: true
+    dropout: 0
+    hidden_units:
+    - 32
+    - 32
