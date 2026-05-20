@@ -18,7 +18,9 @@ def _get_multivariate_lognormal_fn(
 
     def dist(parameters: tf.Tensor) -> tfd.Distribution:
         mv_normal = mv_normal_dist(parameters)
-        return tfp.distributions.TransformedDistribution(mv_normal, tfp.bijectors.Exp())
+        return tfp.distributions.TransformedDistribution(
+            mv_normal, tfp.bijectors.Softplus()
+        )
 
     return dist, parameters_shape
 
