@@ -10,7 +10,7 @@ model_kwargs:
   distribution: multivariate_lognormal_diag
   parameters_fn_kwargs:
     activation: relu
-    batch_norm: true
+    batch_norm: false
     conditional: true
     dropout: 0
     hidden_units:
