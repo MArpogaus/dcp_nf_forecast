@@ -2,8 +2,8 @@ compile_kwargs: {}
 fit_kwargs:
   batch_size: 256
   early_stopping_patience: 10
-  epochs: 100
-  learning_rate: 0.0005
+  epochs: 200
+  learning_rate: 0.001
   verbose: true
 model_kwargs:
   distribution: masked_autoregressive_flow
@@ -15,7 +15,7 @@ model_kwargs:
   invert: true
   base_distribution_kwargs:
     distribution_name: normal
-  num_parameters: 96
+  num_parameters: 8
   parameters_constraint_fn: hybrid_flows.activations.get_thetas_constrain_fn
   parameters_constraint_fn_kwargs:
     allow_flexible_bounds: false
@@ -24,5 +24,7 @@ model_kwargs:
     high: 148
   parameters_fn_kwargs:
     activation: relu
-    hidden_units: [256, 256, 256]
+    hidden_units:
+    - 128
+    - 128
     conditional: true

@@ -3,8 +3,8 @@ compile_kwargs:
 fit_kwargs:
   batch_size: 256
   early_stopping_patience: 10
-  epochs: 100
-  learning_rate: 0.0005
+  epochs: 200
+  learning_rate: 0.001
   verbose: true
 model_kwargs:
   distribution: multivariate_normal
@@ -14,5 +14,5 @@ model_kwargs:
     conditional: true
     dropout: 0
     hidden_units:
-    - 32
-    - 32
+    - 128
+    - 128
