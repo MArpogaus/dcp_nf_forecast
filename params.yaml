@@ -53,3 +53,5 @@ models:
 - spline_nf_lognormal
 - bernstein_nf_scale
 - bernstein_nf_scale_lognormal
+- spline_nf_scale
+- spline_nf_scale_lognormal

@@ -20,6 +20,8 @@
 | bernstein_nf_scale_lognormal | lognormal | Scale + BernsteinPolynomial | nested bijectors |
 | spline_nf | normal | RationalQuadraticSpline | |
 | spline_nf_lognormal | lognormal | RationalQuadraticSpline | |
+| spline_nf_scale | normal | Scale + RationalQuadraticSpline | nested bijectors |
+| spline_nf_scale_lognormal | lognormal | Scale + RationalQuadraticSpline | nested bijectors |
 
 ---
 

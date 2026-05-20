@@ -1,0 +1,53 @@
+compile_kwargs: {}
+fit_kwargs:
+  epochs: 200
+  learning_rate: 0.001
+  batch_size: 256
+  early_stopping_patience: 10
+  verbose: true
+model_kwargs:
+  distribution: masked_autoregressive_flow
+  num_layers: 1
+  base_distribution_kwargs:
+    distribution_name: lognormal
+  num_parameters: 24
+  parameters_fn_kwargs:
+    activation: relu
+    hidden_units:
+    - 128
+    - 128
+  nested_bijectors:
+  - bijector: Scale
+    parameters_slice_size: 1
+    parameters_constraint_fn: tensorflow.math.softplus
+    parameters_fn: parameter_vector_or_simple_network
+    parameters_fn_kwargs:
+      activation: relu
+      conditional: true
+      dropout: false
+      batch_norm: false
+      hidden_units:
+      - 128
+      - 128
+      parameter_shape: [48]
+  - bijector: RationalQuadraticSpline
+    parameters_slice_size: 23
+    bijector_kwargs:
+      range_min: 0
+    invert: true
+    parameters_constraint_fn: hybrid_flows.activations.get_spline_param_constrain_fn
+    parameters_constraint_fn_kwargs:
+      interval_width: 4
+      min_slope: 0.001
+      min_bin_width: 0.001
+      nbins: 8
+    parameters_fn: parameter_vector_or_simple_network
+    parameters_fn_kwargs:
+      activation: relu
+      conditional: true
+      dropout: false
+      batch_norm: false
+      hidden_units:
+      - 128
+      - 128
+      parameter_shape: [48, 23]
