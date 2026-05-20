@@ -19,40 +19,34 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Train a normalizing flow forecasting model"
     )
-    parser.add_argument("--processed-dir", required=True, type=str)
     parser.add_argument("--target-name", required=True, type=str)
     parser.add_argument("--model", required=True, type=str)
-    parser.add_argument("--data-format", required=True, type=str)
-    parser.add_argument("--prediction-horizon", required=True, type=int)
     parser.add_argument("--stage-name", required=True, type=str)
-    parser.add_argument("--experiment-name", required=True, type=str)
-    parser.add_argument("--test-mode", required=True, type=str)
-    parser.add_argument("--log-level", required=True, type=str)
-    parser.add_argument("--log-file", required=True, type=str)
     args = parser.parse_args()
+    params = dvc.api.params_show(stages=args.stage_name)
 
-    logger = setup_logging(args.log_level, args.log_file)
-    test_mode = args.test_mode.lower() in ("true", "1", "yes")
+    logger = setup_logging(params["log_level"], params["log_file"])
+
     run_name = f"{args.model}_{args.target_name}"
     results_dir = Path("results") / args.target_name / args.model
     results_dir.mkdir(parents=True, exist_ok=True)
 
-    experiment_name = args.experiment_name + ("_test" if test_mode else "")
-
-    params = dvc.api.params_show(stages=args.stage_name)
-    prefix = f"params/models/{args.target_name}/{args.model}.yaml:"
-    compile_kwargs = params.get(f"{prefix}compile_kwargs", {})
-    fit_kwargs = params[f"{prefix}fit_kwargs"]
-    model_kwargs = params[f"{prefix}model_kwargs"]
+    test_mode = params["test_mode"]
+    experiment_name = "-".join(
+        [params["experiment_name"], args.target_name] + ["test"] if test_mode else []
+    )
+    compile_kwargs = params.get("compile_kwargs", {})
+    fit_kwargs = params["fit_kwargs"]
+    model_kwargs = params["model_kwargs"]
 
     if test_mode:
         fit_kwargs["epochs"] = 1
 
-    x_train, y_train = load_data(Path(args.processed_dir), "train", args.data_format)
-    x_val, y_val = load_data(Path(args.processed_dir), "val", args.data_format)
+    processed_dir = Path(params["paths"]["data_processed"]) / args.target_name
+    x_train, y_train = load_data(processed_dir, "train", params["data"]["data_format"])
+    x_val, y_val = load_data(processed_dir, "val", params["data"]["data_format"])
     covariate_dim = x_train.shape[1]
-
-    dims = args.prediction_horizon
+    dims = y_train.shape[1]
 
     pk = model_kwargs["parameters_fn_kwargs"]
     pk["conditional_event_shape"] = covariate_dim
@@ -72,18 +66,11 @@ def main() -> None:
         parent_run_id_file = results_dir / "parent_run_id.txt"
         with open(parent_run_id_file, "w") as f:
             f.write(parent_run.info.run_id)
+        log_cfg(params)
 
         with start_run_with_exception_logging(run_name=f"{run_name}_training"):
             mlflow.set_tag("stage", "training")
-            mlflow.log_dict(params, "dvc_params.yaml")
-            log_cfg(
-                vars(args)
-                | {
-                    f"{prefix}model_kwargs": model_kwargs,
-                    f"{prefix}fit_kwargs": fit_kwargs,
-                    f"{prefix}compile_kwargs": compile_kwargs,
-                }
-            )
+            log_cfg(params)
             mlflow.tensorflow.autolog(checkpoint_save_weights_only=True)
 
             model = DensityRegressionModel(dims=dims, **model_kwargs)

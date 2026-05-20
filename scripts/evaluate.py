@@ -225,42 +225,39 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Evaluate a trained normalizing flow model on test data"
     )
-    parser.add_argument("--processed-dir", required=True, type=str)
     parser.add_argument("--target-name", required=True, type=str)
     parser.add_argument("--model", required=True, type=str)
-    parser.add_argument("--data-format", required=True, type=str)
-    parser.add_argument("--prediction-horizon", required=True, type=int)
-    parser.add_argument("--n-samples", required=True, type=int)
     parser.add_argument("--stage-name", required=True, type=str)
-    parser.add_argument("--experiment-name", required=True, type=str)
-    parser.add_argument("--test-mode", required=True, type=str)
-    parser.add_argument("--log-level", required=True, type=str)
-    parser.add_argument("--log-file", required=True, type=str)
+    parser.add_argument("--prediction-horizon", required=True, type=int)
     args = parser.parse_args()
+    params = dvc.api.params_show(stages=args.stage_name)
 
-    setup_logging(args.log_level, args.log_file)
-    test_mode = args.test_mode.lower() in ("true", "1", "yes")
+    setup_logging(params["log_level"], params["log_file"])
+    test_mode = params["test_mode"]
     run_name = f"eval_{args.model}_{args.target_name}"
-    experiment_name = args.experiment_name + ("_test" if test_mode else "")
+    experiment_name = "-".join(
+        [params["experiment_name"], args.target_name] + ["test"] if test_mode else []
+    )
+    data_format = params["data"]["data_format"]
+    n_samples = 50 if test_mode else params["eval"]["n_samples"]
 
-    processed_dir = Path(args.processed_dir)
+    processed_dir = Path(params["paths"]["data_processed"]) / args.target_name
     results_dir = Path("results") / args.target_name / args.model
 
-    params = dvc.api.params_show(stages=args.stage_name)
-    prefix = f"params/models/{args.target_name}/{args.model}.yaml:"
-    model_kwargs = params[f"{prefix}model_kwargs"]
+    model_kwargs = params["model_kwargs"]
 
-    x_test, y_test = load_data(processed_dir, "test", args.data_format)
+    x_test, y_test = load_data(processed_dir, "test", data_format)
     covariate_dim = x_test.shape[1]
 
     pk = model_kwargs["parameters_fn_kwargs"]
     pk["conditional_event_shape"] = covariate_dim
     model_kwargs["parameters_fn_kwargs"] = pk
 
-    n_eval = min(len(x_test), 100 if test_mode else 150)
+    n_eval = min(len(x_test), 10 if test_mode else 150)
     x_test, y_test = x_test[:n_eval], y_test[:n_eval]
-    n_samples = 50 if test_mode else args.n_samples
     batch_size = min(n_eval, 16)
+
+    logger.info("n_samples=%d test_mode=%s", n_samples, test_mode)
 
     logger.info(
         "Loaded test data: X=%s y=%s (n_eval=%d)", x_test.shape, y_test.shape, n_eval
@@ -280,17 +277,12 @@ def main() -> None:
     mlflow.set_experiment(experiment_name)
 
     parent_run_id_file = results_dir / "parent_run_id.txt"
-    run_context = (
-        mlflow.start_run(run_id=parent_run_id_file.read_text().strip())
-        if parent_run_id_file.exists()
-        else mlflow.start_run(run_name=run_name)
-    )
 
-    with run_context:
+    with mlflow.start_run(run_id=parent_run_id_file.read_text().strip()):
         with start_run_with_exception_logging(run_name=f"{run_name}_evaluation"):
             mlflow.set_tag("stage", "evaluation")
-            mlflow.log_dict(params, "dvc_params.yaml")
-            log_cfg(vars(args) | {f"{prefix}model_kwargs": model_kwargs})
+            log_cfg(params)
+
             mlflow.tensorflow.autolog()
 
             logger.info("Sampling %d draws from predictive distribution ...", n_samples)

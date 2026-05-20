@@ -2,7 +2,7 @@ experiment_name: dcp_nf_forecast
 log_level: info
 log_file: logs/pipeline.log
 seed: 42
-test_mode: false
+test_mode: true
 
 paths:
   raw_data: ../dcp/norm_data/norm_fondium_15_min_data_2023.csv
@@ -27,17 +27,25 @@ splits:
 targets:
 - name: dla
   y_column: dla_stromverbrauch_kwh
-  prediction_horizon: 12
+  prediction_horizon: 48
   lag_columns: dla_stromverbrauch_kwh:96
 - name: ofen_g_koks
   y_column: ofen_g_koks_kg
-  prediction_horizon: 12
+  prediction_horizon: 48
   lag_columns: ofen_g_koks_kg:96
 - name: ofen_f_koks
   y_column: ofen_f_koks_kg
-  prediction_horizon: 12
+  prediction_horizon: 48
   lag_columns: ofen_f_koks_kg:96
 - name: pl2
   y_column: pl2_stromverbrauch_kwh
-  prediction_horizon: 12
+  prediction_horizon: 48
   lag_columns: pl2_stromverbrauch_kwh:96
+  # TODO: Anzahl der Kästen noch als covariate einführen
+  # TODO: Feiertage einfügen
+
+models:
+- bernstein_nf
+- spline_nf
+- bernstein_nf_lognormal
+- spline_nf_lognormal
