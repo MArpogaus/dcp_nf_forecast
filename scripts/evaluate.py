@@ -11,13 +11,14 @@ import mlflow
 import numpy as np
 import tensorflow as tf
 import yaml
-from hybrid_flows.models import DensityRegressionModel
 from hybrid_flows.utils.mlflow import (
     log_and_save_figure,
     log_cfg,
     start_run_with_exception_logging,
 )
+from hybrid_flows.utils.visualisation import get_figsize
 
+from dcp_nf_forecast.models import build_model
 from dcp_nf_forecast.utils import load_data, setup_logging
 
 logger = logging.getLogger(__name__)
@@ -28,19 +29,20 @@ plt.rcParams.update(
         "savefig.dpi": 300,
         "savefig.bbox": "tight",
         "font.size": 10,
-        "axes.labelsize": 11,
-        "axes.titlesize": 12,
-        "legend.fontsize": 9,
-        "xtick.labelsize": 9,
-        "ytick.labelsize": 9,
+        "axes.labelsize": 10,
+        "axes.titlesize": 11,
+        "legend.fontsize": 8,
+        "xtick.labelsize": 8,
+        "ytick.labelsize": 8,
         "lines.linewidth": 0.8,
         "figure.figsize": (8, 4.5),
+        "font.family": "sans-serif",
     }
 )
 
 
 def sample_predictions(
-    model: DensityRegressionModel,
+    model,
     x: np.ndarray,
     n_samples: int,
     batch_size: int,
@@ -69,15 +71,16 @@ def plot_forecast_with_intervals(
     samples: np.ndarray,
     n_show: int = 48,
     title: str = "",
-    alpha: float = 0.3,
+    alpha: float = 0.25,
 ) -> plt.Figure:
     n_steps = y_true.shape[1]
-    n_cols = 4
+    n_cols = min(4, n_steps)
     n_rows = int(np.ceil(n_steps / n_cols))
+    width, height = get_figsize("thesis", subplots=(n_rows, n_cols))
     fig, axes = plt.subplots(
-        n_rows, n_cols, figsize=(n_cols * 3, n_rows * 2.5), sharex=True, sharey=True
+        n_rows, n_cols, figsize=(width, height), sharex=True, sharey=True
     )
-    axes = axes.flatten()
+    axes = axes.flatten() if n_steps > 1 else [axes]
     n_show = min(n_show, len(y_true))
     quantiles = [5, 10, 25, 50, 75, 90, 95]
     q = np.percentile(samples[:, :n_show], quantiles, axis=0)
@@ -86,42 +89,42 @@ def plot_forecast_with_intervals(
         ax = axes[step]
         t = np.arange(n_show)
         y = y_true[:n_show, step]
-        ax.plot(t, y, "k-", label="Actual", linewidth=0.8)
-        ax.plot(t, q[3, :, step], "b-", label="Median", linewidth=0.8)
+        ax.plot(t, y, color="#333333", label=r"Actual", linewidth=0.6)
+        ax.plot(t, q[3, :, step], color="#1f77b4", label=r"Median", linewidth=0.7)
         ax.fill_between(
             t,
             q[0, :, step],
             q[-1, :, step],
             alpha=alpha,
-            color="b",
-            label="90% CI",
+            color="#1f77b4",
+            label=r"90\% CI",
         )
         ax.fill_between(
             t,
             q[1, :, step],
             q[-2, :, step],
-            alpha=alpha * 1.5,
-            color="b",
-            label="80% CI",
+            alpha=alpha * 1.6,
+            color="#2c8ad4",
+            label=r"80\% CI",
         )
         ax.fill_between(
             t,
             q[2, :, step],
             q[-3, :, step],
-            alpha=alpha * 2,
-            color="b",
-            label="50% CI",
+            alpha=alpha * 2.2,
+            color="#3a9ee6",
+            label=r"50\% CI",
         )
         if step == 0:
-            ax.legend(fontsize=7, loc="upper right")
-        ax.set_title(f"Step +{step + 1}", fontsize=10)
+            ax.legend(fontsize=7, loc="upper right", framealpha=0.9)
+        ax.set_title(rf"$t + {step + 1}$", fontsize=9)
 
     for j in range(n_steps, len(axes)):
         axes[j].set_visible(False)
 
-    fig.suptitle(title, fontsize=12)
-    fig.supxlabel("Test sample index")
-    fig.supylabel("Value")
+    fig.suptitle(title, fontsize=11)
+    fig.supxlabel(r"Test sample index", fontsize=9)
+    fig.supylabel(r"Value", fontsize=9)
     fig.tight_layout()
     return fig
 
@@ -135,7 +138,10 @@ def plot_pit_histogram(
     n_steps = y_true.shape[1]
     n_cols = min(4, n_steps)
     n_rows = int(np.ceil(n_steps / n_cols))
-    fig, axes = plt.subplots(n_rows, n_cols, figsize=(12, 3 * n_rows))
+    width, height = get_figsize("thesis", subplots=(n_rows, n_cols))
+    fig, axes = plt.subplots(
+        n_rows, n_cols, figsize=(width, height), sharex=True, sharey=True
+    )
     axes = axes.flatten() if n_steps > 1 else [axes]
 
     for step in range(n_steps):
@@ -147,19 +153,22 @@ def plot_pit_histogram(
             pit,
             bins=n_bins,
             density=True,
-            alpha=0.7,
+            alpha=0.75,
             color="steelblue",
             edgecolor="white",
+            linewidth=0.5,
         )
-        ax.axhline(1.0, color="red", linestyle="--", linewidth=0.8)
-        ax.set_title(f"Step +{step + 1}", fontsize=9)
+        ax.axhline(
+            1.0, color="#d62728", linestyle="--", linewidth=0.7, label=r"Uniform"
+        )
+        ax.set_title(rf"$t + {step + 1}$", fontsize=9)
         ax.set_xlim(0, 1)
         ax.set_ylim(0, 2.5)
 
     for j in range(n_steps, len(axes)):
         axes[j].set_visible(False)
 
-    fig.suptitle(f"PIT Histogram \u2013 {title}", fontsize=12)
+    fig.suptitle(rf"PIT Histogram -- {title}", fontsize=11)
     fig.tight_layout()
     return fig
 
@@ -172,7 +181,10 @@ def plot_calibration(
     n_steps = y_true.shape[1]
     n_cols = min(4, n_steps)
     n_rows = int(np.ceil(n_steps / n_cols))
-    fig, axes = plt.subplots(n_rows, n_cols, figsize=(12, 3 * n_rows))
+    width, height = get_figsize("thesis", subplots=(n_rows, n_cols))
+    fig, axes = plt.subplots(
+        n_rows, n_cols, figsize=(width, height), sharex=True, sharey=True
+    )
     axes = axes.flatten() if n_steps > 1 else [axes]
 
     nominal = np.linspace(0, 1, 21)
@@ -187,20 +199,35 @@ def plot_calibration(
             coverage = np.mean((y >= lower) & (y <= upper))
             empirical.append(coverage)
         ax.plot(
-            nominal, empirical, "o-", markersize=3, linewidth=0.8, color="steelblue"
+            nominal,
+            empirical,
+            "o-",
+            markersize=3,
+            linewidth=0.7,
+            color="steelblue",
+            label=r"Empirical",
         )
-        ax.plot([0, 1], [0, 1], "r--", linewidth=0.8)
-        ax.set_title(f"Step +{step + 1}", fontsize=9)
+        ax.plot(
+            [0, 1],
+            [0, 1],
+            linewidth=0.7,
+            color="#d62728",
+            linestyle="--",
+            label=r"Perfect",
+        )
+        ax.set_title(rf"$t + {step + 1}$", fontsize=9)
         ax.set_xlim(0, 1)
         ax.set_ylim(0, 1)
         ax.set_aspect("equal")
+        if step == 0:
+            ax.legend(fontsize=7, loc="lower right", framealpha=0.9)
 
     for j in range(n_steps, len(axes)):
         axes[j].set_visible(False)
 
-    fig.suptitle(f"Calibration Plot \u2013 {title}", fontsize=12)
-    fig.supxlabel("Nominal coverage")
-    fig.supylabel("Empirical coverage")
+    fig.suptitle(rf"Calibration Plot -- {title}", fontsize=11)
+    fig.supxlabel(r"Nominal coverage", fontsize=9)
+    fig.supylabel(r"Empirical coverage", fontsize=9)
     fig.tight_layout()
     return fig
 
@@ -244,14 +271,8 @@ def main() -> None:
     processed_dir = Path(params["paths"]["data_processed"]) / args.target_name
     results_dir = Path("results") / args.target_name / args.model
 
-    model_kwargs = params["model_kwargs"]
-
     x_test, y_test = load_data(processed_dir, "test", data_format)
     covariate_dim = x_test.shape[1]
-
-    pk = model_kwargs["parameters_fn_kwargs"]
-    pk["conditional_event_shape"] = covariate_dim
-    model_kwargs["parameters_fn_kwargs"] = pk
 
     n_eval = min(len(x_test), 10 if test_mode else 150)
     x_test, y_test = x_test[:n_eval], y_test[:n_eval]
@@ -264,7 +285,9 @@ def main() -> None:
     )
 
     dims = args.prediction_horizon
-    model = DensityRegressionModel(dims=dims, **model_kwargs)
+    model = build_model(
+        dims=dims, covariate_dim=covariate_dim, model_kwargs=params["model_kwargs"]
+    )
 
     model.compile(
         optimizer=tf.keras.optimizers.Adam(learning_rate=0.001),

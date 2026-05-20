@@ -6,12 +6,12 @@ import mlflow
 import numpy as np
 import tensorflow as tf
 import yaml
-from hybrid_flows.models import DensityRegressionModel
 from hybrid_flows.utils.mlflow import (
     log_cfg,
     start_run_with_exception_logging,
 )
 
+from dcp_nf_forecast.models import build_model
 from dcp_nf_forecast.utils import load_data, setup_logging
 
 
@@ -48,16 +48,16 @@ def main() -> None:
     covariate_dim = x_train.shape[1]
     dims = y_train.shape[1]
 
-    pk = model_kwargs["parameters_fn_kwargs"]
-    pk["conditional_event_shape"] = covariate_dim
-    model_kwargs["parameters_fn_kwargs"] = pk
-
     logger.info(
         "Creating %s: dims=%d cov=%d model_kwargs=%s",
         run_name,
         dims,
         covariate_dim,
         model_kwargs,
+    )
+
+    model = build_model(
+        dims=dims, covariate_dim=covariate_dim, model_kwargs=model_kwargs
     )
 
     mlflow.set_experiment(experiment_name)
@@ -73,12 +73,16 @@ def main() -> None:
             log_cfg(params)
             mlflow.tensorflow.autolog(checkpoint_save_weights_only=True)
 
-            model = DensityRegressionModel(dims=dims, **model_kwargs)
+            lr = fit_kwargs["learning_rate"]
+            if isinstance(lr, dict):
+                lr_scheduler = getattr(
+                    tf.keras.optimizers.schedules, lr["scheduler_name"]
+                )(**lr.get("scheduler_kwargs", {}))
+                lr = lr_scheduler
+                compile_kwargs.pop("jit_compile", None)
 
             model.compile(
-                optimizer=tf.keras.optimizers.Adam(
-                    learning_rate=fit_kwargs["learning_rate"]
-                ),
+                optimizer=tf.keras.optimizers.Adam(learning_rate=lr),
                 loss=lambda y, p_y: -p_y.log_prob(y),
                 **compile_kwargs,
             )
