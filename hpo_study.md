@@ -48,11 +48,36 @@
 
 **Commands:**
 ```bash
-dvc repro train@dataset0-normal_baseline train@dataset0-lognormal_baseline train@dataset0-bernstein_nf train@dataset0-bernstein_nf_lognormal train@dataset0-bernstein_nf_scale train@dataset0-bernstein_nf_scale_lognormal train@dataset0-spline_nf train@dataset0-spline_nf_lognormal
-dvc repro evaluate@dataset0-normal_baseline evaluate@dataset0-lognormal_baseline evaluate@dataset0-bernstein_nf evaluate@dataset0-bernstein_nf_lognormal evaluate@dataset0-bernstein_nf_scale evaluate@dataset0-bernstein_nf_scale_lognormal evaluate@dataset0-spline_nf evaluate@dataset0-spline_nf_lognormal
+nohup dvc repro train@dataset0-normal_baseline train@dataset0-lognormal_baseline train@dataset0-bernstein_nf train@dataset0-bernstein_nf_lognormal train@dataset0-bernstein_nf_scale train@dataset0-bernstein_nf_scale_lognormal train@dataset0-spline_nf train@dataset0-spline_nf_lognormal > phase1_training.log 2>&1 &
+# Followed by: dvc repro evaluate@dataset0-* (auto-runs after training stages complete)
 ```
 
+**Results:**
+
+```
+Model                          min_val_loss   best_ep   RMSE (eval)    MAE (eval)
+spline_nf                       -161.133         77       0.0813        0.0622
+spline_nf_lognormal             -160.559        196       0.4415        0.2681
+bernstein_nf_scale_lognormal    -136.288        102       0.0197        0.0181
+bernstein_nf_lognormal          -131.670        155       0.0437        0.0381
+bernstein_nf_scale              -104.856         58       0.2469        0.1859
+bernstein_nf                     -97.927         91       0.1782        0.1476
+normal_baseline                  -22.541          4       0.2676        0.2180
+lognormal_baseline                   nan         56       0.9091        0.8886
+```
+
+**Findings:**
+- **spline_nf** (Normal base, [128,128], order=8, nbins=8): best NLL (-161.133) but 3rd best RMSE (0.0813)
+- **bernstein_nf_scale_lognormal**: best RMSE (0.0197) and tight 90% CI (width=0.067) — excellent point forecasts
+- **spline_nf_lognormal**: near-best NLL but poor RMSE (0.44) and very wide CIs (width=4.42) — overconfident uncertainty
+- **lognormal_baseline**: NaN — full-covariance lognormal + Exp bijector unstable with small data
+- **Scale bijector helps LogNormal base** (RMSE 0.020 vs 0.044) but **hurts Normal base** (RMSE 0.247 vs 0.178)
+
+**Decision:** Continue Phase 2 with all 8 models. Cosine decay may help models that plateaued early (spline_nf at ep 77, bernstein_nf_scale at ep 58).
+
 ---
+
+## Phase 2 — Cosine Decay LR
 
 ## Phase 2 — Cosine Decay LR
 

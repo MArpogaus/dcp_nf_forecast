@@ -263,7 +263,7 @@ def main() -> None:
     test_mode = params["test_mode"]
     run_name = f"eval_{args.model}_{args.target_name}"
     experiment_name = "-".join(
-        [params["experiment_name"], args.target_name] + ["test"] if test_mode else []
+        [params["experiment_name"], args.target_name] + (["test"] if test_mode else [])
     )
     data_format = params["data"]["data_format"]
     n_samples = 50 if test_mode else params["eval"]["n_samples"]

@@ -18,8 +18,8 @@ stages:
       size: 3178
     - path: src/dcp_nf_forecast/
       hash: md5
-      md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
-      size: 35957
+      md5: c0e49c150520d88f7466d66fa5244faa.dir
+      size: 33785
       nfiles: 10
     params:
       params.yaml:
@@ -74,8 +74,8 @@ stages:
       size: 1858
     - path: src/dcp_nf_forecast/
       hash: md5
-      md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
-      size: 35957
+      md5: c0e49c150520d88f7466d66fa5244faa.dir
+      size: 33785
       nfiles: 10
     params:
       params.yaml:
@@ -2218,12 +2218,12 @@ stages:
       nfiles: 6
     - path: scripts/train.py
       hash: md5
-      md5: ded3f63fd5a34fbf497b6f14bbaaa1fe
-      size: 4960
+      md5: 2fb19f701c2b8780d750eb3e6519a577
+      size: 4976
     - path: src/dcp_nf_forecast/
       hash: md5
-      md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
-      size: 35957
+      md5: c0e49c150520d88f7466d66fa5244faa.dir
+      size: 33785
       nfiles: 10
     params:
       params.yaml:
@@ -2233,14 +2233,14 @@ stages:
         log_level: info
         paths.data_processed: data/processed
         seed: 42
-        test_mode: true
+        test_mode: false
       params/models/dla/bernstein_nf.yaml:
         compile_kwargs: {}
         fit_kwargs:
           batch_size: 256
           early_stopping_patience: 10
-          epochs: 100
-          learning_rate: 0.0005
+          epochs: 200
+          learning_rate: 0.001
           verbose: true
         model_kwargs:
           distribution: masked_autoregressive_flow
@@ -2254,7 +2254,7 @@ stages:
           invert: true
           base_distribution_kwargs:
             distribution_name: normal
-          num_parameters: 96
+          num_parameters: 8
           parameters_constraint_fn:
             hybrid_flows.activations.get_thetas_constrain_fn
           parameters_constraint_fn_kwargs:
@@ -2265,22 +2265,21 @@ stages:
           parameters_fn_kwargs:
             activation: relu
             hidden_units:
-            - 256
-            - 256
-            - 256
+            - 128
+            - 128
             conditional: true
     outs:
     - path: results/dla/bernstein_nf/metrics.yaml
       hash: md5
-      md5: d983943a26ce4eef567858bbecd86bcd
-      size: 146
+      md5: 281b8e645c8078397718a85ff7d9b59c
+      size: 149
     - path: results/dla/bernstein_nf/model_weights.h5
       hash: md5
-      md5: 30d04e9262215aa3eca2d0d76f273658
-      size: 5331848
+      md5: 39f3dec428aeeabb3039767de047d2a0
+      size: 305504
     - path: results/dla/bernstein_nf/parent_run_id.txt
       hash: md5
-      md5: 5279239fa8f0f4c72dc7c92c7429b393
+      md5: e272e9ddf97c3fda54a51587a505e6b9
       size: 32
   train@dataset0-spline_nf:
     cmd: "python scripts/train.py --model spline_nf --stage-name train@dataset0-spline_nf
@@ -2293,12 +2292,12 @@ stages:
       nfiles: 6
     - path: scripts/train.py
       hash: md5
-      md5: ded3f63fd5a34fbf497b6f14bbaaa1fe
-      size: 4960
+      md5: 2fb19f701c2b8780d750eb3e6519a577
+      size: 4976
     - path: src/dcp_nf_forecast/
       hash: md5
-      md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
-      size: 35957
+      md5: c0e49c150520d88f7466d66fa5244faa.dir
+      size: 33785
       nfiles: 10
     params:
       params.yaml:
@@ -2308,14 +2307,14 @@ stages:
         log_level: info
         paths.data_processed: data/processed
         seed: 42
-        test_mode: true
+        test_mode: false
       params/models/dla/spline_nf.yaml:
         compile_kwargs: {}
         fit_kwargs:
           batch_size: 256
           early_stopping_patience: 10
-          epochs: 100
-          learning_rate: 0.0005
+          epochs: 200
+          learning_rate: 0.001
           verbose: true
         model_kwargs:
           distribution: masked_autoregressive_flow
@@ -2325,33 +2324,32 @@ stages:
             range_min: -4
           base_distribution_kwargs:
             distribution_name: normal
-          num_parameters: 95
+          num_parameters: 23
           parameters_constraint_fn:
             hybrid_flows.activations.get_spline_param_constrain_fn
           parameters_constraint_fn_kwargs:
             interval_width: 8
             min_slope: 0.001
             min_bin_width: 0.001
-            nbins: 32
+            nbins: 8
           parameters_fn_kwargs:
             activation: relu
             hidden_units:
-            - 256
-            - 256
-            - 256
+            - 128
+            - 128
             conditional: true
     outs:
     - path: results/dla/spline_nf/metrics.yaml
       hash: md5
-      md5: 9b3a0fe2c787e00116be92282dde5a92
-      size: 150
+      md5: a824af58e4d317b3c0178298c80eaa09
+      size: 153
     - path: results/dla/spline_nf/model_weights.h5
       hash: md5
-      md5: 990d79a718dbafeaa41c540fd1e3fa62
-      size: 5282504
+      md5: f7f45ea57f68ac709ffadd4df876ff47
+      size: 677024
     - path: results/dla/spline_nf/parent_run_id.txt
       hash: md5
-      md5: e8689182b0dbd6c58384eb6b217b9f33
+      md5: 6151e378925711f7a8d73d636c892e9b
       size: 32
   train@dataset0-bernstein_nf_lognormal:
     cmd: "python scripts/train.py --model bernstein_nf_lognormal --stage-name train@dataset0-bernstein_nf_lognormal
@@ -2364,12 +2362,12 @@ stages:
       nfiles: 6
     - path: scripts/train.py
       hash: md5
-      md5: ded3f63fd5a34fbf497b6f14bbaaa1fe
-      size: 4960
+      md5: 2fb19f701c2b8780d750eb3e6519a577
+      size: 4976
     - path: src/dcp_nf_forecast/
       hash: md5
-      md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
-      size: 35957
+      md5: c0e49c150520d88f7466d66fa5244faa.dir
+      size: 33785
       nfiles: 10
     params:
       params.yaml:
@@ -2379,14 +2377,14 @@ stages:
         log_level: info
         paths.data_processed: data/processed
         seed: 42
-        test_mode: true
+        test_mode: false
       params/models/dla/bernstein_nf_lognormal.yaml:
         compile_kwargs: {}
         fit_kwargs:
           batch_size: 256
           early_stopping_patience: 10
-          epochs: 100
-          learning_rate: 0.0005
+          epochs: 200
+          learning_rate: 0.001
           verbose: true
         model_kwargs:
           distribution: masked_autoregressive_flow
@@ -2400,7 +2398,7 @@ stages:
           invert: true
           base_distribution_kwargs:
             distribution_name: lognormal
-          num_parameters: 96
+          num_parameters: 8
           parameters_constraint_fn:
             hybrid_flows.activations.get_thetas_constrain_fn
           parameters_constraint_fn_kwargs:
@@ -2411,22 +2409,21 @@ stages:
           parameters_fn_kwargs:
             activation: relu
             hidden_units:
-            - 256
-            - 256
-            - 256
+            - 128
+            - 128
             conditional: true
     outs:
     - path: results/dla/bernstein_nf_lognormal/metrics.yaml
       hash: md5
-      md5: e3c8113b5d952d675efd4afdfbffb3c1
-      size: 148
+      md5: 67d2ed6be8e1bdb28f5d2ea6db125070
+      size: 145
     - path: results/dla/bernstein_nf_lognormal/model_weights.h5
       hash: md5
-      md5: 4c3175446d9d5d77657cfd5ea9eb7a41
-      size: 5331848
+      md5: f480def5480cf8adc7aa2c3df28d1db2
+      size: 305504
     - path: results/dla/bernstein_nf_lognormal/parent_run_id.txt
       hash: md5
-      md5: d216741e8ca758b512d31c003dafc4a1
+      md5: 0ee699e89ed007efb7420f37e62afd12
       size: 32
   train@dataset0-spline_nf_lognormal:
     cmd: "python scripts/train.py --model spline_nf_lognormal --stage-name train@dataset0-spline_nf_lognormal
@@ -2439,12 +2436,12 @@ stages:
       nfiles: 6
     - path: scripts/train.py
       hash: md5
-      md5: ded3f63fd5a34fbf497b6f14bbaaa1fe
-      size: 4960
+      md5: 2fb19f701c2b8780d750eb3e6519a577
+      size: 4976
     - path: src/dcp_nf_forecast/
       hash: md5
-      md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
-      size: 35957
+      md5: c0e49c150520d88f7466d66fa5244faa.dir
+      size: 33785
       nfiles: 10
     params:
       params.yaml:
@@ -2454,14 +2451,14 @@ stages:
         log_level: info
         paths.data_processed: data/processed
         seed: 42
-        test_mode: true
+        test_mode: false
       params/models/dla/spline_nf_lognormal.yaml:
         compile_kwargs: {}
         fit_kwargs:
           batch_size: 256
           early_stopping_patience: 10
-          epochs: 100
-          learning_rate: 0.0005
+          epochs: 200
+          learning_rate: 0.001
           verbose: true
         model_kwargs:
           distribution: masked_autoregressive_flow
@@ -2471,33 +2468,32 @@ stages:
             range_min: 0
           base_distribution_kwargs:
             distribution_name: lognormal
-          num_parameters: 95
+          num_parameters: 23
           parameters_constraint_fn:
             hybrid_flows.activations.get_spline_param_constrain_fn
           parameters_constraint_fn_kwargs:
             interval_width: 4
             min_slope: 0.001
             min_bin_width: 0.001
-            nbins: 32
+            nbins: 8
           parameters_fn_kwargs:
             activation: relu
             hidden_units:
-            - 256
-            - 256
-            - 256
+            - 128
+            - 128
             conditional: true
     outs:
     - path: results/dla/spline_nf_lognormal/metrics.yaml
       hash: md5
-      md5: 8d987f8f4bfe8208d2c7ed1e399b6410
-      size: 150
+      md5: 8cb30728f2198f27c6a4bceed2b6dfeb
+      size: 153
     - path: results/dla/spline_nf_lognormal/model_weights.h5
       hash: md5
-      md5: 85a0bb9023776d938b8140dcdb4d6ad3
-      size: 5282504
+      md5: 4e34915d300ad07323c4b4a1144cf629
+      size: 677024
     - path: results/dla/spline_nf_lognormal/parent_run_id.txt
       hash: md5
-      md5: e63c56730830d5d2f1f5db04ecbd2a72
+      md5: e325fbcda286ed81e0cc652ab7668bc1
       size: 32
   train@dataset1-bernstein_nf:
     cmd: "python scripts/train.py --model bernstein_nf --stage-name train@dataset1-bernstein_nf
@@ -2510,8 +2506,8 @@ stages:
       nfiles: 6
     - path: scripts/train.py
       hash: md5
-      md5: ded3f63fd5a34fbf497b6f14bbaaa1fe
-      size: 4960
+      md5: ad733804a3e4450d6090b84b3a044305
+      size: 4974
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
@@ -2564,15 +2560,15 @@ stages:
     outs:
     - path: results/ofen_g_koks/bernstein_nf/metrics.yaml
       hash: md5
-      md5: 1e770af93b9ff40f46a85edaad35cee1
-      size: 140
+      md5: b117be92302b2809e781a8a5d5345e31
+      size: 142
     - path: results/ofen_g_koks/bernstein_nf/model_weights.h5
       hash: md5
-      md5: e3500657282fafd2317ff28977ea0559
+      md5: e9bf0c4230753fd167e88e2c06c89940
       size: 5331848
     - path: results/ofen_g_koks/bernstein_nf/parent_run_id.txt
       hash: md5
-      md5: 05729c8371d0a08a40b266a6c5e08272
+      md5: ae07bf6f6ea7492b119a6cba6d210c16
       size: 32
   train@dataset1-spline_nf:
     cmd: "python scripts/train.py --model spline_nf --stage-name train@dataset1-spline_nf
@@ -2585,8 +2581,8 @@ stages:
       nfiles: 6
     - path: scripts/train.py
       hash: md5
-      md5: ded3f63fd5a34fbf497b6f14bbaaa1fe
-      size: 4960
+      md5: ad733804a3e4450d6090b84b3a044305
+      size: 4974
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
@@ -2635,15 +2631,15 @@ stages:
     outs:
     - path: results/ofen_g_koks/spline_nf/metrics.yaml
       hash: md5
-      md5: 45fda825aec1cafb67abb624f99a4bb4
-      size: 148
+      md5: 0d7efbcc26bc32f4f3fd998e69861e7a
+      size: 146
     - path: results/ofen_g_koks/spline_nf/model_weights.h5
       hash: md5
-      md5: 7838196a3af31b00fe5460f063e4e62c
+      md5: bfa4625225f1ed40751da62c16e97c77
       size: 5282504
     - path: results/ofen_g_koks/spline_nf/parent_run_id.txt
       hash: md5
-      md5: e636cf3b4f954b3a4e045cbae9a69f25
+      md5: 5bf772f42a174db5801c673ebebd12b4
       size: 32
   train@dataset1-bernstein_nf_lognormal:
     cmd: "python scripts/train.py --model bernstein_nf_lognormal --stage-name train@dataset1-bernstein_nf_lognormal
@@ -2656,8 +2652,8 @@ stages:
       nfiles: 6
     - path: scripts/train.py
       hash: md5
-      md5: ded3f63fd5a34fbf497b6f14bbaaa1fe
-      size: 4960
+      md5: ad733804a3e4450d6090b84b3a044305
+      size: 4974
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
@@ -2710,15 +2706,15 @@ stages:
     outs:
     - path: results/ofen_g_koks/bernstein_nf_lognormal/metrics.yaml
       hash: md5
-      md5: 8188f4cdc42a157b3b03698be4d18c5f
+      md5: 4e607dd72d64b9e0c2d00542a2ec6564
       size: 142
     - path: results/ofen_g_koks/bernstein_nf_lognormal/model_weights.h5
       hash: md5
-      md5: 8d1b3a9a6a8cc13f93a6af927c16c75e
+      md5: 370f81f344307d31d69cb2f8b1f7b8c9
       size: 5331848
     - path: results/ofen_g_koks/bernstein_nf_lognormal/parent_run_id.txt
       hash: md5
-      md5: 48a398ff9063be1ed653c6c1f49dbada
+      md5: a167c131c71fa1a13328f2b59c6e11d0
       size: 32
   train@dataset1-spline_nf_lognormal:
     cmd: "python scripts/train.py --model spline_nf_lognormal --stage-name train@dataset1-spline_nf_lognormal
@@ -2731,8 +2727,8 @@ stages:
       nfiles: 6
     - path: scripts/train.py
       hash: md5
-      md5: ded3f63fd5a34fbf497b6f14bbaaa1fe
-      size: 4960
+      md5: ad733804a3e4450d6090b84b3a044305
+      size: 4974
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
@@ -2785,11 +2781,11 @@ stages:
       size: 92
     - path: results/ofen_g_koks/spline_nf_lognormal/model_weights.h5
       hash: md5
-      md5: d6f23d7d4e2b9eb98a0eeb8d94c95598
+      md5: 17a31850552c454559d2c5d29295fa0b
       size: 5282504
     - path: results/ofen_g_koks/spline_nf_lognormal/parent_run_id.txt
       hash: md5
-      md5: 83ddd838dfd787bad698881dd25e4e2d
+      md5: 0c94a711a2d05404c446d3e64c7fd29c
       size: 32
   train@dataset2-bernstein_nf:
     cmd: "python scripts/train.py --model bernstein_nf --stage-name train@dataset2-bernstein_nf
@@ -2802,8 +2798,8 @@ stages:
       nfiles: 6
     - path: scripts/train.py
       hash: md5
-      md5: ded3f63fd5a34fbf497b6f14bbaaa1fe
-      size: 4960
+      md5: ad733804a3e4450d6090b84b3a044305
+      size: 4974
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
@@ -2856,15 +2852,15 @@ stages:
     outs:
     - path: results/ofen_f_koks/bernstein_nf/metrics.yaml
       hash: md5
-      md5: d18039497587512b634e667f90706f72
-      size: 144
+      md5: 1376c5c989d90267f4b6b280eb767df6
+      size: 132
     - path: results/ofen_f_koks/bernstein_nf/model_weights.h5
       hash: md5
-      md5: 345a671cd27bd7ec5f2e95fde420e2ed
+      md5: c2c3515f1c2f1b7064ea7edf257e4fd6
       size: 5331848
     - path: results/ofen_f_koks/bernstein_nf/parent_run_id.txt
       hash: md5
-      md5: 050c64a722b046b7c2cf4ce17d3046be
+      md5: 22a68a73854eb378fe4b4c7cb4b4c176
       size: 32
   train@dataset2-spline_nf:
     cmd: "python scripts/train.py --model spline_nf --stage-name train@dataset2-spline_nf
@@ -2877,8 +2873,8 @@ stages:
       nfiles: 6
     - path: scripts/train.py
       hash: md5
-      md5: ded3f63fd5a34fbf497b6f14bbaaa1fe
-      size: 4960
+      md5: ad733804a3e4450d6090b84b3a044305
+      size: 4974
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
@@ -2927,15 +2923,15 @@ stages:
     outs:
     - path: results/ofen_f_koks/spline_nf/metrics.yaml
       hash: md5
-      md5: 9b080ab9782b3ff87a3a96f9bbfb867e
+      md5: c608dccc60bd48ed24cde1653d4778e0
       size: 146
     - path: results/ofen_f_koks/spline_nf/model_weights.h5
       hash: md5
-      md5: ab17b9411cbe9322fcdd3d810b48aa7f
+      md5: e0601fb1ab27c50bd1543256ab2d5bdc
       size: 5282504
     - path: results/ofen_f_koks/spline_nf/parent_run_id.txt
       hash: md5
-      md5: 374c0b735517668a3d8fbf99cf8d13d3
+      md5: a9cc9cee9f6c4498321cea260e9932b2
       size: 32
   train@dataset2-bernstein_nf_lognormal:
     cmd: "python scripts/train.py --model bernstein_nf_lognormal --stage-name train@dataset2-bernstein_nf_lognormal
@@ -2948,8 +2944,8 @@ stages:
       nfiles: 6
     - path: scripts/train.py
       hash: md5
-      md5: ded3f63fd5a34fbf497b6f14bbaaa1fe
-      size: 4960
+      md5: ad733804a3e4450d6090b84b3a044305
+      size: 4974
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
@@ -3002,15 +2998,15 @@ stages:
     outs:
     - path: results/ofen_f_koks/bernstein_nf_lognormal/metrics.yaml
       hash: md5
-      md5: 71195e9f318951e652d9dbcab47c29c8
+      md5: 1f19f2fe3a7b5867f47501cda5c825d7
       size: 150
     - path: results/ofen_f_koks/bernstein_nf_lognormal/model_weights.h5
       hash: md5
-      md5: da2f6a893aa2ec70199d030f7f8e1055
+      md5: 63568c52f9083349c531ea74c37fa5ad
       size: 5331848
     - path: results/ofen_f_koks/bernstein_nf_lognormal/parent_run_id.txt
       hash: md5
-      md5: 79e16ff01199b21ff75fa27ca9086645
+      md5: b35031615b9042a6d65cd73eca7da49b
       size: 32
   train@dataset2-spline_nf_lognormal:
     cmd: "python scripts/train.py --model spline_nf_lognormal --stage-name train@dataset2-spline_nf_lognormal
@@ -3023,8 +3019,8 @@ stages:
       nfiles: 6
     - path: scripts/train.py
       hash: md5
-      md5: ded3f63fd5a34fbf497b6f14bbaaa1fe
-      size: 4960
+      md5: ad733804a3e4450d6090b84b3a044305
+      size: 4974
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
@@ -3077,11 +3073,11 @@ stages:
       size: 92
     - path: results/ofen_f_koks/spline_nf_lognormal/model_weights.h5
       hash: md5
-      md5: b858c135c98d8042baa4a1ddf37140b1
+      md5: 125a148ac542336c650c90534ad3dffb
       size: 5282504
     - path: results/ofen_f_koks/spline_nf_lognormal/parent_run_id.txt
       hash: md5
-      md5: 8340af83fbc65f3b9a34f7b39c1dcd9c
+      md5: df53f48d7910874ee47d6f9a2504b28d
       size: 32
   train@dataset3-bernstein_nf:
     cmd: "python scripts/train.py --model bernstein_nf --stage-name train@dataset3-bernstein_nf
@@ -3094,8 +3090,8 @@ stages:
       nfiles: 6
     - path: scripts/train.py
       hash: md5
-      md5: ded3f63fd5a34fbf497b6f14bbaaa1fe
-      size: 4960
+      md5: ad733804a3e4450d6090b84b3a044305
+      size: 4974
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
@@ -3148,15 +3144,15 @@ stages:
     outs:
     - path: results/pl2/bernstein_nf/metrics.yaml
       hash: md5
-      md5: 0e7ca3cf146e650726dc60ed91786534
-      size: 148
+      md5: 020883e0ce66b3408cb0d834b554cb66
+      size: 150
     - path: results/pl2/bernstein_nf/model_weights.h5
       hash: md5
-      md5: 5627d9907ea88513a717b064bd369ed3
+      md5: e8d3a098fa1b238eb78f73b26f31a664
       size: 5331848
     - path: results/pl2/bernstein_nf/parent_run_id.txt
       hash: md5
-      md5: e0268309ce979d6c8e2d50fe2307765b
+      md5: 03e6a7e1cfee2cacf7989eee4a8c0429
       size: 32
   train@dataset3-spline_nf:
     cmd: "python scripts/train.py --model spline_nf --stage-name train@dataset3-spline_nf
@@ -3169,8 +3165,8 @@ stages:
       nfiles: 6
     - path: scripts/train.py
       hash: md5
-      md5: ded3f63fd5a34fbf497b6f14bbaaa1fe
-      size: 4960
+      md5: ad733804a3e4450d6090b84b3a044305
+      size: 4974
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
@@ -3219,15 +3215,15 @@ stages:
     outs:
     - path: results/pl2/spline_nf/metrics.yaml
       hash: md5
-      md5: 0bd36f5ba48ea12e95457697b34a3dc3
-      size: 146
+      md5: 25586479a69e3c28af7b36af1e283661
+      size: 144
     - path: results/pl2/spline_nf/model_weights.h5
       hash: md5
-      md5: 1673ce0c8b2e8c12198d5ca6a56405a3
+      md5: f80316c67f7e2b215581e4d1f6703360
       size: 5282504
     - path: results/pl2/spline_nf/parent_run_id.txt
       hash: md5
-      md5: d72d92887afe687001e8bc23038fdc68
+      md5: 51783f7b4c539039e1e8c79811f07db8
       size: 32
   train@dataset3-bernstein_nf_lognormal:
     cmd: "python scripts/train.py --model bernstein_nf_lognormal --stage-name train@dataset3-bernstein_nf_lognormal
@@ -3240,8 +3236,8 @@ stages:
       nfiles: 6
     - path: scripts/train.py
       hash: md5
-      md5: ded3f63fd5a34fbf497b6f14bbaaa1fe
-      size: 4960
+      md5: ad733804a3e4450d6090b84b3a044305
+      size: 4974
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
@@ -3294,15 +3290,15 @@ stages:
     outs:
     - path: results/pl2/bernstein_nf_lognormal/metrics.yaml
       hash: md5
-      md5: 8c3e1eb1a54cd2d57961b80875cba5a5
-      size: 148
+      md5: ef4391243d57162abc773e069ecd3a90
+      size: 150
     - path: results/pl2/bernstein_nf_lognormal/model_weights.h5
       hash: md5
-      md5: 064402b415434285cb3452874ddaf40d
+      md5: ea3605299cd536c5219558510bad0618
       size: 5331848
     - path: results/pl2/bernstein_nf_lognormal/parent_run_id.txt
       hash: md5
-      md5: 2692d616d2d4c2ccad824ef1a53c7534
+      md5: 72b01e5c2211fc68580690c0c1d560ff
       size: 32
   train@dataset3-spline_nf_lognormal:
     cmd: "python scripts/train.py --model spline_nf_lognormal --stage-name train@dataset3-spline_nf_lognormal
@@ -3315,8 +3311,8 @@ stages:
       nfiles: 6
     - path: scripts/train.py
       hash: md5
-      md5: ded3f63fd5a34fbf497b6f14bbaaa1fe
-      size: 4960
+      md5: ad733804a3e4450d6090b84b3a044305
+      size: 4974
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
@@ -3365,15 +3361,15 @@ stages:
     outs:
     - path: results/pl2/spline_nf_lognormal/metrics.yaml
       hash: md5
-      md5: 273e3b1bf0f0883c736da867022ef8cf
-      size: 120
+      md5: 93777aebbc7e858f23221044fe1ceccf
+      size: 118
     - path: results/pl2/spline_nf_lognormal/model_weights.h5
       hash: md5
-      md5: 67bd3aa7a08cef7256c8d309700a81f8
+      md5: 6735b40437fa242a57df9ab445d71e66
       size: 5282504
     - path: results/pl2/spline_nf_lognormal/parent_run_id.txt
       hash: md5
-      md5: 6e7df36ff0ad671a82262d7a0362753a
+      md5: a73518c024e514a35a02e3871ecaada0
       size: 32
   evaluate@dataset0-bernstein_nf:
     cmd: "python scripts/evaluate.py --model bernstein_nf --stage-name evaluate@dataset0-bernstein_nf
@@ -3386,16 +3382,16 @@ stages:
       nfiles: 6
     - path: results/dla/bernstein_nf/model_weights.h5
       hash: md5
-      md5: 30d04e9262215aa3eca2d0d76f273658
+      md5: 43a9db73cd7e408e7557679f12be451b
       size: 5331848
     - path: results/dla/bernstein_nf/parent_run_id.txt
       hash: md5
-      md5: 5279239fa8f0f4c72dc7c92c7429b393
+      md5: ff1dd2f0289518aa6b830369bf062827
       size: 32
     - path: scripts/evaluate.py
       hash: md5
-      md5: a84a23b96209a9b10f9c987f1cc1e755
-      size: 10750
+      md5: bb9677395adfab212d992feee404fd3c
+      size: 11318
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
@@ -3449,20 +3445,20 @@ stages:
     outs:
     - path: results/dla/bernstein_nf/evaluation/calibration.pdf
       hash: md5
-      md5: 14148d17bc24a278b7f63533b8a00a22
-      size: 41155
+      md5: e0abb10c5b040c27a6ebd9ada848e26c
+      size: 41212
     - path: results/dla/bernstein_nf/evaluation/forecast.pdf
       hash: md5
-      md5: ca1699f2911319d6d022216d71632e9b
-      size: 50406
+      md5: ca4797a9148af3a01eb964497862beba
+      size: 50526
     - path: results/dla/bernstein_nf/evaluation/metrics.yaml
       hash: md5
-      md5: 4824587ff905eb986120ffc420e58428
+      md5: 69a7e4872cf72a2d5800f8cc57ebab63
       size: 88
     - path: results/dla/bernstein_nf/evaluation/pit_histogram.pdf
       hash: md5
-      md5: 9083de32c1de88a7b4a1542c9fe85243
-      size: 35600
+      md5: 480f13e871e52abe3e1d262ba49b7f83
+      size: 35443
   evaluate@dataset0-spline_nf:
     cmd: "python scripts/evaluate.py --model spline_nf --stage-name evaluate@dataset0-spline_nf
       --target-name dla --prediction-horizon 48\n"
@@ -3474,16 +3470,16 @@ stages:
       nfiles: 6
     - path: results/dla/spline_nf/model_weights.h5
       hash: md5
-      md5: 990d79a718dbafeaa41c540fd1e3fa62
+      md5: 419ead9d61b8422deae4769bf491bcde
       size: 5282504
     - path: results/dla/spline_nf/parent_run_id.txt
       hash: md5
-      md5: e8689182b0dbd6c58384eb6b217b9f33
+      md5: 5a9231b66778d6bc97fb369a47b89d36
       size: 32
     - path: scripts/evaluate.py
       hash: md5
-      md5: 94780e65e6a11489a15cd7c277afe437
-      size: 10759
+      md5: bb9677395adfab212d992feee404fd3c
+      size: 11318
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
@@ -3533,20 +3529,20 @@ stages:
     outs:
     - path: results/dla/spline_nf/evaluation/calibration.pdf
       hash: md5
-      md5: 0b27f82cfde6c3a18d8d3755183b8113
-      size: 42050
+      md5: 7aa11b0729ef3610e8b6fd29fcc51a05
+      size: 41991
     - path: results/dla/spline_nf/evaluation/forecast.pdf
       hash: md5
-      md5: 9c304f4e10161bbc64a93604a45d21b6
-      size: 49953
+      md5: 36e9a49c2ec4fbe7a2e2891bd14f5df8
+      size: 50441
     - path: results/dla/spline_nf/evaluation/metrics.yaml
       hash: md5
-      md5: ebe2bf46e4f3aeb86c7488a7f5727694
+      md5: fcab1d46d843818b41f6bb7291b7deba
       size: 88
     - path: results/dla/spline_nf/evaluation/pit_histogram.pdf
       hash: md5
-      md5: 16f6b931ea004b85fc8be22531a5d217
-      size: 38355
+      md5: 56f7a50c64340612caa7dc4e276f1e86
+      size: 38465
   evaluate@dataset0-bernstein_nf_lognormal:
     cmd: "python scripts/evaluate.py --model bernstein_nf_lognormal --stage-name evaluate@dataset0-bernstein_nf_lognormal
       --target-name dla --prediction-horizon 48\n"
@@ -3558,16 +3554,16 @@ stages:
       nfiles: 6
     - path: results/dla/bernstein_nf_lognormal/model_weights.h5
       hash: md5
-      md5: 4c3175446d9d5d77657cfd5ea9eb7a41
+      md5: bd32cd91ad5170343c221fa0dfe9e91c
       size: 5331848
     - path: results/dla/bernstein_nf_lognormal/parent_run_id.txt
       hash: md5
-      md5: d216741e8ca758b512d31c003dafc4a1
+      md5: 7875370c547998ae36cdafad5e62247a
       size: 32
     - path: scripts/evaluate.py
       hash: md5
-      md5: a84a23b96209a9b10f9c987f1cc1e755
-      size: 10750
+      md5: bb9677395adfab212d992feee404fd3c
+      size: 11318
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
@@ -3621,20 +3617,20 @@ stages:
     outs:
     - path: results/dla/bernstein_nf_lognormal/evaluation/calibration.pdf
       hash: md5
-      md5: bea65098338d3a4da009cf5a96d54e29
-      size: 41934
+      md5: 03bd7f8d4c81e7ffbcbbb0cc773e0f23
+      size: 41892
     - path: results/dla/bernstein_nf_lognormal/evaluation/forecast.pdf
       hash: md5
-      md5: 8f56201d869570dbbf640dfcbfc1e905
-      size: 52112
+      md5: 83c6e118c9dd94be031d8e9e59681c69
+      size: 51972
     - path: results/dla/bernstein_nf_lognormal/evaluation/metrics.yaml
       hash: md5
-      md5: 0fac66fa603d8e65886c8a578b481406
-      size: 88
+      md5: 0ccc6fd55eabca45864bf62d9fe561d7
+      size: 90
     - path: results/dla/bernstein_nf_lognormal/evaluation/pit_histogram.pdf
       hash: md5
-      md5: 0abdd207bb95af61c07c6c239fae847d
-      size: 37803
+      md5: ed8db6a66f2abe3a840b88cb24e77865
+      size: 37775
   evaluate@dataset0-spline_nf_lognormal:
     cmd: "python scripts/evaluate.py --model spline_nf_lognormal --stage-name evaluate@dataset0-spline_nf_lognormal
       --target-name dla --prediction-horizon 48\n"
@@ -3646,16 +3642,16 @@ stages:
       nfiles: 6
     - path: results/dla/spline_nf_lognormal/model_weights.h5
       hash: md5
-      md5: 85a0bb9023776d938b8140dcdb4d6ad3
+      md5: ac3e2f416da4d255506b0b9163986f77
       size: 5282504
     - path: results/dla/spline_nf_lognormal/parent_run_id.txt
       hash: md5
-      md5: e63c56730830d5d2f1f5db04ecbd2a72
+      md5: 35aba295dc4855c071c80ffb31a9b478
       size: 32
     - path: scripts/evaluate.py
       hash: md5
-      md5: a84a23b96209a9b10f9c987f1cc1e755
-      size: 10750
+      md5: bb9677395adfab212d992feee404fd3c
+      size: 11318
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
@@ -3705,20 +3701,20 @@ stages:
     outs:
     - path: results/dla/spline_nf_lognormal/evaluation/calibration.pdf
       hash: md5
-      md5: ee2417b5a5abea7d36ed529b06d0615a
-      size: 41815
+      md5: 33183f08caf062be80de6837ad39cb24
+      size: 41867
     - path: results/dla/spline_nf_lognormal/evaluation/forecast.pdf
       hash: md5
-      md5: 0d98aaf4522032f63c92983b13ada49b
-      size: 47717
+      md5: 9cba3959ec75f88b5a8a54a89e905651
+      size: 48057
     - path: results/dla/spline_nf_lognormal/evaluation/metrics.yaml
       hash: md5
-      md5: 00a132395e2b79600b7b2b2a32ecd7a7
+      md5: 9b90b8887612fff34c6278bef688a780
       size: 86
     - path: results/dla/spline_nf_lognormal/evaluation/pit_histogram.pdf
       hash: md5
-      md5: 92ecb3b62123b694f8649f9ff5f50196
-      size: 37852
+      md5: 5202cb373053baf84ed68bd1730563cf
+      size: 37796
   evaluate@dataset1-bernstein_nf:
     cmd: "python scripts/evaluate.py --model bernstein_nf --stage-name evaluate@dataset1-bernstein_nf
       --target-name ofen_g_koks --prediction-horizon 48\n"
@@ -3730,16 +3726,16 @@ stages:
       nfiles: 6
     - path: results/ofen_g_koks/bernstein_nf/model_weights.h5
       hash: md5
-      md5: e3500657282fafd2317ff28977ea0559
+      md5: e9bf0c4230753fd167e88e2c06c89940
       size: 5331848
     - path: results/ofen_g_koks/bernstein_nf/parent_run_id.txt
       hash: md5
-      md5: 05729c8371d0a08a40b266a6c5e08272
+      md5: ae07bf6f6ea7492b119a6cba6d210c16
       size: 32
     - path: scripts/evaluate.py
       hash: md5
-      md5: a84a23b96209a9b10f9c987f1cc1e755
-      size: 10750
+      md5: bb9677395adfab212d992feee404fd3c
+      size: 11318
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
@@ -3793,20 +3789,20 @@ stages:
     outs:
     - path: results/ofen_g_koks/bernstein_nf/evaluation/calibration.pdf
       hash: md5
-      md5: d88ceef68bed79ca563d66779c630ab1
-      size: 44208
+      md5: a2a37a0b080a3f92ee2250a6a607c689
+      size: 41235
     - path: results/ofen_g_koks/bernstein_nf/evaluation/forecast.pdf
       hash: md5
-      md5: faae78b95b1755c117762469f00af364
-      size: 55529
+      md5: dd202d701911f095304cd9dfce966b83
+      size: 51734
     - path: results/ofen_g_koks/bernstein_nf/evaluation/metrics.yaml
       hash: md5
-      md5: 67a37cfa5c2a8cb9b97419953518d1ec
-      size: 87
+      md5: 58fb0e1df48f0f90838c0223cbe9268b
+      size: 88
     - path: results/ofen_g_koks/bernstein_nf/evaluation/pit_histogram.pdf
       hash: md5
-      md5: b31b21eebca04977888ee6686bab49b5
-      size: 39030
+      md5: 3c68ab0101de8aae6e1888bf4360416e
+      size: 36141
   evaluate@dataset1-spline_nf:
     cmd: "python scripts/evaluate.py --model spline_nf --stage-name evaluate@dataset1-spline_nf
       --target-name ofen_g_koks --prediction-horizon 48\n"
@@ -3818,16 +3814,16 @@ stages:
       nfiles: 6
     - path: results/ofen_g_koks/spline_nf/model_weights.h5
       hash: md5
-      md5: 7838196a3af31b00fe5460f063e4e62c
+      md5: bfa4625225f1ed40751da62c16e97c77
       size: 5282504
     - path: results/ofen_g_koks/spline_nf/parent_run_id.txt
       hash: md5
-      md5: e636cf3b4f954b3a4e045cbae9a69f25
+      md5: 5bf772f42a174db5801c673ebebd12b4
       size: 32
     - path: scripts/evaluate.py
       hash: md5
-      md5: a84a23b96209a9b10f9c987f1cc1e755
-      size: 10750
+      md5: bb9677395adfab212d992feee404fd3c
+      size: 11318
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
@@ -3877,20 +3873,20 @@ stages:
     outs:
     - path: results/ofen_g_koks/spline_nf/evaluation/calibration.pdf
       hash: md5
-      md5: 6abf9566f01c73174107dab07199da01
-      size: 44904
+      md5: 7693d65904a0f01d699121f8519b8f0b
+      size: 41835
     - path: results/ofen_g_koks/spline_nf/evaluation/forecast.pdf
       hash: md5
-      md5: 8f5baa6aeeae8f72bf7047687fe5275b
-      size: 53477
+      md5: 783ddbbf90a25cb71363cbb7be720ad0
+      size: 50801
     - path: results/ofen_g_koks/spline_nf/evaluation/metrics.yaml
       hash: md5
-      md5: 1d4a1853129b520adb62b71115f9673d
+      md5: 4978590bbf7c49ef692bde6b934b3a21
       size: 88
     - path: results/ofen_g_koks/spline_nf/evaluation/pit_histogram.pdf
       hash: md5
-      md5: ab895db0971c0249c947060f3796e72b
-      size: 41526
+      md5: d9dc0723db1e40963a7e3027efd5d749
+      size: 38250
   train@dataset0-normal_baseline:
     cmd: "python scripts/train.py --model normal_baseline --stage-name train@dataset0-normal_baseline
       --target-name dla\n"
@@ -3902,12 +3898,12 @@ stages:
       nfiles: 6
     - path: scripts/train.py
       hash: md5
-      md5: ded3f63fd5a34fbf497b6f14bbaaa1fe
-      size: 4960
+      md5: 2fb19f701c2b8780d750eb3e6519a577
+      size: 4976
     - path: src/dcp_nf_forecast/
       hash: md5
-      md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
-      size: 35957
+      md5: c0e49c150520d88f7466d66fa5244faa.dir
+      size: 33785
       nfiles: 10
     params:
       params.yaml:
@@ -3917,38 +3913,38 @@ stages:
         log_level: info
         paths.data_processed: data/processed
         seed: 42
-        test_mode: true
+        test_mode: false
       params/models/dla/normal_baseline.yaml:
         compile_kwargs:
           jit_compile: false
         fit_kwargs:
           batch_size: 256
           early_stopping_patience: 10
-          epochs: 100
-          learning_rate: 0.0005
+          epochs: 200
+          learning_rate: 0.001
           verbose: true
         model_kwargs:
-          distribution: multivariate_normal_diag
+          distribution: multivariate_normal
           parameters_fn_kwargs:
             activation: relu
-            batch_norm: true
+            batch_norm: false
             conditional: true
             dropout: 0
             hidden_units:
-            - 32
-            - 32
+            - 128
+            - 128
     outs:
     - path: results/dla/normal_baseline/metrics.yaml
       hash: md5
-      md5: a590adb9092d631a86239850b7384ed9
-      size: 130
+      md5: 2e287d2554e7e75aa5e674567cfc17c3
+      size: 151
     - path: results/dla/normal_baseline/model_weights.h5
       hash: md5
-      md5: 97d9710e3f8eb9b8e0379f75dd7c2ed7
-      size: 96208
+      md5: 59ca8a0f9d5fb0372e78aafc5cbdae38
+      size: 1520928
     - path: results/dla/normal_baseline/parent_run_id.txt
       hash: md5
-      md5: 01f766339ca17ffb6514c4f4f47c597e
+      md5: e148cbc08f7ff318b9b8fbd56c90ba4d
       size: 32
   evaluate@dataset1-bernstein_nf_lognormal:
     cmd: "python scripts/evaluate.py --model bernstein_nf_lognormal --stage-name evaluate@dataset1-bernstein_nf_lognormal
@@ -3961,20 +3957,20 @@ stages:
       nfiles: 6
     - path: results/ofen_g_koks/bernstein_nf_lognormal/model_weights.h5
       hash: md5
-      md5: be9fd1cc7211227a099cfbbc86342cfc
+      md5: 370f81f344307d31d69cb2f8b1f7b8c9
       size: 5331848
     - path: results/ofen_g_koks/bernstein_nf_lognormal/parent_run_id.txt
       hash: md5
-      md5: 13d30a61a71092061bde998301e96b10
+      md5: a167c131c71fa1a13328f2b59c6e11d0
       size: 32
     - path: scripts/evaluate.py
       hash: md5
-      md5: 687f31f5e7949abce8a7d107e0336c4e
-      size: 10576
+      md5: bb9677395adfab212d992feee404fd3c
+      size: 11318
     - path: src/dcp_nf_forecast/
       hash: md5
-      md5: 73a0fcd9b994c6023e6e1e324b0f67d2.dir
-      size: 35713
+      md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
+      size: 35957
       nfiles: 10
     params:
       params.yaml:
@@ -4025,21 +4021,21 @@ stages:
     - path:
         results/ofen_g_koks/bernstein_nf_lognormal/evaluation/calibration.pdf
       hash: md5
-      md5: c194724b2e61e57d1c9c23eaa9919ab3
-      size: 44710
+      md5: 8314415d1f01c65d0030caa1a5d5419b
+      size: 41638
     - path: results/ofen_g_koks/bernstein_nf_lognormal/evaluation/forecast.pdf
       hash: md5
-      md5: 58c87a22bcc7c5b3e46d6dcb6e0051c9
-      size: 56602
+      md5: 6a112120e4030a54a504ad3e0b089858
+      size: 51756
     - path: results/ofen_g_koks/bernstein_nf_lognormal/evaluation/metrics.yaml
       hash: md5
-      md5: fe1e4036f45801ee256e85e99aa12463
-      size: 88
+      md5: 98f2707bc50d807025e31cb25b77114e
+      size: 89
     - path:
         results/ofen_g_koks/bernstein_nf_lognormal/evaluation/pit_histogram.pdf
       hash: md5
-      md5: 1dedd28b1a5eff68057eee93a748e94d
-      size: 41265
+      md5: 05a69915ccd43540673341137d2f559c
+      size: 37911
   train@dataset0-lognormal_baseline:
     cmd: "python scripts/train.py --model lognormal_baseline --stage-name train@dataset0-lognormal_baseline
       --target-name dla\n"
@@ -4051,12 +4047,12 @@ stages:
       nfiles: 6
     - path: scripts/train.py
       hash: md5
-      md5: ded3f63fd5a34fbf497b6f14bbaaa1fe
-      size: 4960
+      md5: 2fb19f701c2b8780d750eb3e6519a577
+      size: 4976
     - path: src/dcp_nf_forecast/
       hash: md5
-      md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
-      size: 35957
+      md5: c0e49c150520d88f7466d66fa5244faa.dir
+      size: 33785
       nfiles: 10
     params:
       params.yaml:
@@ -4066,38 +4062,38 @@ stages:
         log_level: info
         paths.data_processed: data/processed
         seed: 42
-        test_mode: true
+        test_mode: false
       params/models/dla/lognormal_baseline.yaml:
         compile_kwargs:
           jit_compile: false
         fit_kwargs:
           batch_size: 256
           early_stopping_patience: 10
-          epochs: 100
-          learning_rate: 0.0005
+          epochs: 200
+          learning_rate: 0.001
           verbose: true
         model_kwargs:
-          distribution: multivariate_lognormal_diag
+          distribution: multivariate_lognormal
           parameters_fn_kwargs:
             activation: relu
-            batch_norm: true
+            batch_norm: false
             conditional: true
             dropout: 0
             hidden_units:
-            - 32
-            - 32
+            - 128
+            - 128
     outs:
     - path: results/dla/lognormal_baseline/metrics.yaml
       hash: md5
-      md5: a3b44375ae73b613a7d8d49de279c5f1
-      size: 134
+      md5: 9fc56fc9c660a5a4901006c56c05dd6c
+      size: 93
     - path: results/dla/lognormal_baseline/model_weights.h5
       hash: md5
-      md5: 6938c1964cec0a83114095297f570e05
-      size: 96208
+      md5: e75b3cca40d86c83972bbb6ee61e75d7
+      size: 1520928
     - path: results/dla/lognormal_baseline/parent_run_id.txt
       hash: md5
-      md5: 52c55b7861af0d21e33839cd7f0c9355
+      md5: 4b643af84afeaf8fb7a0a47b30864385
       size: 32
   evaluate@dataset1-spline_nf_lognormal:
     cmd: "python scripts/evaluate.py --model spline_nf_lognormal --stage-name evaluate@dataset1-spline_nf_lognormal
@@ -4110,20 +4106,20 @@ stages:
       nfiles: 6
     - path: results/ofen_g_koks/spline_nf_lognormal/model_weights.h5
       hash: md5
-      md5: ce6fdb8713b16c480114d952df518b22
+      md5: 17a31850552c454559d2c5d29295fa0b
       size: 5282504
     - path: results/ofen_g_koks/spline_nf_lognormal/parent_run_id.txt
       hash: md5
-      md5: 016a6b1c85f73000c801a9f1147ac313
+      md5: 0c94a711a2d05404c446d3e64c7fd29c
       size: 32
     - path: scripts/evaluate.py
       hash: md5
-      md5: 687f31f5e7949abce8a7d107e0336c4e
-      size: 10576
+      md5: bb9677395adfab212d992feee404fd3c
+      size: 11318
     - path: src/dcp_nf_forecast/
       hash: md5
-      md5: 73a0fcd9b994c6023e6e1e324b0f67d2.dir
-      size: 35713
+      md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
+      size: 35957
       nfiles: 10
     params:
       params.yaml:
@@ -4169,20 +4165,20 @@ stages:
     outs:
     - path: results/ofen_g_koks/spline_nf_lognormal/evaluation/calibration.pdf
       hash: md5
-      md5: 794b3e69ae5c250f5d9661e7e2b677bc
-      size: 45020
+      md5: c81f16960ea15453b29e2558b3228c0c
+      size: 41981
     - path: results/ofen_g_koks/spline_nf_lognormal/evaluation/forecast.pdf
       hash: md5
-      md5: 35b75e5fdf4774670648c75f68ef680d
-      size: 53505
+      md5: c9df0b6d4e1e39232daaeef37894feec
+      size: 49135
     - path: results/ofen_g_koks/spline_nf_lognormal/evaluation/metrics.yaml
       hash: md5
-      md5: 28610314bcbf86112ceb9eb17704cc93
-      size: 86
+      md5: 1e756dfa85362d6b00d99c4d5c8398f7
+      size: 84
     - path: results/ofen_g_koks/spline_nf_lognormal/evaluation/pit_histogram.pdf
       hash: md5
-      md5: e1c86ec1fd44122267dd80299809eb55
-      size: 41441
+      md5: 5c39601cd001681d34f409a13cab2828
+      size: 38419
   evaluate@dataset2-bernstein_nf:
     cmd: "python scripts/evaluate.py --model bernstein_nf --stage-name evaluate@dataset2-bernstein_nf
       --target-name ofen_f_koks --prediction-horizon 48\n"
@@ -4194,16 +4190,16 @@ stages:
       nfiles: 6
     - path: results/ofen_f_koks/bernstein_nf/model_weights.h5
       hash: md5
-      md5: 345a671cd27bd7ec5f2e95fde420e2ed
+      md5: c2c3515f1c2f1b7064ea7edf257e4fd6
       size: 5331848
     - path: results/ofen_f_koks/bernstein_nf/parent_run_id.txt
       hash: md5
-      md5: 050c64a722b046b7c2cf4ce17d3046be
+      md5: 22a68a73854eb378fe4b4c7cb4b4c176
       size: 32
     - path: scripts/evaluate.py
       hash: md5
-      md5: a84a23b96209a9b10f9c987f1cc1e755
-      size: 10750
+      md5: bb9677395adfab212d992feee404fd3c
+      size: 11318
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
@@ -4257,92 +4253,222 @@ stages:
     outs:
     - path: results/ofen_f_koks/bernstein_nf/evaluation/calibration.pdf
       hash: md5
-      md5: 7aa277136343c5d756ac1a44c6c6b6f7
-      size: 44403
+      md5: 56dc600eef446c8d1c00d0f86e0a1df3
+      size: 41278
     - path: results/ofen_f_koks/bernstein_nf/evaluation/forecast.pdf
       hash: md5
-      md5: 9170080b7fe94e99929a770252f66550
-      size: 54659
+      md5: a66fba955044f725b05a6bd882951918
+      size: 50940
     - path: results/ofen_f_koks/bernstein_nf/evaluation/metrics.yaml
       hash: md5
-      md5: a6c434c94f8bd38063c47ff0fb177fb3
-      size: 85
+      md5: 6bc97def13600f4608075e0769c9e683
+      size: 87
     - path: results/ofen_f_koks/bernstein_nf/evaluation/pit_histogram.pdf
       hash: md5
-      md5: 28bd6d25db9f947f898f9f749cc1c7a1
-      size: 40037
-  evaluate@dataset0-normal_baseline:
-    cmd: "python scripts/evaluate.py --model normal_baseline --stage-name evaluate@dataset0-normal_baseline
-      --target-name dla --prediction-horizon 48\n"
+      md5: 7de1e25f33fa7c019f5f6f6a19a8d0f9
+      size: 36406
+  train@dataset0-bernstein_nf_scale:
+    cmd: "python scripts/train.py --model bernstein_nf_scale --stage-name train@dataset0-bernstein_nf_scale
+      --target-name dla\n"
     deps:
     - path: data/processed/dla/
       hash: md5
       md5: 0a4228c60ad08b7cc54c64d7b88fc3cd.dir
       size: 16692796
       nfiles: 6
-    - path: results/dla/normal_baseline/model_weights.h5
+    - path: scripts/train.py
       hash: md5
-      md5: a2d9ab74d7b4ee24a32b38740b5b130b
-      size: 96208
-    - path: results/dla/normal_baseline/parent_run_id.txt
-      hash: md5
-      md5: 92c2eaf09be7f0e174a2723a780496de
-      size: 32
-    - path: scripts/evaluate.py
-      hash: md5
-      md5: a84a23b96209a9b10f9c987f1cc1e755
-      size: 10750
+      md5: 2fb19f701c2b8780d750eb3e6519a577
+      size: 4976
     - path: src/dcp_nf_forecast/
       hash: md5
-      md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
-      size: 35957
+      md5: c0e49c150520d88f7466d66fa5244faa.dir
+      size: 33785
       nfiles: 10
     params:
       params.yaml:
         data.data_format: feather
-        eval.n_samples: 1000
         experiment_name: dcp_nf_forecast
         log_file: logs/pipeline.log
         log_level: info
         paths.data_processed: data/processed
         seed: 42
-        test_mode: true
-      params/models/dla/normal_baseline.yaml:
-        compile_kwargs:
-          jit_compile: false
+        test_mode: false
+      params/models/dla/bernstein_nf_scale.yaml:
+        compile_kwargs: {}
         fit_kwargs:
-          batch_size: 256
-          early_stopping_patience: 10
           epochs: 200
           learning_rate: 0.001
+          batch_size: 256
+          early_stopping_patience: 10
           verbose: true
         model_kwargs:
-          distribution: multivariate_normal_diag
+          distribution: masked_autoregressive_flow
+          num_layers: 1
+          base_distribution_kwargs:
+            distribution_name: normal
+          num_parameters: 9
           parameters_fn_kwargs:
             activation: relu
-            batch_norm: true
-            conditional: true
-            dropout: 0
             hidden_units:
-            - 32
-            - 32
+            - 128
+            - 128
+          nested_bijectors:
+          - bijector: Scale
+            parameters_slice_size: 1
+            parameters_constraint_fn: tensorflow.math.softplus
+            parameters_fn: parameter_vector_or_simple_network
+            parameters_fn_kwargs:
+              activation: relu
+              conditional: true
+              dropout: false
+              batch_norm: false
+              hidden_units:
+              - 128
+              - 128
+              parameter_shape:
+              - 48
+          - bijector: BernsteinPolynomial
+            parameters_slice_size: 8
+            bijector_kwargs:
+              extrapolation: false
+              domain:
+              - 0.0
+              - 1.0
+            invert: true
+            parameters_constraint_fn:
+              hybrid_flows.activations.get_thetas_constrain_fn
+            parameters_constraint_fn_kwargs:
+              allow_flexible_bounds: false
+              bounds: none
+              low: 0.007
+              high: 148
+            parameters_fn: parameter_vector_or_simple_network
+            parameters_fn_kwargs:
+              activation: relu
+              conditional: true
+              dropout: false
+              batch_norm: false
+              hidden_units:
+              - 128
+              - 128
+              parameter_shape:
+              - 48
+              - 8
     outs:
-    - path: results/dla/normal_baseline/evaluation/calibration.pdf
+    - path: results/dla/bernstein_nf_scale/metrics.yaml
       hash: md5
-      md5: a1193dfcff4c94a4fa6721c4f987d053
-      size: 42054
-    - path: results/dla/normal_baseline/evaluation/forecast.pdf
+      md5: 38450be3e5f536b482dfc865e65297de
+      size: 152
+    - path: results/dla/bernstein_nf_scale/model_weights.h5
       hash: md5
-      md5: 06355258fd5a4999df0c4e2ab01c7bc5
-      size: 51403
-    - path: results/dla/normal_baseline/evaluation/metrics.yaml
+      md5: 6448c3637bba5f61453db694256ccfb6
+      size: 804912
+    - path: results/dla/bernstein_nf_scale/parent_run_id.txt
       hash: md5
-      md5: ffb91285369603acddcbe1a104688b17
-      size: 87
-    - path: results/dla/normal_baseline/evaluation/pit_histogram.pdf
+      md5: 7bc6dfee00c32a3ad56188e72f22acc7
+      size: 32
+  train@dataset0-bernstein_nf_scale_lognormal:
+    cmd: "python scripts/train.py --model bernstein_nf_scale_lognormal --stage-name
+      train@dataset0-bernstein_nf_scale_lognormal --target-name dla\n"
+    deps:
+    - path: data/processed/dla/
       hash: md5
-      md5: bb79f0ab08cf8cbced7c854d0a7b3eed
-      size: 38089
+      md5: 0a4228c60ad08b7cc54c64d7b88fc3cd.dir
+      size: 16692796
+      nfiles: 6
+    - path: scripts/train.py
+      hash: md5
+      md5: 2fb19f701c2b8780d750eb3e6519a577
+      size: 4976
+    - path: src/dcp_nf_forecast/
+      hash: md5
+      md5: c0e49c150520d88f7466d66fa5244faa.dir
+      size: 33785
+      nfiles: 10
+    params:
+      params.yaml:
+        data.data_format: feather
+        experiment_name: dcp_nf_forecast
+        log_file: logs/pipeline.log
+        log_level: info
+        paths.data_processed: data/processed
+        seed: 42
+        test_mode: false
+      params/models/dla/bernstein_nf_scale_lognormal.yaml:
+        compile_kwargs: {}
+        fit_kwargs:
+          epochs: 200
+          learning_rate: 0.001
+          batch_size: 256
+          early_stopping_patience: 10
+          verbose: true
+        model_kwargs:
+          distribution: masked_autoregressive_flow
+          num_layers: 1
+          base_distribution_kwargs:
+            distribution_name: lognormal
+          num_parameters: 9
+          parameters_fn_kwargs:
+            activation: relu
+            hidden_units:
+            - 128
+            - 128
+          nested_bijectors:
+          - bijector: Scale
+            parameters_slice_size: 1
+            parameters_constraint_fn: tensorflow.math.softplus
+            parameters_fn: parameter_vector_or_simple_network
+            parameters_fn_kwargs:
+              activation: relu
+              conditional: true
+              dropout: false
+              batch_norm: false
+              hidden_units:
+              - 128
+              - 128
+              parameter_shape:
+              - 48
+          - bijector: BernsteinPolynomial
+            parameters_slice_size: 8
+            bijector_kwargs:
+              extrapolation: false
+              domain:
+              - 0.0
+              - 1.0
+            invert: true
+            parameters_constraint_fn:
+              hybrid_flows.activations.get_thetas_constrain_fn
+            parameters_constraint_fn_kwargs:
+              allow_flexible_bounds: false
+              bounds: none
+              low: 0.007
+              high: 148
+            parameters_fn: parameter_vector_or_simple_network
+            parameters_fn_kwargs:
+              activation: relu
+              conditional: true
+              dropout: false
+              batch_norm: false
+              hidden_units:
+              - 128
+              - 128
+              parameter_shape:
+              - 48
+              - 8
+    outs:
+    - path: results/dla/bernstein_nf_scale_lognormal/metrics.yaml
+      hash: md5
+      md5: 4b431dec6b170ef0fa84f8a1e3327f42
+      size: 152
+    - path: results/dla/bernstein_nf_scale_lognormal/model_weights.h5
+      hash: md5
+      md5: 180cdac5314a7a83be6da83edd3d87cc
+      size: 804912
+    - path: results/dla/bernstein_nf_scale_lognormal/parent_run_id.txt
+      hash: md5
+      md5: 1bbcf19c592c1d00529cc73edd8a1033
+      size: 32
   train@dataset1-normal_baseline:
     cmd: "python scripts/train.py --model normal_baseline --stage-name train@dataset1-normal_baseline
       --target-name ofen_g_koks\n"
@@ -4354,8 +4480,8 @@ stages:
       nfiles: 6
     - path: scripts/train.py
       hash: md5
-      md5: ded3f63fd5a34fbf497b6f14bbaaa1fe
-      size: 4960
+      md5: ad733804a3e4450d6090b84b3a044305
+      size: 4974
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
@@ -4392,15 +4518,15 @@ stages:
     outs:
     - path: results/ofen_g_koks/normal_baseline/metrics.yaml
       hash: md5
-      md5: a75d2cf383d514d87338124ee468e8b3
-      size: 146
+      md5: 8079a2fd699ff699b6b26a062c6db328
+      size: 144
     - path: results/ofen_g_koks/normal_baseline/model_weights.h5
       hash: md5
-      md5: 789303031b37dcb08610fa0a45e1a123
+      md5: a0016de53d34ebfb64d776e1c30a639e
       size: 96208
     - path: results/ofen_g_koks/normal_baseline/parent_run_id.txt
       hash: md5
-      md5: dc90293c20ae2c388fd516f2c55f31f5
+      md5: 3751676b7b95ee4129784d1ce5c9dc16
       size: 32
   train@dataset1-lognormal_baseline:
     cmd: "python scripts/train.py --model lognormal_baseline --stage-name train@dataset1-lognormal_baseline
@@ -4413,8 +4539,8 @@ stages:
       nfiles: 6
     - path: scripts/train.py
       hash: md5
-      md5: ded3f63fd5a34fbf497b6f14bbaaa1fe
-      size: 4960
+      md5: ad733804a3e4450d6090b84b3a044305
+      size: 4974
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
@@ -4455,671 +4581,11 @@ stages:
       size: 92
     - path: results/ofen_g_koks/lognormal_baseline/model_weights.h5
       hash: md5
-      md5: 5d4a99a3f1ad6cdfd042c8d43525aa1c
+      md5: 676ed7d62abb34519237b2ecd2fbaec0
       size: 96208
     - path: results/ofen_g_koks/lognormal_baseline/parent_run_id.txt
       hash: md5
-      md5: fd30e3eb05e5fb010cecdb492495aab2
-      size: 32
-  train@dataset2-normal_baseline:
-    cmd: "python scripts/train.py --model normal_baseline --stage-name train@dataset2-normal_baseline
-      --target-name ofen_f_koks\n"
-    deps:
-    - path: data/processed/ofen_f_koks/
-      hash: md5
-      md5: 9856bca90cc5c0413c771deef3debeea.dir
-      size: 27457172
-      nfiles: 6
-    - path: scripts/train.py
-      hash: md5
-      md5: ded3f63fd5a34fbf497b6f14bbaaa1fe
-      size: 4960
-    - path: src/dcp_nf_forecast/
-      hash: md5
-      md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
-      size: 35957
-      nfiles: 10
-    params:
-      params.yaml:
-        data.data_format: feather
-        experiment_name: dcp_nf_forecast
-        log_file: logs/pipeline.log
-        log_level: info
-        paths.data_processed: data/processed
-        seed: 42
-        test_mode: true
-      params/models/ofen_f_koks/normal_baseline.yaml:
-        compile_kwargs:
-          jit_compile: false
-        fit_kwargs:
-          batch_size: 256
-          early_stopping_patience: 10
-          epochs: 100
-          learning_rate: 0.0005
-          verbose: true
-        model_kwargs:
-          distribution: multivariate_normal_diag
-          parameters_fn_kwargs:
-            activation: relu
-            batch_norm: true
-            conditional: true
-            dropout: 0
-            hidden_units:
-            - 32
-            - 32
-    outs:
-    - path: results/ofen_f_koks/normal_baseline/metrics.yaml
-      hash: md5
-      md5: 46f14bd94996f8107c3e2235678bb371
-      size: 132
-    - path: results/ofen_f_koks/normal_baseline/model_weights.h5
-      hash: md5
-      md5: 1986c891b5d56498d036f504f33d3a17
-      size: 96208
-    - path: results/ofen_f_koks/normal_baseline/parent_run_id.txt
-      hash: md5
-      md5: bca873600689592de9d3e2be33afb10d
-      size: 32
-  train@dataset2-lognormal_baseline:
-    cmd: "python scripts/train.py --model lognormal_baseline --stage-name train@dataset2-lognormal_baseline
-      --target-name ofen_f_koks\n"
-    deps:
-    - path: data/processed/ofen_f_koks/
-      hash: md5
-      md5: 9856bca90cc5c0413c771deef3debeea.dir
-      size: 27457172
-      nfiles: 6
-    - path: scripts/train.py
-      hash: md5
-      md5: ad733804a3e4450d6090b84b3a044305
-      size: 4974
-    - path: src/dcp_nf_forecast/
-      hash: md5
-      md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
-      size: 35957
-      nfiles: 10
-    params:
-      params.yaml:
-        data.data_format: feather
-        experiment_name: dcp_nf_forecast
-        log_file: logs/pipeline.log
-        log_level: info
-        paths.data_processed: data/processed
-        seed: 42
-        test_mode: true
-      params/models/ofen_f_koks/lognormal_baseline.yaml:
-        compile_kwargs:
-          jit_compile: false
-        fit_kwargs:
-          batch_size: 256
-          early_stopping_patience: 10
-          epochs: 100
-          learning_rate: 0.0005
-          verbose: true
-        model_kwargs:
-          distribution: multivariate_lognormal_diag
-          parameters_fn_kwargs:
-            activation: relu
-            batch_norm: true
-            conditional: true
-            dropout: 0
-            hidden_units:
-            - 32
-            - 32
-    outs:
-    - path: results/ofen_f_koks/lognormal_baseline/metrics.yaml
-      hash: md5
-      md5: e287efa5902b8b38bc9aa5e6ec523f3c
-      size: 92
-    - path: results/ofen_f_koks/lognormal_baseline/model_weights.h5
-      hash: md5
-      md5: be28e58a179c4687fd9416f4b5b60009
-      size: 96208
-    - path: results/ofen_f_koks/lognormal_baseline/parent_run_id.txt
-      hash: md5
-      md5: 501fbb369c48b4b7553b16a06f7ee155
-      size: 32
-  train@dataset3-normal_baseline:
-    cmd: "python scripts/train.py --model normal_baseline --stage-name train@dataset3-normal_baseline
-      --target-name pl2\n"
-    deps:
-    - path: data/processed/pl2/
-      hash: md5
-      md5: ace540117f66c965120462f17290eb8c.dir
-      size: 34048532
-      nfiles: 6
-    - path: scripts/train.py
-      hash: md5
-      md5: ded3f63fd5a34fbf497b6f14bbaaa1fe
-      size: 4960
-    - path: src/dcp_nf_forecast/
-      hash: md5
-      md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
-      size: 35957
-      nfiles: 10
-    params:
-      params.yaml:
-        data.data_format: feather
-        experiment_name: dcp_nf_forecast
-        log_file: logs/pipeline.log
-        log_level: info
-        paths.data_processed: data/processed
-        seed: 42
-        test_mode: true
-      params/models/pl2/normal_baseline.yaml:
-        compile_kwargs:
-          jit_compile: false
-        fit_kwargs:
-          batch_size: 256
-          early_stopping_patience: 10
-          epochs: 200
-          learning_rate: 0.001
-          verbose: true
-        model_kwargs:
-          distribution: multivariate_normal_diag
-          parameters_fn_kwargs:
-            activation: relu
-            batch_norm: true
-            conditional: true
-            dropout: 0
-            hidden_units:
-            - 32
-            - 32
-    outs:
-    - path: results/pl2/normal_baseline/metrics.yaml
-      hash: md5
-      md5: 8b6d90e9d1fb5fd26a60053352bafe78
-      size: 144
-    - path: results/pl2/normal_baseline/model_weights.h5
-      hash: md5
-      md5: 4439ff201898250df1e6ab0e3f961aed
-      size: 96208
-    - path: results/pl2/normal_baseline/parent_run_id.txt
-      hash: md5
-      md5: 6e7a9fd40e1ecd7e384be549b33284ee
-      size: 32
-  train@dataset3-lognormal_baseline:
-    cmd: "python scripts/train.py --model lognormal_baseline --stage-name train@dataset3-lognormal_baseline
-      --target-name pl2\n"
-    deps:
-    - path: data/processed/pl2/
-      hash: md5
-      md5: ace540117f66c965120462f17290eb8c.dir
-      size: 34048532
-      nfiles: 6
-    - path: scripts/train.py
-      hash: md5
-      md5: ded3f63fd5a34fbf497b6f14bbaaa1fe
-      size: 4960
-    - path: src/dcp_nf_forecast/
-      hash: md5
-      md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
-      size: 35957
-      nfiles: 10
-    params:
-      params.yaml:
-        data.data_format: feather
-        experiment_name: dcp_nf_forecast
-        log_file: logs/pipeline.log
-        log_level: info
-        paths.data_processed: data/processed
-        seed: 42
-        test_mode: true
-      params/models/pl2/lognormal_baseline.yaml:
-        compile_kwargs:
-          jit_compile: false
-        fit_kwargs:
-          batch_size: 256
-          early_stopping_patience: 10
-          epochs: 200
-          learning_rate: 0.001
-          verbose: true
-        model_kwargs:
-          distribution: multivariate_lognormal_diag
-          parameters_fn_kwargs:
-            activation: relu
-            batch_norm: true
-            conditional: true
-            dropout: 0
-            hidden_units:
-            - 32
-            - 32
-    outs:
-    - path: results/pl2/lognormal_baseline/metrics.yaml
-      hash: md5
-      md5: e287efa5902b8b38bc9aa5e6ec523f3c
-      size: 92
-    - path: results/pl2/lognormal_baseline/model_weights.h5
-      hash: md5
-      md5: 8a0aab869aa9042d7b909a926c7aa458
-      size: 96208
-    - path: results/pl2/lognormal_baseline/parent_run_id.txt
-      hash: md5
-      md5: bf87a36ca5f0abd0895744796370bdff
-      size: 32
-  evaluate@dataset1-normal_baseline:
-    cmd: "python scripts/evaluate.py --model normal_baseline --stage-name evaluate@dataset1-normal_baseline
-      --target-name ofen_g_koks --prediction-horizon 48\n"
-    deps:
-    - path: data/processed/ofen_g_koks/
-      hash: md5
-      md5: 6fd5cf3061b1dd3a8cf8579adc597439.dir
-      size: 28657756
-      nfiles: 6
-    - path: results/ofen_g_koks/normal_baseline/model_weights.h5
-      hash: md5
-      md5: 83913ca5578578a464c44e66ab933452
-      size: 96208
-    - path: results/ofen_g_koks/normal_baseline/parent_run_id.txt
-      hash: md5
-      md5: 17296537304b615e0985b2846aad0480
-      size: 32
-    - path: scripts/evaluate.py
-      hash: md5
-      md5: e192fe71e19c88fdae91769aab7baeb7
-      size: 10929
-    - path: src/dcp_nf_forecast/
-      hash: md5
-      md5: 28f531579af29347ef6c4153eb5c4c12.dir
-      size: 37353
-      nfiles: 10
-    params:
-      params.yaml:
-        data.data_format: feather
-        eval.n_samples: 1000
-        experiment_name: dcp_nf_forecast
-        log_file: logs/pipeline.log
-        log_level: info
-        paths.data_processed: data/processed
-        seed: 42
-        test_mode: true
-      params/models/ofen_g_koks/normal_baseline.yaml:
-        compile_kwargs:
-          jit_compile: false
-        fit_kwargs:
-          batch_size: 256
-          early_stopping_patience: 10
-          epochs: 200
-          learning_rate: 0.001
-          verbose: true
-        model_kwargs:
-          distribution: multivariate_normal_diag
-          parameters_fn_kwargs:
-            activation: relu
-            batch_norm: true
-            conditional: true
-            dropout: 0
-            hidden_units:
-            - 32
-            - 32
-    outs:
-    - path: results/ofen_g_koks/normal_baseline/evaluation/calibration.pdf
-      hash: md5
-      md5: 2f06c210a9042eeaeaf6e732434969cf
-      size: 41912
-    - path: results/ofen_g_koks/normal_baseline/evaluation/forecast.pdf
-      hash: md5
-      md5: d52cd6eba45ff50b2d261e7c920444f9
-      size: 52950
-    - path: results/ofen_g_koks/normal_baseline/evaluation/metrics.yaml
-      hash: md5
-      md5: 5ff841e96aa9de354b0785c16068ae45
-      size: 88
-    - path: results/ofen_g_koks/normal_baseline/evaluation/pit_histogram.pdf
-      hash: md5
-      md5: b3f500f73eb93fed7fa5357ad3e2d45a
-      size: 38287
-  evaluate@dataset3-normal_baseline:
-    cmd: "python scripts/evaluate.py --model normal_baseline --stage-name evaluate@dataset3-normal_baseline
-      --target-name pl2 --prediction-horizon 48\n"
-    deps:
-    - path: data/processed/pl2/
-      hash: md5
-      md5: ace540117f66c965120462f17290eb8c.dir
-      size: 34048532
-      nfiles: 6
-    - path: results/pl2/normal_baseline/model_weights.h5
-      hash: md5
-      md5: f86e3c3e441c487cf12bc5301d87df7f
-      size: 96208
-    - path: results/pl2/normal_baseline/parent_run_id.txt
-      hash: md5
-      md5: 00c1af96d25df3104d1bf4156c792e7a
-      size: 32
-    - path: scripts/evaluate.py
-      hash: md5
-      md5: e192fe71e19c88fdae91769aab7baeb7
-      size: 10929
-    - path: src/dcp_nf_forecast/
-      hash: md5
-      md5: 28f531579af29347ef6c4153eb5c4c12.dir
-      size: 37353
-      nfiles: 10
-    params:
-      params.yaml:
-        data.data_format: feather
-        eval.n_samples: 1000
-        experiment_name: dcp_nf_forecast
-        log_file: logs/pipeline.log
-        log_level: info
-        paths.data_processed: data/processed
-        seed: 42
-        test_mode: true
-      params/models/pl2/normal_baseline.yaml:
-        compile_kwargs:
-          jit_compile: false
-        fit_kwargs:
-          batch_size: 256
-          early_stopping_patience: 10
-          epochs: 200
-          learning_rate: 0.001
-          verbose: true
-        model_kwargs:
-          distribution: multivariate_normal_diag
-          parameters_fn_kwargs:
-            activation: relu
-            batch_norm: true
-            conditional: true
-            dropout: 0
-            hidden_units:
-            - 32
-            - 32
-    outs:
-    - path: results/pl2/normal_baseline/evaluation/calibration.pdf
-      hash: md5
-      md5: 7debaf7761627a12ef666932789cd7bf
-      size: 41611
-    - path: results/pl2/normal_baseline/evaluation/forecast.pdf
-      hash: md5
-      md5: 0fadf4f8f7f05f6b3f64f7e534cb47e5
-      size: 50610
-    - path: results/pl2/normal_baseline/evaluation/metrics.yaml
-      hash: md5
-      md5: d25f1de02034ec714a623cf3f3299e1d
-      size: 86
-    - path: results/pl2/normal_baseline/evaluation/pit_histogram.pdf
-      hash: md5
-      md5: be082e65f59a61cb2f36456ec4aafe7c
-      size: 38078
-  evaluate@dataset2-normal_baseline:
-    cmd: "python scripts/evaluate.py --model normal_baseline --stage-name evaluate@dataset2-normal_baseline
-      --target-name ofen_f_koks --prediction-horizon 48\n"
-    deps:
-    - path: data/processed/ofen_f_koks/
-      hash: md5
-      md5: 9856bca90cc5c0413c771deef3debeea.dir
-      size: 27457172
-      nfiles: 6
-    - path: results/ofen_f_koks/normal_baseline/model_weights.h5
-      hash: md5
-      md5: f4509c851dbab047fc6c6490ff8faa75
-      size: 96208
-    - path: results/ofen_f_koks/normal_baseline/parent_run_id.txt
-      hash: md5
-      md5: 656f102d3d9ea455be0842d303a217b7
-      size: 32
-    - path: scripts/evaluate.py
-      hash: md5
-      md5: a84a23b96209a9b10f9c987f1cc1e755
-      size: 10750
-    - path: src/dcp_nf_forecast/
-      hash: md5
-      md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
-      size: 35957
-      nfiles: 10
-    params:
-      params.yaml:
-        data.data_format: feather
-        eval.n_samples: 1000
-        experiment_name: dcp_nf_forecast
-        log_file: logs/pipeline.log
-        log_level: info
-        paths.data_processed: data/processed
-        seed: 42
-        test_mode: true
-      params/models/ofen_f_koks/normal_baseline.yaml:
-        compile_kwargs:
-          jit_compile: false
-        fit_kwargs:
-          batch_size: 256
-          early_stopping_patience: 10
-          epochs: 200
-          learning_rate: 0.001
-          verbose: true
-        model_kwargs:
-          distribution: multivariate_normal_diag
-          parameters_fn_kwargs:
-            activation: relu
-            batch_norm: true
-            conditional: true
-            dropout: 0
-            hidden_units:
-            - 32
-            - 32
-    outs:
-    - path: results/ofen_f_koks/normal_baseline/evaluation/calibration.pdf
-      hash: md5
-      md5: 040f1063c94450f4e014396ffb93dea9
-      size: 41929
-    - path: results/ofen_f_koks/normal_baseline/evaluation/forecast.pdf
-      hash: md5
-      md5: aa93d43edf78765d5de3aa5a22676b00
-      size: 52550
-    - path: results/ofen_f_koks/normal_baseline/evaluation/metrics.yaml
-      hash: md5
-      md5: f208be647500ed06685cc7fb11af73cb
-      size: 87
-    - path: results/ofen_f_koks/normal_baseline/evaluation/pit_histogram.pdf
-      hash: md5
-      md5: 280b6fbd79565ad78fab60cb5b070f65
-      size: 38366
-  train@dataset0-bernstein_nf_scale:
-    cmd: "python scripts/train.py --model bernstein_nf_scale --stage-name train@dataset0-bernstein_nf_scale
-      --target-name dla\n"
-    deps:
-    - path: data/processed/dla/
-      hash: md5
-      md5: 0a4228c60ad08b7cc54c64d7b88fc3cd.dir
-      size: 16692796
-      nfiles: 6
-    - path: scripts/train.py
-      hash: md5
-      md5: ded3f63fd5a34fbf497b6f14bbaaa1fe
-      size: 4960
-    - path: src/dcp_nf_forecast/
-      hash: md5
-      md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
-      size: 35957
-      nfiles: 10
-    params:
-      params.yaml:
-        data.data_format: feather
-        experiment_name: dcp_nf_forecast
-        log_file: logs/pipeline.log
-        log_level: info
-        paths.data_processed: data/processed
-        seed: 42
-        test_mode: true
-      params/models/dla/bernstein_nf_scale.yaml:
-        compile_kwargs: {}
-        fit_kwargs:
-          epochs: 100
-          learning_rate: 0.0005
-          batch_size: 256
-          early_stopping_patience: 10
-          verbose: true
-        model_kwargs:
-          distribution: masked_autoregressive_flow
-          num_layers: 1
-          base_distribution_kwargs:
-            distribution_name: normal
-          num_parameters: 51
-          parameters_fn_kwargs:
-            activation: relu
-            hidden_units:
-            - 256
-            - 256
-            - 256
-          nested_bijectors:
-          - bijector: Scale
-            parameters_slice_size: 1
-            parameters_constraint_fn: tensorflow.math.softplus
-            parameters_fn: parameter_vector_or_simple_network
-            parameters_fn_kwargs:
-              activation: relu
-              conditional: true
-              dropout: false
-              batch_norm: false
-              hidden_units:
-              - 128
-              - 128
-              - 128
-              parameter_shape:
-              - 48
-          - bijector: BernsteinPolynomial
-            parameters_slice_size: 50
-            bijector_kwargs:
-              extrapolation: false
-              domain:
-              - 0.0
-              - 1.0
-            invert: true
-            parameters_constraint_fn:
-              hybrid_flows.activations.get_thetas_constrain_fn
-            parameters_constraint_fn_kwargs:
-              allow_flexible_bounds: false
-              bounds: none
-              low: 0.007
-              high: 148
-            parameters_fn: parameter_vector_or_simple_network
-            parameters_fn_kwargs:
-              activation: relu
-              conditional: true
-              dropout: false
-              batch_norm: false
-              hidden_units:
-              - 256
-              - 256
-              - 256
-              parameter_shape:
-              - 48
-              - 50
-    outs:
-    - path: results/dla/bernstein_nf_scale/metrics.yaml
-      hash: md5
-      md5: 794900086b7abaeccd2f2bbc81476c8b
-      size: 142
-    - path: results/dla/bernstein_nf_scale/model_weights.h5
-      hash: md5
-      md5: a8103194378a31e1eb82a2d2bc3bf34a
-      size: 6440256
-    - path: results/dla/bernstein_nf_scale/parent_run_id.txt
-      hash: md5
-      md5: 2021ace882842aa7b289bcf6b2ea9867
-      size: 32
-  train@dataset0-bernstein_nf_scale_lognormal:
-    cmd: "python scripts/train.py --model bernstein_nf_scale_lognormal --stage-name
-      train@dataset0-bernstein_nf_scale_lognormal --target-name dla\n"
-    deps:
-    - path: data/processed/dla/
-      hash: md5
-      md5: 0a4228c60ad08b7cc54c64d7b88fc3cd.dir
-      size: 16692796
-      nfiles: 6
-    - path: scripts/train.py
-      hash: md5
-      md5: ded3f63fd5a34fbf497b6f14bbaaa1fe
-      size: 4960
-    - path: src/dcp_nf_forecast/
-      hash: md5
-      md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
-      size: 35957
-      nfiles: 10
-    params:
-      params.yaml:
-        data.data_format: feather
-        experiment_name: dcp_nf_forecast
-        log_file: logs/pipeline.log
-        log_level: info
-        paths.data_processed: data/processed
-        seed: 42
-        test_mode: true
-      params/models/dla/bernstein_nf_scale_lognormal.yaml:
-        compile_kwargs: {}
-        fit_kwargs:
-          epochs: 100
-          learning_rate: 0.0005
-          batch_size: 256
-          early_stopping_patience: 10
-          verbose: true
-        model_kwargs:
-          distribution: masked_autoregressive_flow
-          num_layers: 1
-          base_distribution_kwargs:
-            distribution_name: lognormal
-          num_parameters: 51
-          parameters_fn_kwargs:
-            activation: relu
-            hidden_units:
-            - 256
-            - 256
-            - 256
-          nested_bijectors:
-          - bijector: Scale
-            parameters_slice_size: 1
-            parameters_constraint_fn: tensorflow.math.softplus
-            parameters_fn: parameter_vector_or_simple_network
-            parameters_fn_kwargs:
-              activation: relu
-              conditional: true
-              dropout: false
-              batch_norm: false
-              hidden_units:
-              - 128
-              - 128
-              - 128
-              parameter_shape:
-              - 48
-          - bijector: BernsteinPolynomial
-            parameters_slice_size: 50
-            bijector_kwargs:
-              extrapolation: false
-              domain:
-              - 0.0
-              - 1.0
-            invert: true
-            parameters_constraint_fn:
-              hybrid_flows.activations.get_thetas_constrain_fn
-            parameters_constraint_fn_kwargs:
-              allow_flexible_bounds: false
-              bounds: none
-              low: 0.007
-              high: 148
-            parameters_fn: parameter_vector_or_simple_network
-            parameters_fn_kwargs:
-              activation: relu
-              conditional: true
-              dropout: false
-              batch_norm: false
-              hidden_units:
-              - 256
-              - 256
-              - 256
-              parameter_shape:
-              - 48
-              - 50
-    outs:
-    - path: results/dla/bernstein_nf_scale_lognormal/metrics.yaml
-      hash: md5
-      md5: 263501093867ffb446558ee33e6cb1cc
-      size: 152
-    - path: results/dla/bernstein_nf_scale_lognormal/model_weights.h5
-      hash: md5
-      md5: cb50c76f723cb3759f760a753c847f32
-      size: 6440256
-    - path: results/dla/bernstein_nf_scale_lognormal/parent_run_id.txt
-      hash: md5
-      md5: de9a51b24413ba5cda97ec2629df48c8
+      md5: 36b432e9e1eaa04a39b61452eeb9a246
       size: 32
   train@dataset1-bernstein_nf_scale:
     cmd: "python scripts/train.py --model bernstein_nf_scale --stage-name train@dataset1-bernstein_nf_scale
@@ -5132,8 +4598,8 @@ stages:
       nfiles: 6
     - path: scripts/train.py
       hash: md5
-      md5: ded3f63fd5a34fbf497b6f14bbaaa1fe
-      size: 4960
+      md5: ad733804a3e4450d6090b84b3a044305
+      size: 4974
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
@@ -5215,15 +4681,15 @@ stages:
     outs:
     - path: results/ofen_g_koks/bernstein_nf_scale/metrics.yaml
       hash: md5
-      md5: 215868e7ab4bd71d8e05dd66bb48327b
+      md5: 0fb974d6f46cf186faad9ab717815644
       size: 144
     - path: results/ofen_g_koks/bernstein_nf_scale/model_weights.h5
       hash: md5
-      md5: a5135b0377e897b54c73bf436d1f89b4
+      md5: 4dc76523b6ba5aadccd989618cc5a72d
       size: 6440256
     - path: results/ofen_g_koks/bernstein_nf_scale/parent_run_id.txt
       hash: md5
-      md5: 37b284079e313925271c864c46281814
+      md5: 039fb504100c57c8024a5e0d767519d0
       size: 32
   train@dataset1-bernstein_nf_scale_lognormal:
     cmd: "python scripts/train.py --model bernstein_nf_scale_lognormal --stage-name
@@ -5236,8 +4702,8 @@ stages:
       nfiles: 6
     - path: scripts/train.py
       hash: md5
-      md5: ded3f63fd5a34fbf497b6f14bbaaa1fe
-      size: 4960
+      md5: ad733804a3e4450d6090b84b3a044305
+      size: 4974
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
@@ -5319,15 +4785,133 @@ stages:
     outs:
     - path: results/ofen_g_koks/bernstein_nf_scale_lognormal/metrics.yaml
       hash: md5
-      md5: c019c60a5a19cbf321ba1b36491dd3a0
-      size: 148
+      md5: 9e672ceefbf356d77ccc632206fe22cb
+      size: 150
     - path: results/ofen_g_koks/bernstein_nf_scale_lognormal/model_weights.h5
       hash: md5
-      md5: c70bfe6c51176bd7adbf2497ec18a2d1
+      md5: be832f2fe46531348d744205d8115305
       size: 6440256
     - path: results/ofen_g_koks/bernstein_nf_scale_lognormal/parent_run_id.txt
       hash: md5
-      md5: 293c526edcc155277bd706b57aee5c62
+      md5: b06a6eb2330e0654bb69efe46c7245f0
+      size: 32
+  train@dataset2-normal_baseline:
+    cmd: "python scripts/train.py --model normal_baseline --stage-name train@dataset2-normal_baseline
+      --target-name ofen_f_koks\n"
+    deps:
+    - path: data/processed/ofen_f_koks/
+      hash: md5
+      md5: 9856bca90cc5c0413c771deef3debeea.dir
+      size: 27457172
+      nfiles: 6
+    - path: scripts/train.py
+      hash: md5
+      md5: ad733804a3e4450d6090b84b3a044305
+      size: 4974
+    - path: src/dcp_nf_forecast/
+      hash: md5
+      md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
+      size: 35957
+      nfiles: 10
+    params:
+      params.yaml:
+        data.data_format: feather
+        experiment_name: dcp_nf_forecast
+        log_file: logs/pipeline.log
+        log_level: info
+        paths.data_processed: data/processed
+        seed: 42
+        test_mode: true
+      params/models/ofen_f_koks/normal_baseline.yaml:
+        compile_kwargs:
+          jit_compile: false
+        fit_kwargs:
+          batch_size: 256
+          early_stopping_patience: 10
+          epochs: 100
+          learning_rate: 0.0005
+          verbose: true
+        model_kwargs:
+          distribution: multivariate_normal_diag
+          parameters_fn_kwargs:
+            activation: relu
+            batch_norm: true
+            conditional: true
+            dropout: 0
+            hidden_units:
+            - 32
+            - 32
+    outs:
+    - path: results/ofen_f_koks/normal_baseline/metrics.yaml
+      hash: md5
+      md5: 7f34f6a3d3aa5713391d8d431cecf92a
+      size: 134
+    - path: results/ofen_f_koks/normal_baseline/model_weights.h5
+      hash: md5
+      md5: 96aab2d8d9c6349965f2a4a02c797994
+      size: 96208
+    - path: results/ofen_f_koks/normal_baseline/parent_run_id.txt
+      hash: md5
+      md5: 73377680d8db7f894fc93797a84912bc
+      size: 32
+  train@dataset2-lognormal_baseline:
+    cmd: "python scripts/train.py --model lognormal_baseline --stage-name train@dataset2-lognormal_baseline
+      --target-name ofen_f_koks\n"
+    deps:
+    - path: data/processed/ofen_f_koks/
+      hash: md5
+      md5: 9856bca90cc5c0413c771deef3debeea.dir
+      size: 27457172
+      nfiles: 6
+    - path: scripts/train.py
+      hash: md5
+      md5: ad733804a3e4450d6090b84b3a044305
+      size: 4974
+    - path: src/dcp_nf_forecast/
+      hash: md5
+      md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
+      size: 35957
+      nfiles: 10
+    params:
+      params.yaml:
+        data.data_format: feather
+        experiment_name: dcp_nf_forecast
+        log_file: logs/pipeline.log
+        log_level: info
+        paths.data_processed: data/processed
+        seed: 42
+        test_mode: true
+      params/models/ofen_f_koks/lognormal_baseline.yaml:
+        compile_kwargs:
+          jit_compile: false
+        fit_kwargs:
+          batch_size: 256
+          early_stopping_patience: 10
+          epochs: 100
+          learning_rate: 0.0005
+          verbose: true
+        model_kwargs:
+          distribution: multivariate_lognormal_diag
+          parameters_fn_kwargs:
+            activation: relu
+            batch_norm: true
+            conditional: true
+            dropout: 0
+            hidden_units:
+            - 32
+            - 32
+    outs:
+    - path: results/ofen_f_koks/lognormal_baseline/metrics.yaml
+      hash: md5
+      md5: e287efa5902b8b38bc9aa5e6ec523f3c
+      size: 92
+    - path: results/ofen_f_koks/lognormal_baseline/model_weights.h5
+      hash: md5
+      md5: be28e58a179c4687fd9416f4b5b60009
+      size: 96208
+    - path: results/ofen_f_koks/lognormal_baseline/parent_run_id.txt
+      hash: md5
+      md5: 501fbb369c48b4b7553b16a06f7ee155
       size: 32
   train@dataset2-bernstein_nf_scale:
     cmd: "python scripts/train.py --model bernstein_nf_scale --stage-name train@dataset2-bernstein_nf_scale
@@ -5340,8 +4924,8 @@ stages:
       nfiles: 6
     - path: scripts/train.py
       hash: md5
-      md5: ded3f63fd5a34fbf497b6f14bbaaa1fe
-      size: 4960
+      md5: ad733804a3e4450d6090b84b3a044305
+      size: 4974
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
@@ -5423,15 +5007,15 @@ stages:
     outs:
     - path: results/ofen_f_koks/bernstein_nf_scale/metrics.yaml
       hash: md5
-      md5: f51072462a0e76dcc5e67e111c21a691
+      md5: 3b64a8f76e2e406af7d904ecc0c371ac
       size: 148
     - path: results/ofen_f_koks/bernstein_nf_scale/model_weights.h5
       hash: md5
-      md5: e023af7fe106b706f5ae9ae6a7568119
+      md5: 6461217bd49f466e848baa8b76aa45aa
       size: 6440256
     - path: results/ofen_f_koks/bernstein_nf_scale/parent_run_id.txt
       hash: md5
-      md5: da2672a897a1d75130bf50ce9007ccc0
+      md5: 5961d783e17c6fafc66841e472d4ee08
       size: 32
   train@dataset2-bernstein_nf_scale_lognormal:
     cmd: "python scripts/train.py --model bernstein_nf_scale_lognormal --stage-name
@@ -5444,8 +5028,8 @@ stages:
       nfiles: 6
     - path: scripts/train.py
       hash: md5
-      md5: ded3f63fd5a34fbf497b6f14bbaaa1fe
-      size: 4960
+      md5: ad733804a3e4450d6090b84b3a044305
+      size: 4974
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
@@ -5527,15 +5111,133 @@ stages:
     outs:
     - path: results/ofen_f_koks/bernstein_nf_scale_lognormal/metrics.yaml
       hash: md5
-      md5: d5d8cbae66287f44dc902a4504af761f
+      md5: c5268dda62bf958022b46f4e661aec4b
       size: 148
     - path: results/ofen_f_koks/bernstein_nf_scale_lognormal/model_weights.h5
       hash: md5
-      md5: 5d9029b11d4cbec3eac763699ffb66c8
+      md5: e6d1415955262a5cfdc23b1a750a734a
       size: 6440256
     - path: results/ofen_f_koks/bernstein_nf_scale_lognormal/parent_run_id.txt
       hash: md5
-      md5: e178b23200ece83bca01540cb797d613
+      md5: 5af3051b4334541794c9bb0994fff270
+      size: 32
+  train@dataset3-normal_baseline:
+    cmd: "python scripts/train.py --model normal_baseline --stage-name train@dataset3-normal_baseline
+      --target-name pl2\n"
+    deps:
+    - path: data/processed/pl2/
+      hash: md5
+      md5: ace540117f66c965120462f17290eb8c.dir
+      size: 34048532
+      nfiles: 6
+    - path: scripts/train.py
+      hash: md5
+      md5: ad733804a3e4450d6090b84b3a044305
+      size: 4974
+    - path: src/dcp_nf_forecast/
+      hash: md5
+      md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
+      size: 35957
+      nfiles: 10
+    params:
+      params.yaml:
+        data.data_format: feather
+        experiment_name: dcp_nf_forecast
+        log_file: logs/pipeline.log
+        log_level: info
+        paths.data_processed: data/processed
+        seed: 42
+        test_mode: true
+      params/models/pl2/normal_baseline.yaml:
+        compile_kwargs:
+          jit_compile: false
+        fit_kwargs:
+          batch_size: 256
+          early_stopping_patience: 10
+          epochs: 100
+          learning_rate: 0.0005
+          verbose: true
+        model_kwargs:
+          distribution: multivariate_normal_diag
+          parameters_fn_kwargs:
+            activation: relu
+            batch_norm: true
+            conditional: true
+            dropout: 0
+            hidden_units:
+            - 32
+            - 32
+    outs:
+    - path: results/pl2/normal_baseline/metrics.yaml
+      hash: md5
+      md5: d3789e895dfa9af8c6f14d401a1707e4
+      size: 146
+    - path: results/pl2/normal_baseline/model_weights.h5
+      hash: md5
+      md5: 96e768e31291a8ef652c91aceb40218d
+      size: 96208
+    - path: results/pl2/normal_baseline/parent_run_id.txt
+      hash: md5
+      md5: 6dcd2fe664cd92a7b74f35337909e625
+      size: 32
+  train@dataset3-lognormal_baseline:
+    cmd: "python scripts/train.py --model lognormal_baseline --stage-name train@dataset3-lognormal_baseline
+      --target-name pl2\n"
+    deps:
+    - path: data/processed/pl2/
+      hash: md5
+      md5: ace540117f66c965120462f17290eb8c.dir
+      size: 34048532
+      nfiles: 6
+    - path: scripts/train.py
+      hash: md5
+      md5: ad733804a3e4450d6090b84b3a044305
+      size: 4974
+    - path: src/dcp_nf_forecast/
+      hash: md5
+      md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
+      size: 35957
+      nfiles: 10
+    params:
+      params.yaml:
+        data.data_format: feather
+        experiment_name: dcp_nf_forecast
+        log_file: logs/pipeline.log
+        log_level: info
+        paths.data_processed: data/processed
+        seed: 42
+        test_mode: true
+      params/models/pl2/lognormal_baseline.yaml:
+        compile_kwargs:
+          jit_compile: false
+        fit_kwargs:
+          batch_size: 256
+          early_stopping_patience: 10
+          epochs: 100
+          learning_rate: 0.0005
+          verbose: true
+        model_kwargs:
+          distribution: multivariate_lognormal_diag
+          parameters_fn_kwargs:
+            activation: relu
+            batch_norm: true
+            conditional: true
+            dropout: 0
+            hidden_units:
+            - 32
+            - 32
+    outs:
+    - path: results/pl2/lognormal_baseline/metrics.yaml
+      hash: md5
+      md5: e287efa5902b8b38bc9aa5e6ec523f3c
+      size: 92
+    - path: results/pl2/lognormal_baseline/model_weights.h5
+      hash: md5
+      md5: 5ee038bf0f726a8cbbc41cc0ff8d93de
+      size: 96208
+    - path: results/pl2/lognormal_baseline/parent_run_id.txt
+      hash: md5
+      md5: 946a9309c50e72f5270951b0e4eca88f
       size: 32
   train@dataset3-bernstein_nf_scale:
     cmd: "python scripts/train.py --model bernstein_nf_scale --stage-name train@dataset3-bernstein_nf_scale
@@ -5548,8 +5250,8 @@ stages:
       nfiles: 6
     - path: scripts/train.py
       hash: md5
-      md5: ded3f63fd5a34fbf497b6f14bbaaa1fe
-      size: 4960
+      md5: ad733804a3e4450d6090b84b3a044305
+      size: 4974
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
@@ -5631,15 +5333,15 @@ stages:
     outs:
     - path: results/pl2/bernstein_nf_scale/metrics.yaml
       hash: md5
-      md5: 8ba5ab49ef05f4610a7272460af87e32
-      size: 148
+      md5: 50acb5601a42bebc74f1db336d276357
+      size: 146
     - path: results/pl2/bernstein_nf_scale/model_weights.h5
       hash: md5
-      md5: 6ba55fd245e52c184988ed776ef0c739
+      md5: 026b76cbbc39747070486dd589b123fa
       size: 6440256
     - path: results/pl2/bernstein_nf_scale/parent_run_id.txt
       hash: md5
-      md5: 034a09645b75fcc397d7232c590558a0
+      md5: e410403f3ace20beb1f0b87529f74db8
       size: 32
   train@dataset3-bernstein_nf_scale_lognormal:
     cmd: "python scripts/train.py --model bernstein_nf_scale_lognormal --stage-name
@@ -5652,8 +5354,8 @@ stages:
       nfiles: 6
     - path: scripts/train.py
       hash: md5
-      md5: ded3f63fd5a34fbf497b6f14bbaaa1fe
-      size: 4960
+      md5: ad733804a3e4450d6090b84b3a044305
+      size: 4974
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
@@ -5735,16 +5437,88 @@ stages:
     outs:
     - path: results/pl2/bernstein_nf_scale_lognormal/metrics.yaml
       hash: md5
-      md5: 8af2bb901b322fa136a503e51aa8393d
+      md5: 3480f10f976f48ee3f00b8e0052b0f31
       size: 152
     - path: results/pl2/bernstein_nf_scale_lognormal/model_weights.h5
       hash: md5
-      md5: 688102037cbe32b31d8e30f36c041ab7
+      md5: c911bcc630362024e461827f98f17478
       size: 6440256
     - path: results/pl2/bernstein_nf_scale_lognormal/parent_run_id.txt
       hash: md5
-      md5: b9c8c79839f358e7b58ab281674ecc73
+      md5: 9f786504122796068074c7e632f151c8
       size: 32
+  evaluate@dataset0-normal_baseline:
+    cmd: "python scripts/evaluate.py --model normal_baseline --stage-name evaluate@dataset0-normal_baseline
+      --target-name dla --prediction-horizon 48\n"
+    deps:
+    - path: data/processed/dla/
+      hash: md5
+      md5: 0a4228c60ad08b7cc54c64d7b88fc3cd.dir
+      size: 16692796
+      nfiles: 6
+    - path: results/dla/normal_baseline/model_weights.h5
+      hash: md5
+      md5: cdfe0b48bd17257c7038e75f579cb648
+      size: 96208
+    - path: results/dla/normal_baseline/parent_run_id.txt
+      hash: md5
+      md5: fa405540a22f329753c0588791c596e4
+      size: 32
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: bb9677395adfab212d992feee404fd3c
+      size: 11318
+    - path: src/dcp_nf_forecast/
+      hash: md5
+      md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
+      size: 35957
+      nfiles: 10
+    params:
+      params.yaml:
+        data.data_format: feather
+        eval.n_samples: 1000
+        experiment_name: dcp_nf_forecast
+        log_file: logs/pipeline.log
+        log_level: info
+        paths.data_processed: data/processed
+        seed: 42
+        test_mode: true
+      params/models/dla/normal_baseline.yaml:
+        compile_kwargs:
+          jit_compile: false
+        fit_kwargs:
+          batch_size: 256
+          early_stopping_patience: 10
+          epochs: 100
+          learning_rate: 0.0005
+          verbose: true
+        model_kwargs:
+          distribution: multivariate_normal_diag
+          parameters_fn_kwargs:
+            activation: relu
+            batch_norm: true
+            conditional: true
+            dropout: 0
+            hidden_units:
+            - 32
+            - 32
+    outs:
+    - path: results/dla/normal_baseline/evaluation/calibration.pdf
+      hash: md5
+      md5: 4459999812c963772dc7685fa22ad475
+      size: 42108
+    - path: results/dla/normal_baseline/evaluation/forecast.pdf
+      hash: md5
+      md5: cbf2923782b5d9386815841084a0e764
+      size: 51414
+    - path: results/dla/normal_baseline/evaluation/metrics.yaml
+      hash: md5
+      md5: c6a57d366d5d38cdc6beffcf0cfcf86b
+      size: 87
+    - path: results/dla/normal_baseline/evaluation/pit_histogram.pdf
+      hash: md5
+      md5: df1c4656e6983f81d8f248b4d22cf2ed
+      size: 38301
   evaluate@dataset0-lognormal_baseline:
     cmd: "python scripts/evaluate.py --model lognormal_baseline --stage-name evaluate@dataset0-lognormal_baseline
       --target-name dla --prediction-horizon 48\n"
@@ -5756,16 +5530,16 @@ stages:
       nfiles: 6
     - path: results/dla/lognormal_baseline/model_weights.h5
       hash: md5
-      md5: 48b78b469bd5c1f76e187d45a6559b98
+      md5: c66c5f437adc32876dbab56c8e0d1ec1
       size: 96208
     - path: results/dla/lognormal_baseline/parent_run_id.txt
       hash: md5
-      md5: 576250223d8c93477f767ffacfd15116
+      md5: 438a9df41562f24f02cdbc25141f1e77
       size: 32
     - path: scripts/evaluate.py
       hash: md5
-      md5: a84a23b96209a9b10f9c987f1cc1e755
-      size: 10750
+      md5: bb9677395adfab212d992feee404fd3c
+      size: 11318
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
@@ -5787,8 +5561,8 @@ stages:
         fit_kwargs:
           batch_size: 256
           early_stopping_patience: 10
-          epochs: 200
-          learning_rate: 0.001
+          epochs: 100
+          learning_rate: 0.0005
           verbose: true
         model_kwargs:
           distribution: multivariate_lognormal_diag
@@ -5803,20 +5577,20 @@ stages:
     outs:
     - path: results/dla/lognormal_baseline/evaluation/calibration.pdf
       hash: md5
-      md5: dfba90a4a0eae7ae0d7d43cc6e967f2a
-      size: 40609
+      md5: 4b1d2eb4cd8a9c71177a9c17a73a4aeb
+      size: 40590
     - path: results/dla/lognormal_baseline/evaluation/forecast.pdf
       hash: md5
-      md5: 7cdc57f429e45503881d29c1220d1abe
-      size: 51019
+      md5: ea554ecb11c5163b0ba06314671c4ca0
+      size: 50882
     - path: results/dla/lognormal_baseline/evaluation/metrics.yaml
       hash: md5
-      md5: 77e6bc2ec25819ab8b24842c37d7f56a
+      md5: fcb968f9c3a091d0ebfc9e2a0672d28b
       size: 86
     - path: results/dla/lognormal_baseline/evaluation/pit_histogram.pdf
       hash: md5
-      md5: f4ac13746b5b5b8cd551005217ef9a46
-      size: 33961
+      md5: 05ea00a910647d19ec8168522ccb3cb0
+      size: 34452
   evaluate@dataset0-bernstein_nf_scale:
     cmd: "python scripts/evaluate.py --model bernstein_nf_scale --stage-name evaluate@dataset0-bernstein_nf_scale
       --target-name dla --prediction-horizon 48\n"
@@ -5828,16 +5602,16 @@ stages:
       nfiles: 6
     - path: results/dla/bernstein_nf_scale/model_weights.h5
       hash: md5
-      md5: a8103194378a31e1eb82a2d2bc3bf34a
+      md5: d84976c3f0120fb99ae64972c267015e
       size: 6440256
     - path: results/dla/bernstein_nf_scale/parent_run_id.txt
       hash: md5
-      md5: 2021ace882842aa7b289bcf6b2ea9867
+      md5: acfcb05cbc59caa07cc3ca6a01d606ad
       size: 32
     - path: scripts/evaluate.py
       hash: md5
-      md5: a84a23b96209a9b10f9c987f1cc1e755
-      size: 10750
+      md5: bb9677395adfab212d992feee404fd3c
+      size: 11318
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
@@ -5920,256 +5694,20 @@ stages:
     outs:
     - path: results/dla/bernstein_nf_scale/evaluation/calibration.pdf
       hash: md5
-      md5: 009d88be183928be02c455e6106b8229
-      size: 41941
+      md5: 9e66a3568c368a38eaefba67b9cf8962
+      size: 41906
     - path: results/dla/bernstein_nf_scale/evaluation/forecast.pdf
       hash: md5
-      md5: 877714dbc1c443327953ccb910d1fb09
-      size: 50333
+      md5: cec546acd9b34ff3ba6776b8d7f4380e
+      size: 50381
     - path: results/dla/bernstein_nf_scale/evaluation/metrics.yaml
       hash: md5
-      md5: 24a70f280ed3a22458fe485cd5785234
-      size: 87
+      md5: f52f73267d2ffe905feec7aca7666f33
+      size: 88
     - path: results/dla/bernstein_nf_scale/evaluation/pit_histogram.pdf
       hash: md5
-      md5: fa29e2ecf68a258d8f4790693a1530f3
-      size: 38335
-  evaluate@dataset1-bernstein_nf_scale:
-    cmd: "python scripts/evaluate.py --model bernstein_nf_scale --stage-name evaluate@dataset1-bernstein_nf_scale
-      --target-name ofen_g_koks --prediction-horizon 48\n"
-    deps:
-    - path: data/processed/ofen_g_koks/
-      hash: md5
-      md5: 6fd5cf3061b1dd3a8cf8579adc597439.dir
-      size: 28657756
-      nfiles: 6
-    - path: results/ofen_g_koks/bernstein_nf_scale/model_weights.h5
-      hash: md5
-      md5: a5135b0377e897b54c73bf436d1f89b4
-      size: 6440256
-    - path: results/ofen_g_koks/bernstein_nf_scale/parent_run_id.txt
-      hash: md5
-      md5: 37b284079e313925271c864c46281814
-      size: 32
-    - path: scripts/evaluate.py
-      hash: md5
-      md5: a84a23b96209a9b10f9c987f1cc1e755
-      size: 10750
-    - path: src/dcp_nf_forecast/
-      hash: md5
-      md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
-      size: 35957
-      nfiles: 10
-    params:
-      params.yaml:
-        data.data_format: feather
-        eval.n_samples: 1000
-        experiment_name: dcp_nf_forecast
-        log_file: logs/pipeline.log
-        log_level: info
-        paths.data_processed: data/processed
-        seed: 42
-        test_mode: true
-      params/models/ofen_g_koks/bernstein_nf_scale.yaml:
-        compile_kwargs: {}
-        fit_kwargs:
-          epochs: 100
-          learning_rate: 0.0005
-          batch_size: 256
-          early_stopping_patience: 10
-          verbose: true
-        model_kwargs:
-          distribution: masked_autoregressive_flow
-          num_layers: 1
-          base_distribution_kwargs:
-            distribution_name: normal
-          num_parameters: 51
-          parameters_fn_kwargs:
-            activation: relu
-            hidden_units:
-            - 256
-            - 256
-            - 256
-          nested_bijectors:
-          - bijector: Scale
-            parameters_slice_size: 1
-            parameters_constraint_fn: tensorflow.math.softplus
-            parameters_fn: parameter_vector_or_simple_network
-            parameters_fn_kwargs:
-              activation: relu
-              conditional: true
-              dropout: false
-              batch_norm: false
-              hidden_units:
-              - 128
-              - 128
-              - 128
-              parameter_shape:
-              - 48
-          - bijector: BernsteinPolynomial
-            parameters_slice_size: 50
-            bijector_kwargs:
-              extrapolation: false
-              domain:
-              - 0.0
-              - 1.0
-            invert: true
-            parameters_constraint_fn:
-              hybrid_flows.activations.get_thetas_constrain_fn
-            parameters_constraint_fn_kwargs:
-              allow_flexible_bounds: false
-              bounds: none
-              low: 0.007
-              high: 148
-            parameters_fn: parameter_vector_or_simple_network
-            parameters_fn_kwargs:
-              activation: relu
-              conditional: true
-              dropout: false
-              batch_norm: false
-              hidden_units:
-              - 256
-              - 256
-              - 256
-              parameter_shape:
-              - 48
-              - 50
-    outs:
-    - path: results/ofen_g_koks/bernstein_nf_scale/evaluation/calibration.pdf
-      hash: md5
-      md5: c4edd6cd5e7bde715c53207033e4281b
-      size: 41752
-    - path: results/ofen_g_koks/bernstein_nf_scale/evaluation/forecast.pdf
-      hash: md5
-      md5: ee060f0bd9a19abf0970fa7a563fc03a
-      size: 51519
-    - path: results/ofen_g_koks/bernstein_nf_scale/evaluation/metrics.yaml
-      hash: md5
-      md5: 07f128ec75212f74c40027e763eb90b8
-      size: 86
-    - path: results/ofen_g_koks/bernstein_nf_scale/evaluation/pit_histogram.pdf
-      hash: md5
-      md5: 132a37b292ac15d54d2034b30126dfc8
-      size: 38520
-  evaluate@dataset3-bernstein_nf_scale_lognormal:
-    cmd: "python scripts/evaluate.py --model bernstein_nf_scale_lognormal --stage-name
-      evaluate@dataset3-bernstein_nf_scale_lognormal --target-name pl2 --prediction-horizon
-      48\n"
-    deps:
-    - path: data/processed/pl2/
-      hash: md5
-      md5: ace540117f66c965120462f17290eb8c.dir
-      size: 34048532
-      nfiles: 6
-    - path: results/pl2/bernstein_nf_scale_lognormal/model_weights.h5
-      hash: md5
-      md5: 688102037cbe32b31d8e30f36c041ab7
-      size: 6440256
-    - path: results/pl2/bernstein_nf_scale_lognormal/parent_run_id.txt
-      hash: md5
-      md5: b9c8c79839f358e7b58ab281674ecc73
-      size: 32
-    - path: scripts/evaluate.py
-      hash: md5
-      md5: a84a23b96209a9b10f9c987f1cc1e755
-      size: 10750
-    - path: src/dcp_nf_forecast/
-      hash: md5
-      md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
-      size: 35957
-      nfiles: 10
-    params:
-      params.yaml:
-        data.data_format: feather
-        eval.n_samples: 1000
-        experiment_name: dcp_nf_forecast
-        log_file: logs/pipeline.log
-        log_level: info
-        paths.data_processed: data/processed
-        seed: 42
-        test_mode: true
-      params/models/pl2/bernstein_nf_scale_lognormal.yaml:
-        compile_kwargs: {}
-        fit_kwargs:
-          epochs: 100
-          learning_rate: 0.0005
-          batch_size: 256
-          early_stopping_patience: 10
-          verbose: true
-        model_kwargs:
-          distribution: masked_autoregressive_flow
-          num_layers: 1
-          base_distribution_kwargs:
-            distribution_name: lognormal
-          num_parameters: 51
-          parameters_fn_kwargs:
-            activation: relu
-            hidden_units:
-            - 256
-            - 256
-            - 256
-          nested_bijectors:
-          - bijector: Scale
-            parameters_slice_size: 1
-            parameters_constraint_fn: tensorflow.math.softplus
-            parameters_fn: parameter_vector_or_simple_network
-            parameters_fn_kwargs:
-              activation: relu
-              conditional: true
-              dropout: false
-              batch_norm: false
-              hidden_units:
-              - 128
-              - 128
-              - 128
-              parameter_shape:
-              - 48
-          - bijector: BernsteinPolynomial
-            parameters_slice_size: 50
-            bijector_kwargs:
-              extrapolation: false
-              domain:
-              - 0.0
-              - 1.0
-            invert: true
-            parameters_constraint_fn:
-              hybrid_flows.activations.get_thetas_constrain_fn
-            parameters_constraint_fn_kwargs:
-              allow_flexible_bounds: false
-              bounds: none
-              low: 0.007
-              high: 148
-            parameters_fn: parameter_vector_or_simple_network
-            parameters_fn_kwargs:
-              activation: relu
-              conditional: true
-              dropout: false
-              batch_norm: false
-              hidden_units:
-              - 256
-              - 256
-              - 256
-              parameter_shape:
-              - 48
-              - 50
-    outs:
-    - path: results/pl2/bernstein_nf_scale_lognormal/evaluation/calibration.pdf
-      hash: md5
-      md5: cf83fb02a06be4b35e3216439ed86475
-      size: 41687
-    - path: results/pl2/bernstein_nf_scale_lognormal/evaluation/forecast.pdf
-      hash: md5
-      md5: 92413cdfaaedbb4c331e350e02a96eb1
-      size: 51120
-    - path: results/pl2/bernstein_nf_scale_lognormal/evaluation/metrics.yaml
-      hash: md5
-      md5: a864f5dd59bf1ddc208a7cca3c3693b7
-      size: 91
-    - path:
-        results/pl2/bernstein_nf_scale_lognormal/evaluation/pit_histogram.pdf
-      hash: md5
-      md5: a9a7f0858188f57959bcf60a7481f007
-      size: 38666
+      md5: 86f961c6798c5830dcdfd1f31d018e1a
+      size: 38159
   evaluate@dataset0-bernstein_nf_scale_lognormal:
     cmd: "python scripts/evaluate.py --model bernstein_nf_scale_lognormal --stage-name
       evaluate@dataset0-bernstein_nf_scale_lognormal --target-name dla --prediction-horizon
@@ -6182,16 +5720,16 @@ stages:
       nfiles: 6
     - path: results/dla/bernstein_nf_scale_lognormal/model_weights.h5
       hash: md5
-      md5: cb50c76f723cb3759f760a753c847f32
+      md5: c40a327291d73a9fae3349c094733129
       size: 6440256
     - path: results/dla/bernstein_nf_scale_lognormal/parent_run_id.txt
       hash: md5
-      md5: de9a51b24413ba5cda97ec2629df48c8
+      md5: 344efe10fb9bc2aa6e8168041b2a6f08
       size: 32
     - path: scripts/evaluate.py
       hash: md5
-      md5: a84a23b96209a9b10f9c987f1cc1e755
-      size: 10750
+      md5: bb9677395adfab212d992feee404fd3c
+      size: 11318
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
@@ -6274,21 +5812,93 @@ stages:
     outs:
     - path: results/dla/bernstein_nf_scale_lognormal/evaluation/calibration.pdf
       hash: md5
-      md5: 97b86d349f0513a82bd89021bc8afae6
-      size: 42111
+      md5: 2e45654fa843156b61d3cdcc8e796878
+      size: 42165
     - path: results/dla/bernstein_nf_scale_lognormal/evaluation/forecast.pdf
       hash: md5
-      md5: ef7207bc30c72ba0c01a60c45b0a74c8
-      size: 52313
+      md5: 7ee6c1f3b848dd112b26136aa4c3e6ec
+      size: 52281
     - path: results/dla/bernstein_nf_scale_lognormal/evaluation/metrics.yaml
       hash: md5
-      md5: 022409e2034e2da7f6c8354b10fa0904
-      size: 91
+      md5: 617c5b1e7ac92ddf9bc6313515b75b38
+      size: 90
     - path:
         results/dla/bernstein_nf_scale_lognormal/evaluation/pit_histogram.pdf
       hash: md5
-      md5: a2c29c91ea3889882c4373b256f779c3
-      size: 38821
+      md5: f02e2a2f3200c5adb12cc314f98dd370
+      size: 38794
+  evaluate@dataset1-normal_baseline:
+    cmd: "python scripts/evaluate.py --model normal_baseline --stage-name evaluate@dataset1-normal_baseline
+      --target-name ofen_g_koks --prediction-horizon 48\n"
+    deps:
+    - path: data/processed/ofen_g_koks/
+      hash: md5
+      md5: 6fd5cf3061b1dd3a8cf8579adc597439.dir
+      size: 28657756
+      nfiles: 6
+    - path: results/ofen_g_koks/normal_baseline/model_weights.h5
+      hash: md5
+      md5: a0016de53d34ebfb64d776e1c30a639e
+      size: 96208
+    - path: results/ofen_g_koks/normal_baseline/parent_run_id.txt
+      hash: md5
+      md5: 3751676b7b95ee4129784d1ce5c9dc16
+      size: 32
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: bb9677395adfab212d992feee404fd3c
+      size: 11318
+    - path: src/dcp_nf_forecast/
+      hash: md5
+      md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
+      size: 35957
+      nfiles: 10
+    params:
+      params.yaml:
+        data.data_format: feather
+        eval.n_samples: 1000
+        experiment_name: dcp_nf_forecast
+        log_file: logs/pipeline.log
+        log_level: info
+        paths.data_processed: data/processed
+        seed: 42
+        test_mode: true
+      params/models/ofen_g_koks/normal_baseline.yaml:
+        compile_kwargs:
+          jit_compile: false
+        fit_kwargs:
+          batch_size: 256
+          early_stopping_patience: 10
+          epochs: 100
+          learning_rate: 0.0005
+          verbose: true
+        model_kwargs:
+          distribution: multivariate_normal_diag
+          parameters_fn_kwargs:
+            activation: relu
+            batch_norm: true
+            conditional: true
+            dropout: 0
+            hidden_units:
+            - 32
+            - 32
+    outs:
+    - path: results/ofen_g_koks/normal_baseline/evaluation/calibration.pdf
+      hash: md5
+      md5: 8d8cb46b1b4dfe1011b484cf75b71954
+      size: 41993
+    - path: results/ofen_g_koks/normal_baseline/evaluation/forecast.pdf
+      hash: md5
+      md5: cbe8395847724e4bd45525c7a95f4cb9
+      size: 52380
+    - path: results/ofen_g_koks/normal_baseline/evaluation/metrics.yaml
+      hash: md5
+      md5: cacb4d4569b2b6508ddf60eab6f0a739
+      size: 85
+    - path: results/ofen_g_koks/normal_baseline/evaluation/pit_histogram.pdf
+      hash: md5
+      md5: 822708879a1ebcef091ab2e4d9f92322
+      size: 38458
   evaluate@dataset1-lognormal_baseline:
     cmd: "python scripts/evaluate.py --model lognormal_baseline --stage-name evaluate@dataset1-lognormal_baseline
       --target-name ofen_g_koks --prediction-horizon 48\n"
@@ -6300,16 +5910,16 @@ stages:
       nfiles: 6
     - path: results/ofen_g_koks/lognormal_baseline/model_weights.h5
       hash: md5
-      md5: 3a67754f9b20ee067cb3b836bf136be9
+      md5: 676ed7d62abb34519237b2ecd2fbaec0
       size: 96208
     - path: results/ofen_g_koks/lognormal_baseline/parent_run_id.txt
       hash: md5
-      md5: 6d75edfddd1bfcd5457d93486ffcb881
+      md5: 36b432e9e1eaa04a39b61452eeb9a246
       size: 32
     - path: scripts/evaluate.py
       hash: md5
-      md5: a84a23b96209a9b10f9c987f1cc1e755
-      size: 10750
+      md5: bb9677395adfab212d992feee404fd3c
+      size: 11318
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
@@ -6331,8 +5941,8 @@ stages:
         fit_kwargs:
           batch_size: 256
           early_stopping_patience: 10
-          epochs: 200
-          learning_rate: 0.001
+          epochs: 100
+          learning_rate: 0.0005
           verbose: true
         model_kwargs:
           distribution: multivariate_lognormal_diag
@@ -6347,11 +5957,11 @@ stages:
     outs:
     - path: results/ofen_g_koks/lognormal_baseline/evaluation/calibration.pdf
       hash: md5
-      md5: fe8266fe2adf20126be888d56a636a19
+      md5: 805b40df7feec11f63cfc3ad6e14f032
       size: 40393
     - path: results/ofen_g_koks/lognormal_baseline/evaluation/forecast.pdf
       hash: md5
-      md5: 53f89099fa41b17629b4cd00259c8d33
+      md5: c00d8a1ac4e1924db9476aa5274dded6
       size: 26017
     - path: results/ofen_g_koks/lognormal_baseline/evaluation/metrics.yaml
       hash: md5
@@ -6359,8 +5969,125 @@ stages:
       size: 44
     - path: results/ofen_g_koks/lognormal_baseline/evaluation/pit_histogram.pdf
       hash: md5
-      md5: 45f978f17585cb12014c1d98894167b3
+      md5: a45a19086f44d82450c00d9032314e52
       size: 33241
+  evaluate@dataset1-bernstein_nf_scale:
+    cmd: "python scripts/evaluate.py --model bernstein_nf_scale --stage-name evaluate@dataset1-bernstein_nf_scale
+      --target-name ofen_g_koks --prediction-horizon 48\n"
+    deps:
+    - path: data/processed/ofen_g_koks/
+      hash: md5
+      md5: 6fd5cf3061b1dd3a8cf8579adc597439.dir
+      size: 28657756
+      nfiles: 6
+    - path: results/ofen_g_koks/bernstein_nf_scale/model_weights.h5
+      hash: md5
+      md5: 4dc76523b6ba5aadccd989618cc5a72d
+      size: 6440256
+    - path: results/ofen_g_koks/bernstein_nf_scale/parent_run_id.txt
+      hash: md5
+      md5: 039fb504100c57c8024a5e0d767519d0
+      size: 32
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: bb9677395adfab212d992feee404fd3c
+      size: 11318
+    - path: src/dcp_nf_forecast/
+      hash: md5
+      md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
+      size: 35957
+      nfiles: 10
+    params:
+      params.yaml:
+        data.data_format: feather
+        eval.n_samples: 1000
+        experiment_name: dcp_nf_forecast
+        log_file: logs/pipeline.log
+        log_level: info
+        paths.data_processed: data/processed
+        seed: 42
+        test_mode: true
+      params/models/ofen_g_koks/bernstein_nf_scale.yaml:
+        compile_kwargs: {}
+        fit_kwargs:
+          epochs: 100
+          learning_rate: 0.0005
+          batch_size: 256
+          early_stopping_patience: 10
+          verbose: true
+        model_kwargs:
+          distribution: masked_autoregressive_flow
+          num_layers: 1
+          base_distribution_kwargs:
+            distribution_name: normal
+          num_parameters: 51
+          parameters_fn_kwargs:
+            activation: relu
+            hidden_units:
+            - 256
+            - 256
+            - 256
+          nested_bijectors:
+          - bijector: Scale
+            parameters_slice_size: 1
+            parameters_constraint_fn: tensorflow.math.softplus
+            parameters_fn: parameter_vector_or_simple_network
+            parameters_fn_kwargs:
+              activation: relu
+              conditional: true
+              dropout: false
+              batch_norm: false
+              hidden_units:
+              - 128
+              - 128
+              - 128
+              parameter_shape:
+              - 48
+          - bijector: BernsteinPolynomial
+            parameters_slice_size: 50
+            bijector_kwargs:
+              extrapolation: false
+              domain:
+              - 0.0
+              - 1.0
+            invert: true
+            parameters_constraint_fn:
+              hybrid_flows.activations.get_thetas_constrain_fn
+            parameters_constraint_fn_kwargs:
+              allow_flexible_bounds: false
+              bounds: none
+              low: 0.007
+              high: 148
+            parameters_fn: parameter_vector_or_simple_network
+            parameters_fn_kwargs:
+              activation: relu
+              conditional: true
+              dropout: false
+              batch_norm: false
+              hidden_units:
+              - 256
+              - 256
+              - 256
+              parameter_shape:
+              - 48
+              - 50
+    outs:
+    - path: results/ofen_g_koks/bernstein_nf_scale/evaluation/calibration.pdf
+      hash: md5
+      md5: 00651095ae0ed8e24f2e13e9e2e917a0
+      size: 41811
+    - path: results/ofen_g_koks/bernstein_nf_scale/evaluation/forecast.pdf
+      hash: md5
+      md5: b0f5e86109c8f816eca08ea558185718
+      size: 51692
+    - path: results/ofen_g_koks/bernstein_nf_scale/evaluation/metrics.yaml
+      hash: md5
+      md5: 419fd57e452eec26d73608fc98342a05
+      size: 86
+    - path: results/ofen_g_koks/bernstein_nf_scale/evaluation/pit_histogram.pdf
+      hash: md5
+      md5: 5881a31994acfdaf80c9887c11facf6d
+      size: 38310
   evaluate@dataset1-bernstein_nf_scale_lognormal:
     cmd: "python scripts/evaluate.py --model bernstein_nf_scale_lognormal --stage-name
       evaluate@dataset1-bernstein_nf_scale_lognormal --target-name ofen_g_koks --prediction-horizon
@@ -6373,16 +6100,16 @@ stages:
       nfiles: 6
     - path: results/ofen_g_koks/bernstein_nf_scale_lognormal/model_weights.h5
       hash: md5
-      md5: c70bfe6c51176bd7adbf2497ec18a2d1
+      md5: be832f2fe46531348d744205d8115305
       size: 6440256
     - path: results/ofen_g_koks/bernstein_nf_scale_lognormal/parent_run_id.txt
       hash: md5
-      md5: 293c526edcc155277bd706b57aee5c62
+      md5: b06a6eb2330e0654bb69efe46c7245f0
       size: 32
     - path: scripts/evaluate.py
       hash: md5
-      md5: a84a23b96209a9b10f9c987f1cc1e755
-      size: 10750
+      md5: bb9677395adfab212d992feee404fd3c
+      size: 11318
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
@@ -6466,23 +6193,95 @@ stages:
     - path:
         results/ofen_g_koks/bernstein_nf_scale_lognormal/evaluation/calibration.pdf
       hash: md5
-      md5: a2f87813d616d5ccb2475548e152b20c
-      size: 42051
+      md5: 459b753221934a20d9920ff160e6d924
+      size: 42077
     - path:
         results/ofen_g_koks/bernstein_nf_scale_lognormal/evaluation/forecast.pdf
       hash: md5
-      md5: 2de578ad5782e4149280e77ab6f51f7d
-      size: 52215
+      md5: ab0c9157443eb597203423abf5e66310
+      size: 52071
     - path:
         results/ofen_g_koks/bernstein_nf_scale_lognormal/evaluation/metrics.yaml
       hash: md5
-      md5: 94cb340afd6be6a45f112ef9bf909a1f
+      md5: 15cf9b016dc627b36b54402dc240ed9f
       size: 88
     - path:
         results/ofen_g_koks/bernstein_nf_scale_lognormal/evaluation/pit_histogram.pdf
       hash: md5
-      md5: e166d48bda6b1019fbd6e1a0b233b6a4
-      size: 38857
+      md5: 6c11c3da9363f87e49ec1c4440c56664
+      size: 38879
+  evaluate@dataset2-normal_baseline:
+    cmd: "python scripts/evaluate.py --model normal_baseline --stage-name evaluate@dataset2-normal_baseline
+      --target-name ofen_f_koks --prediction-horizon 48\n"
+    deps:
+    - path: data/processed/ofen_f_koks/
+      hash: md5
+      md5: 9856bca90cc5c0413c771deef3debeea.dir
+      size: 27457172
+      nfiles: 6
+    - path: results/ofen_f_koks/normal_baseline/model_weights.h5
+      hash: md5
+      md5: 96aab2d8d9c6349965f2a4a02c797994
+      size: 96208
+    - path: results/ofen_f_koks/normal_baseline/parent_run_id.txt
+      hash: md5
+      md5: 73377680d8db7f894fc93797a84912bc
+      size: 32
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: bb9677395adfab212d992feee404fd3c
+      size: 11318
+    - path: src/dcp_nf_forecast/
+      hash: md5
+      md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
+      size: 35957
+      nfiles: 10
+    params:
+      params.yaml:
+        data.data_format: feather
+        eval.n_samples: 1000
+        experiment_name: dcp_nf_forecast
+        log_file: logs/pipeline.log
+        log_level: info
+        paths.data_processed: data/processed
+        seed: 42
+        test_mode: true
+      params/models/ofen_f_koks/normal_baseline.yaml:
+        compile_kwargs:
+          jit_compile: false
+        fit_kwargs:
+          batch_size: 256
+          early_stopping_patience: 10
+          epochs: 100
+          learning_rate: 0.0005
+          verbose: true
+        model_kwargs:
+          distribution: multivariate_normal_diag
+          parameters_fn_kwargs:
+            activation: relu
+            batch_norm: true
+            conditional: true
+            dropout: 0
+            hidden_units:
+            - 32
+            - 32
+    outs:
+    - path: results/ofen_f_koks/normal_baseline/evaluation/calibration.pdf
+      hash: md5
+      md5: 27e6ecde8a20103de649cf268b1f737c
+      size: 41925
+    - path: results/ofen_f_koks/normal_baseline/evaluation/forecast.pdf
+      hash: md5
+      md5: ac34716c0c758319c343b5eb2d90cc8e
+      size: 52539
+    - path: results/ofen_f_koks/normal_baseline/evaluation/metrics.yaml
+      hash: md5
+      md5: 80e59015d45b89ce0a49bbcfb7e44632
+      size: 87
+    - path: results/ofen_f_koks/normal_baseline/evaluation/pit_histogram.pdf
+      hash: md5
+      md5: 77322afeaf0baaac2a79b4c1c68f053a
+      size: 38379
   evaluate@dataset2-lognormal_baseline:
     cmd: "python scripts/evaluate.py --model lognormal_baseline --stage-name evaluate@dataset2-lognormal_baseline
       --target-name ofen_f_koks --prediction-horizon 48\n"
@@ -6494,16 +6293,16 @@ stages:
       nfiles: 6
     - path: results/ofen_f_koks/lognormal_baseline/model_weights.h5
       hash: md5
-      md5: d586da43ce6ffa2279c6fdf5cd0f471a
+      md5: be28e58a179c4687fd9416f4b5b60009
       size: 96208
     - path: results/ofen_f_koks/lognormal_baseline/parent_run_id.txt
       hash: md5
-      md5: 14e0752eee09aeff3c2867d8b0952777
+      md5: 501fbb369c48b4b7553b16a06f7ee155
       size: 32
     - path: scripts/evaluate.py
       hash: md5
-      md5: a84a23b96209a9b10f9c987f1cc1e755
-      size: 10750
+      md5: bb9677395adfab212d992feee404fd3c
+      size: 11318
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
@@ -6525,8 +6324,8 @@ stages:
         fit_kwargs:
           batch_size: 256
           early_stopping_patience: 10
-          epochs: 200
-          learning_rate: 0.001
+          epochs: 100
+          learning_rate: 0.0005
           verbose: true
         model_kwargs:
           distribution: multivariate_lognormal_diag
@@ -6541,11 +6340,11 @@ stages:
     outs:
     - path: results/ofen_f_koks/lognormal_baseline/evaluation/calibration.pdf
       hash: md5
-      md5: 9d9a45e76b2af3480bedd3e83c6ba327
+      md5: ef4e4179d1e3e5083c9fdcba23a197e4
       size: 40394
     - path: results/ofen_f_koks/lognormal_baseline/evaluation/forecast.pdf
       hash: md5
-      md5: 9350e1f3bb775a374d3b72e1be432a09
+      md5: 7d5139f04195e82fbfbae61108dd760c
       size: 26581
     - path: results/ofen_f_koks/lognormal_baseline/evaluation/metrics.yaml
       hash: md5
@@ -6553,7 +6352,7 @@ stages:
       size: 44
     - path: results/ofen_f_koks/lognormal_baseline/evaluation/pit_histogram.pdf
       hash: md5
-      md5: 85bc964263abfe907840bf73cc18d70e
+      md5: 3abaafcdfeb961f6ad6167b1fa279de8
       size: 33239
   evaluate@dataset2-spline_nf:
     cmd: "python scripts/evaluate.py --model spline_nf --stage-name evaluate@dataset2-spline_nf
@@ -6566,16 +6365,16 @@ stages:
       nfiles: 6
     - path: results/ofen_f_koks/spline_nf/model_weights.h5
       hash: md5
-      md5: ab17b9411cbe9322fcdd3d810b48aa7f
+      md5: e0601fb1ab27c50bd1543256ab2d5bdc
       size: 5282504
     - path: results/ofen_f_koks/spline_nf/parent_run_id.txt
       hash: md5
-      md5: 374c0b735517668a3d8fbf99cf8d13d3
+      md5: a9cc9cee9f6c4498321cea260e9932b2
       size: 32
     - path: scripts/evaluate.py
       hash: md5
-      md5: a84a23b96209a9b10f9c987f1cc1e755
-      size: 10750
+      md5: bb9677395adfab212d992feee404fd3c
+      size: 11318
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
@@ -6625,20 +6424,20 @@ stages:
     outs:
     - path: results/ofen_f_koks/spline_nf/evaluation/calibration.pdf
       hash: md5
-      md5: 8d5e1241fd380698807e08cdcb9bbb07
-      size: 41848
+      md5: c47e64b3e6e85fca5be71a41f5febd0f
+      size: 41815
     - path: results/ofen_f_koks/spline_nf/evaluation/forecast.pdf
       hash: md5
-      md5: ca5c415bed32263e09b017f1d609a8b0
-      size: 50242
+      md5: 275b22ca0a99917255ec0ce14adc165b
+      size: 50878
     - path: results/ofen_f_koks/spline_nf/evaluation/metrics.yaml
       hash: md5
-      md5: 2e61cec4148768f6e3f21d610c4bbc95
-      size: 87
+      md5: bdc0769685d173c7a607e048b82b0278
+      size: 88
     - path: results/ofen_f_koks/spline_nf/evaluation/pit_histogram.pdf
       hash: md5
-      md5: 9438669da7df0d177ff89b4b53846c98
-      size: 38112
+      md5: 6193539486d7036d938c817c57ea7420
+      size: 38042
   evaluate@dataset2-bernstein_nf_lognormal:
     cmd: "python scripts/evaluate.py --model bernstein_nf_lognormal --stage-name evaluate@dataset2-bernstein_nf_lognormal
       --target-name ofen_f_koks --prediction-horizon 48\n"
@@ -6650,16 +6449,16 @@ stages:
       nfiles: 6
     - path: results/ofen_f_koks/bernstein_nf_lognormal/model_weights.h5
       hash: md5
-      md5: da2f6a893aa2ec70199d030f7f8e1055
+      md5: 63568c52f9083349c531ea74c37fa5ad
       size: 5331848
     - path: results/ofen_f_koks/bernstein_nf_lognormal/parent_run_id.txt
       hash: md5
-      md5: 79e16ff01199b21ff75fa27ca9086645
+      md5: b35031615b9042a6d65cd73eca7da49b
       size: 32
     - path: scripts/evaluate.py
       hash: md5
-      md5: a84a23b96209a9b10f9c987f1cc1e755
-      size: 10750
+      md5: bb9677395adfab212d992feee404fd3c
+      size: 11318
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
@@ -6696,4 +6495,763 @@ stages:
           base_distribution_kwargs:
             distribution_name: lognormal
           num_parameters: 96
-          parameters_constraint_fn
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_thetas_constrain_fn
+          parameters_constraint_fn_kwargs:
+            allow_flexible_bounds: false
+            bounds: none
+            low: 0.007
+            high: 148
+          parameters_fn_kwargs:
+            activation: relu
+            hidden_units:
+            - 256
+            - 256
+            - 256
+            conditional: true
+    outs:
+    - path:
+        results/ofen_f_koks/bernstein_nf_lognormal/evaluation/calibration.pdf
+      hash: md5
+      md5: 139c5e96597909703642b1a5affcc53a
+      size: 41903
+    - path: results/ofen_f_koks/bernstein_nf_lognormal/evaluation/forecast.pdf
+      hash: md5
+      md5: c9f57b69cd3bb6e438a98d9986a2a5f6
+      size: 51839
+    - path: results/ofen_f_koks/bernstein_nf_lognormal/evaluation/metrics.yaml
+      hash: md5
+      md5: 839592a62c58102793c57c690378e97f
+      size: 90
+    - path:
+        results/ofen_f_koks/bernstein_nf_lognormal/evaluation/pit_histogram.pdf
+      hash: md5
+      md5: 6d653f2fcbdfac34552c6f83253ce5b2
+      size: 38362
+  evaluate@dataset2-spline_nf_lognormal:
+    cmd: "python scripts/evaluate.py --model spline_nf_lognormal --stage-name evaluate@dataset2-spline_nf_lognormal
+      --target-name ofen_f_koks --prediction-horizon 48\n"
+    deps:
+    - path: data/processed/ofen_f_koks/
+      hash: md5
+      md5: 9856bca90cc5c0413c771deef3debeea.dir
+      size: 27457172
+      nfiles: 6
+    - path: results/ofen_f_koks/spline_nf_lognormal/model_weights.h5
+      hash: md5
+      md5: 125a148ac542336c650c90534ad3dffb
+      size: 5282504
+    - path: results/ofen_f_koks/spline_nf_lognormal/parent_run_id.txt
+      hash: md5
+      md5: df53f48d7910874ee47d6f9a2504b28d
+      size: 32
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: bb9677395adfab212d992feee404fd3c
+      size: 11318
+    - path: src/dcp_nf_forecast/
+      hash: md5
+      md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
+      size: 35957
+      nfiles: 10
+    params:
+      params.yaml:
+        data.data_format: feather
+        eval.n_samples: 1000
+        experiment_name: dcp_nf_forecast
+        log_file: logs/pipeline.log
+        log_level: info
+        paths.data_processed: data/processed
+        seed: 42
+        test_mode: true
+      params/models/ofen_f_koks/spline_nf_lognormal.yaml:
+        compile_kwargs: {}
+        fit_kwargs:
+          batch_size: 256
+          early_stopping_patience: 10
+          epochs: 100
+          learning_rate: 0.0005
+          verbose: true
+        model_kwargs:
+          distribution: masked_autoregressive_flow
+          num_layers: 1
+          bijector: RationalQuadraticSpline
+          bijector_kwargs:
+            range_min: 0
+          base_distribution_kwargs:
+            distribution_name: lognormal
+          num_parameters: 95
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_spline_param_constrain_fn
+          parameters_constraint_fn_kwargs:
+            interval_width: 4
+            min_slope: 0.001
+            min_bin_width: 0.001
+            nbins: 32
+          parameters_fn_kwargs:
+            activation: relu
+            hidden_units:
+            - 256
+            - 256
+            - 256
+            conditional: true
+    outs:
+    - path: results/ofen_f_koks/spline_nf_lognormal/evaluation/calibration.pdf
+      hash: md5
+      md5: e49031d4f063cd848574c459bfd608d1
+      size: 41857
+    - path: results/ofen_f_koks/spline_nf_lognormal/evaluation/forecast.pdf
+      hash: md5
+      md5: 4236a8b72b766112654781e8aa8d437d
+      size: 47868
+    - path: results/ofen_f_koks/spline_nf_lognormal/evaluation/metrics.yaml
+      hash: md5
+      md5: 34c5b2ca012d362988623908cf1865c8
+      size: 85
+    - path: results/ofen_f_koks/spline_nf_lognormal/evaluation/pit_histogram.pdf
+      hash: md5
+      md5: f5c95e44cbdb8b2cf67b84c86a2d2292
+      size: 37962
+  evaluate@dataset2-bernstein_nf_scale:
+    cmd: "python scripts/evaluate.py --model bernstein_nf_scale --stage-name evaluate@dataset2-bernstein_nf_scale
+      --target-name ofen_f_koks --prediction-horizon 48\n"
+    deps:
+    - path: data/processed/ofen_f_koks/
+      hash: md5
+      md5: 9856bca90cc5c0413c771deef3debeea.dir
+      size: 27457172
+      nfiles: 6
+    - path: results/ofen_f_koks/bernstein_nf_scale/model_weights.h5
+      hash: md5
+      md5: 6461217bd49f466e848baa8b76aa45aa
+      size: 6440256
+    - path: results/ofen_f_koks/bernstein_nf_scale/parent_run_id.txt
+      hash: md5
+      md5: 5961d783e17c6fafc66841e472d4ee08
+      size: 32
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: bb9677395adfab212d992feee404fd3c
+      size: 11318
+    - path: src/dcp_nf_forecast/
+      hash: md5
+      md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
+      size: 35957
+      nfiles: 10
+    params:
+      params.yaml:
+        data.data_format: feather
+        eval.n_samples: 1000
+        experiment_name: dcp_nf_forecast
+        log_file: logs/pipeline.log
+        log_level: info
+        paths.data_processed: data/processed
+        seed: 42
+        test_mode: true
+      params/models/ofen_f_koks/bernstein_nf_scale.yaml:
+        compile_kwargs: {}
+        fit_kwargs:
+          epochs: 100
+          learning_rate: 0.0005
+          batch_size: 256
+          early_stopping_patience: 10
+          verbose: true
+        model_kwargs:
+          distribution: masked_autoregressive_flow
+          num_layers: 1
+          base_distribution_kwargs:
+            distribution_name: normal
+          num_parameters: 51
+          parameters_fn_kwargs:
+            activation: relu
+            hidden_units:
+            - 256
+            - 256
+            - 256
+          nested_bijectors:
+          - bijector: Scale
+            parameters_slice_size: 1
+            parameters_constraint_fn: tensorflow.math.softplus
+            parameters_fn: parameter_vector_or_simple_network
+            parameters_fn_kwargs:
+              activation: relu
+              conditional: true
+              dropout: false
+              batch_norm: false
+              hidden_units:
+              - 128
+              - 128
+              - 128
+              parameter_shape:
+              - 48
+          - bijector: BernsteinPolynomial
+            parameters_slice_size: 50
+            bijector_kwargs:
+              extrapolation: false
+              domain:
+              - 0.0
+              - 1.0
+            invert: true
+            parameters_constraint_fn:
+              hybrid_flows.activations.get_thetas_constrain_fn
+            parameters_constraint_fn_kwargs:
+              allow_flexible_bounds: false
+              bounds: none
+              low: 0.007
+              high: 148
+            parameters_fn: parameter_vector_or_simple_network
+            parameters_fn_kwargs:
+              activation: relu
+              conditional: true
+              dropout: false
+              batch_norm: false
+              hidden_units:
+              - 256
+              - 256
+              - 256
+              parameter_shape:
+              - 48
+              - 50
+    outs:
+    - path: results/ofen_f_koks/bernstein_nf_scale/evaluation/calibration.pdf
+      hash: md5
+      md5: de6e374f3048398bf4ad1973bedfbb46
+      size: 42020
+    - path: results/ofen_f_koks/bernstein_nf_scale/evaluation/forecast.pdf
+      hash: md5
+      md5: f8eadfab8a4f4f14312bb609bb6746de
+      size: 51124
+    - path: results/ofen_f_koks/bernstein_nf_scale/evaluation/metrics.yaml
+      hash: md5
+      md5: 6f4d1eeda2ff8010b429cbe5ced1194c
+      size: 87
+    - path: results/ofen_f_koks/bernstein_nf_scale/evaluation/pit_histogram.pdf
+      hash: md5
+      md5: fa4adb61c1f2252beafb5262771dd3c1
+      size: 38519
+  evaluate@dataset2-bernstein_nf_scale_lognormal:
+    cmd: "python scripts/evaluate.py --model bernstein_nf_scale_lognormal --stage-name
+      evaluate@dataset2-bernstein_nf_scale_lognormal --target-name ofen_f_koks --prediction-horizon
+      48\n"
+    deps:
+    - path: data/processed/ofen_f_koks/
+      hash: md5
+      md5: 9856bca90cc5c0413c771deef3debeea.dir
+      size: 27457172
+      nfiles: 6
+    - path: results/ofen_f_koks/bernstein_nf_scale_lognormal/model_weights.h5
+      hash: md5
+      md5: e6d1415955262a5cfdc23b1a750a734a
+      size: 6440256
+    - path: results/ofen_f_koks/bernstein_nf_scale_lognormal/parent_run_id.txt
+      hash: md5
+      md5: 5af3051b4334541794c9bb0994fff270
+      size: 32
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: bb9677395adfab212d992feee404fd3c
+      size: 11318
+    - path: src/dcp_nf_forecast/
+      hash: md5
+      md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
+      size: 35957
+      nfiles: 10
+    params:
+      params.yaml:
+        data.data_format: feather
+        eval.n_samples: 1000
+        experiment_name: dcp_nf_forecast
+        log_file: logs/pipeline.log
+        log_level: info
+        paths.data_processed: data/processed
+        seed: 42
+        test_mode: true
+      params/models/ofen_f_koks/bernstein_nf_scale_lognormal.yaml:
+        compile_kwargs: {}
+        fit_kwargs:
+          epochs: 100
+          learning_rate: 0.0005
+          batch_size: 256
+          early_stopping_patience: 10
+          verbose: true
+        model_kwargs:
+          distribution: masked_autoregressive_flow
+          num_layers: 1
+          base_distribution_kwargs:
+            distribution_name: lognormal
+          num_parameters: 51
+          parameters_fn_kwargs:
+            activation: relu
+            hidden_units:
+            - 256
+            - 256
+            - 256
+          nested_bijectors:
+          - bijector: Scale
+            parameters_slice_size: 1
+            parameters_constraint_fn: tensorflow.math.softplus
+            parameters_fn: parameter_vector_or_simple_network
+            parameters_fn_kwargs:
+              activation: relu
+              conditional: true
+              dropout: false
+              batch_norm: false
+              hidden_units:
+              - 128
+              - 128
+              - 128
+              parameter_shape:
+              - 48
+          - bijector: BernsteinPolynomial
+            parameters_slice_size: 50
+            bijector_kwargs:
+              extrapolation: false
+              domain:
+              - 0.0
+              - 1.0
+            invert: true
+            parameters_constraint_fn:
+              hybrid_flows.activations.get_thetas_constrain_fn
+            parameters_constraint_fn_kwargs:
+              allow_flexible_bounds: false
+              bounds: none
+              low: 0.007
+              high: 148
+            parameters_fn: parameter_vector_or_simple_network
+            parameters_fn_kwargs:
+              activation: relu
+              conditional: true
+              dropout: false
+              batch_norm: false
+              hidden_units:
+              - 256
+              - 256
+              - 256
+              parameter_shape:
+              - 48
+              - 50
+    outs:
+    - path:
+        results/ofen_f_koks/bernstein_nf_scale_lognormal/evaluation/calibration.pdf
+      hash: md5
+      md5: 687fdcf3fcc0abb3b6d3d1567ed92dc1
+      size: 42014
+    - path:
+        results/ofen_f_koks/bernstein_nf_scale_lognormal/evaluation/forecast.pdf
+      hash: md5
+      md5: e9a27e48d88b81edaaf07364db0796ba
+      size: 52399
+    - path:
+        results/ofen_f_koks/bernstein_nf_scale_lognormal/evaluation/metrics.yaml
+      hash: md5
+      md5: e5f079b563e65d4d03aebfc22170a594
+      size: 91
+    - path:
+        results/ofen_f_koks/bernstein_nf_scale_lognormal/evaluation/pit_histogram.pdf
+      hash: md5
+      md5: c6dae114847e127d89c49c01f41ea544
+      size: 38928
+  evaluate@dataset3-normal_baseline:
+    cmd: "python scripts/evaluate.py --model normal_baseline --stage-name evaluate@dataset3-normal_baseline
+      --target-name pl2 --prediction-horizon 48\n"
+    deps:
+    - path: data/processed/pl2/
+      hash: md5
+      md5: ace540117f66c965120462f17290eb8c.dir
+      size: 34048532
+      nfiles: 6
+    - path: results/pl2/normal_baseline/model_weights.h5
+      hash: md5
+      md5: 96e768e31291a8ef652c91aceb40218d
+      size: 96208
+    - path: results/pl2/normal_baseline/parent_run_id.txt
+      hash: md5
+      md5: 6dcd2fe664cd92a7b74f35337909e625
+      size: 32
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: bb9677395adfab212d992feee404fd3c
+      size: 11318
+    - path: src/dcp_nf_forecast/
+      hash: md5
+      md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
+      size: 35957
+      nfiles: 10
+    params:
+      params.yaml:
+        data.data_format: feather
+        eval.n_samples: 1000
+        experiment_name: dcp_nf_forecast
+        log_file: logs/pipeline.log
+        log_level: info
+        paths.data_processed: data/processed
+        seed: 42
+        test_mode: true
+      params/models/pl2/normal_baseline.yaml:
+        compile_kwargs:
+          jit_compile: false
+        fit_kwargs:
+          batch_size: 256
+          early_stopping_patience: 10
+          epochs: 100
+          learning_rate: 0.0005
+          verbose: true
+        model_kwargs:
+          distribution: multivariate_normal_diag
+          parameters_fn_kwargs:
+            activation: relu
+            batch_norm: true
+            conditional: true
+            dropout: 0
+            hidden_units:
+            - 32
+            - 32
+    outs:
+    - path: results/pl2/normal_baseline/evaluation/calibration.pdf
+      hash: md5
+      md5: f8500b77eab4022f64b75aba5d09bfbf
+      size: 41674
+    - path: results/pl2/normal_baseline/evaluation/forecast.pdf
+      hash: md5
+      md5: d8c5ac6b1e93b316fd96833d50f91201
+      size: 51362
+    - path: results/pl2/normal_baseline/evaluation/metrics.yaml
+      hash: md5
+      md5: bd31a34d2a0792ce5e0d2e23187814d2
+      size: 87
+    - path: results/pl2/normal_baseline/evaluation/pit_histogram.pdf
+      hash: md5
+      md5: 012073278a9196ce7cdee47ac29e56a3
+      size: 38292
+  evaluate@dataset3-lognormal_baseline:
+    cmd: "python scripts/evaluate.py --model lognormal_baseline --stage-name evaluate@dataset3-lognormal_baseline
+      --target-name pl2 --prediction-horizon 48\n"
+    deps:
+    - path: data/processed/pl2/
+      hash: md5
+      md5: ace540117f66c965120462f17290eb8c.dir
+      size: 34048532
+      nfiles: 6
+    - path: results/pl2/lognormal_baseline/model_weights.h5
+      hash: md5
+      md5: 5ee038bf0f726a8cbbc41cc0ff8d93de
+      size: 96208
+    - path: results/pl2/lognormal_baseline/parent_run_id.txt
+      hash: md5
+      md5: 946a9309c50e72f5270951b0e4eca88f
+      size: 32
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: bb9677395adfab212d992feee404fd3c
+      size: 11318
+    - path: src/dcp_nf_forecast/
+      hash: md5
+      md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
+      size: 35957
+      nfiles: 10
+    params:
+      params.yaml:
+        data.data_format: feather
+        eval.n_samples: 1000
+        experiment_name: dcp_nf_forecast
+        log_file: logs/pipeline.log
+        log_level: info
+        paths.data_processed: data/processed
+        seed: 42
+        test_mode: true
+      params/models/pl2/lognormal_baseline.yaml:
+        compile_kwargs:
+          jit_compile: false
+        fit_kwargs:
+          batch_size: 256
+          early_stopping_patience: 10
+          epochs: 100
+          learning_rate: 0.0005
+          verbose: true
+        model_kwargs:
+          distribution: multivariate_lognormal_diag
+          parameters_fn_kwargs:
+            activation: relu
+            batch_norm: true
+            conditional: true
+            dropout: 0
+            hidden_units:
+            - 32
+            - 32
+    outs:
+    - path: results/pl2/lognormal_baseline/evaluation/calibration.pdf
+      hash: md5
+      md5: 35043e4223206b1376930298520ee1db
+      size: 40182
+    - path: results/pl2/lognormal_baseline/evaluation/forecast.pdf
+      hash: md5
+      md5: 748294efc3adfa368fb04a65b3e680f7
+      size: 24764
+    - path: results/pl2/lognormal_baseline/evaluation/metrics.yaml
+      hash: md5
+      md5: b1d6ca6b6c3c250dea6b81b2b79b8933
+      size: 44
+    - path: results/pl2/lognormal_baseline/evaluation/pit_histogram.pdf
+      hash: md5
+      md5: 4c4884e166d066bc561454b3319f4f85
+      size: 33131
+  evaluate@dataset3-bernstein_nf:
+    cmd: "python scripts/evaluate.py --model bernstein_nf --stage-name evaluate@dataset3-bernstein_nf
+      --target-name pl2 --prediction-horizon 48\n"
+    deps:
+    - path: data/processed/pl2/
+      hash: md5
+      md5: ace540117f66c965120462f17290eb8c.dir
+      size: 34048532
+      nfiles: 6
+    - path: results/pl2/bernstein_nf/model_weights.h5
+      hash: md5
+      md5: e8d3a098fa1b238eb78f73b26f31a664
+      size: 5331848
+    - path: results/pl2/bernstein_nf/parent_run_id.txt
+      hash: md5
+      md5: 03e6a7e1cfee2cacf7989eee4a8c0429
+      size: 32
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: bb9677395adfab212d992feee404fd3c
+      size: 11318
+    - path: src/dcp_nf_forecast/
+      hash: md5
+      md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
+      size: 35957
+      nfiles: 10
+    params:
+      params.yaml:
+        data.data_format: feather
+        eval.n_samples: 1000
+        experiment_name: dcp_nf_forecast
+        log_file: logs/pipeline.log
+        log_level: info
+        paths.data_processed: data/processed
+        seed: 42
+        test_mode: true
+      params/models/pl2/bernstein_nf.yaml:
+        compile_kwargs: {}
+        fit_kwargs:
+          batch_size: 256
+          early_stopping_patience: 10
+          epochs: 100
+          learning_rate: 0.0005
+          verbose: true
+        model_kwargs:
+          distribution: masked_autoregressive_flow
+          num_layers: 1
+          bijector: BernsteinPolynomial
+          bijector_kwargs:
+            domain:
+            - 0
+            - 1
+            extrapolation: false
+          invert: true
+          base_distribution_kwargs:
+            distribution_name: normal
+          num_parameters: 96
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_thetas_constrain_fn
+          parameters_constraint_fn_kwargs:
+            allow_flexible_bounds: false
+            bounds: none
+            low: 0.007
+            high: 148
+          parameters_fn_kwargs:
+            activation: relu
+            hidden_units:
+            - 256
+            - 256
+            - 256
+            conditional: true
+    outs:
+    - path: results/pl2/bernstein_nf/evaluation/calibration.pdf
+      hash: md5
+      md5: 9b32d877e4ba2ac4ae565c5ac5085390
+      size: 41533
+    - path: results/pl2/bernstein_nf/evaluation/forecast.pdf
+      hash: md5
+      md5: 85f4b25e6cdcb5a8114a5ac4810ab855
+      size: 49607
+    - path: results/pl2/bernstein_nf/evaluation/metrics.yaml
+      hash: md5
+      md5: f17f088ac17f26a39063d0e5b365e2dc
+      size: 88
+    - path: results/pl2/bernstein_nf/evaluation/pit_histogram.pdf
+      hash: md5
+      md5: caa38ee7fe38f24172b55a661620a120
+      size: 37634
+  evaluate@dataset3-spline_nf:
+    cmd: "python scripts/evaluate.py --model spline_nf --stage-name evaluate@dataset3-spline_nf
+      --target-name pl2 --prediction-horizon 48\n"
+    deps:
+    - path: data/processed/pl2/
+      hash: md5
+      md5: ace540117f66c965120462f17290eb8c.dir
+      size: 34048532
+      nfiles: 6
+    - path: results/pl2/spline_nf/model_weights.h5
+      hash: md5
+      md5: f80316c67f7e2b215581e4d1f6703360
+      size: 5282504
+    - path: results/pl2/spline_nf/parent_run_id.txt
+      hash: md5
+      md5: 51783f7b4c539039e1e8c79811f07db8
+      size: 32
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: bb9677395adfab212d992feee404fd3c
+      size: 11318
+    - path: src/dcp_nf_forecast/
+      hash: md5
+      md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
+      size: 35957
+      nfiles: 10
+    params:
+      params.yaml:
+        data.data_format: feather
+        eval.n_samples: 1000
+        experiment_name: dcp_nf_forecast
+        log_file: logs/pipeline.log
+        log_level: info
+        paths.data_processed: data/processed
+        seed: 42
+        test_mode: true
+      params/models/pl2/spline_nf.yaml:
+        compile_kwargs: {}
+        fit_kwargs:
+          batch_size: 256
+          early_stopping_patience: 10
+          epochs: 100
+          learning_rate: 0.0005
+          verbose: true
+        model_kwargs:
+          distribution: masked_autoregressive_flow
+          num_layers: 1
+          bijector: RationalQuadraticSpline
+          bijector_kwargs:
+            range_min: -4
+          base_distribution_kwargs:
+            distribution_name: normal
+          num_parameters: 95
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_spline_param_constrain_fn
+          parameters_constraint_fn_kwargs:
+            interval_width: 8
+            min_slope: 0.001
+            min_bin_width: 0.001
+            nbins: 32
+          parameters_fn_kwargs:
+            activation: relu
+            hidden_units:
+            - 256
+            - 256
+            - 256
+            conditional: true
+    outs:
+    - path: results/pl2/spline_nf/evaluation/calibration.pdf
+      hash: md5
+      md5: f2c188eeee3f9b683a19243cae6cac2e
+      size: 41643
+    - path: results/pl2/spline_nf/evaluation/forecast.pdf
+      hash: md5
+      md5: cea8dd09747047eafb5d6c3490297e38
+      size: 49221
+    - path: results/pl2/spline_nf/evaluation/metrics.yaml
+      hash: md5
+      md5: af03969983f1965d9ce5da72cd45ec12
+      size: 88
+    - path: results/pl2/spline_nf/evaluation/pit_histogram.pdf
+      hash: md5
+      md5: c50af3faf64fe479501617aec498e9c9
+      size: 37879
+  evaluate@dataset3-bernstein_nf_lognormal:
+    cmd: "python scripts/evaluate.py --model bernstein_nf_lognormal --stage-name evaluate@dataset3-bernstein_nf_lognormal
+      --target-name pl2 --prediction-horizon 48\n"
+    deps:
+    - path: data/processed/pl2/
+      hash: md5
+      md5: ace540117f66c965120462f17290eb8c.dir
+      size: 34048532
+      nfiles: 6
+    - path: results/pl2/bernstein_nf_lognormal/model_weights.h5
+      hash: md5
+      md5: ea3605299cd536c5219558510bad0618
+      size: 5331848
+    - path: results/pl2/bernstein_nf_lognormal/parent_run_id.txt
+      hash: md5
+      md5: 72b01e5c2211fc68580690c0c1d560ff
+      size: 32
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: bb9677395adfab212d992feee404fd3c
+      size: 11318
+    - path: src/dcp_nf_forecast/
+      hash: md5
+      md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
+      size: 35957
+      nfiles: 10
+    params:
+      params.yaml:
+        data.data_format: feather
+        eval.n_samples: 1000
+        experiment_name: dcp_nf_forecast
+        log_file: logs/pipeline.log
+        log_level: info
+        paths.data_processed: data/processed
+        seed: 42
+        test_mode: true
+      params/models/pl2/bernstein_nf_lognormal.yaml:
+        compile_kwargs: {}
+        fit_kwargs:
+          batch_size: 256
+          early_stopping_patience: 10
+          epochs: 100
+          learning_rate: 0.0005
+          verbose: true
+        model_kwargs:
+          distribution: masked_autoregressive_flow
+          num_layers: 1
+          bijector: BernsteinPolynomial
+          bijector_kwargs:
+            domain:
+            - 0
+            - 1
+            extrapolation: false
+          invert: true
+          base_distribution_kwargs:
+            distribution_name: lognormal
+          num_parameters: 96
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_thetas_constrain_fn
+          parameters_constraint_fn_kwargs:
+            allow_flexible_bounds: false
+            bounds: none
+            low: 0.007
+            high: 148
+          parameters_fn_kwargs:
+            activation: relu
+            hidden_units:
+            - 256
+            - 256
+            - 256
+            conditional: true
+    outs:
+    - path: results/pl2/bernstein_nf_lognormal/evaluation/calibration.pdf
+      hash: md5
+      md5: b1248ff8e1680ccb058d78cb3a67e7c7
+      size: 41778
+    - path: results/pl2/bernstein_nf_lognormal/evaluation/forecast.pdf
+      hash: md5
+      md5: a5a20f3ffcb5e996cb1318cfbbb39f4f
+      size: 51275
+    - path: results/pl2/bernstein_nf_lognormal/evaluation/metrics.yaml
+      hash: md5
+      md5: a1059b48d293faf2cc213e4fc11038cd
+      size: 90
+    - path: results/pl2/bernstein_nf_lognormal/evaluation/pit_histogram.pdf
+      hash: md5
+      md5: 4127b9ea2c4554e6c3548d14e9954270
+      size: 38321
