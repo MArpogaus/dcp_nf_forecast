@@ -1,10 +1,13 @@
-import argparse
-import logging
-from pathlib import Path
+"""Evaluate a trained normalizing flow forecasting model on test data."""
 
 import matplotlib
 
 matplotlib.use("Agg")
+
+import argparse
+import logging
+from pathlib import Path
+
 import dvc.api
 import matplotlib.pyplot as plt
 import mlflow
@@ -16,7 +19,11 @@ from hybrid_flows.utils.mlflow import (
     log_cfg,
     start_run_with_exception_logging,
 )
-from hybrid_flows.utils.visualisation import get_figsize
+from matplotlib.figure import Figure
+from probabilistic_forecast_validation import (
+    plot_pit_histogram,
+    plot_qq,
+)
 
 from dcp_nf_forecast.models import build_model
 from dcp_nf_forecast.utils import load_data, setup_logging
@@ -42,13 +49,31 @@ plt.rcParams.update(
 
 
 def sample_predictions(
-    model,
+    model: tf.keras.Model,
     x: np.ndarray,
     n_samples: int,
     batch_size: int,
 ) -> np.ndarray:
+    """Sample from the predictive distribution in batches.
+
+    Parameters
+    ----------
+    model : tf.keras.Model
+        Trained forecasting model.
+    x : np.ndarray
+        Input covariates, shape ``(n, cov_dim)``.
+    n_samples : int
+        Number of samples per input.
+    batch_size : int
+        Batch size for sampling.
+
+    Returns
+    -------
+    np.ndarray
+        Samples, shape ``(n_samples, n, prediction_horizon)``.
+    """
     n = len(x)
-    all_samples = []
+    all_samples: list[np.ndarray] = []
     pad = 0
     remainder = n % batch_size
     if remainder:
@@ -57,13 +82,49 @@ def sample_predictions(
     for i in range(0, len(x), batch_size):
         batch = x[i : i + batch_size]
         dist = model(batch, training=False)
-        samples = dist.sample(n_samples)
-        all_samples.append(np.array(samples, dtype=np.float32))
+        batch_samples = dist.sample(n_samples)
+        all_samples.append(np.array(batch_samples, dtype=np.float32))
     result = np.concatenate(all_samples, axis=1)
     if pad:
         result = result[:, :n, :]
     del all_samples
     return result
+
+
+def compute_nll(
+    model: tf.keras.Model,
+    x: np.ndarray,
+    y: np.ndarray,
+    batch_size: int,
+) -> float:
+    """Compute mean negative log-likelihood on test data.
+
+    Parameters
+    ----------
+    model : tf.keras.Model
+        Trained forecasting model.
+    x : np.ndarray
+        Input covariates, shape ``(n, cov_dim)``.
+    y : np.ndarray
+        True target values, shape ``(n, prediction_horizon)``.
+    batch_size : int
+        Batch size for evaluation.
+
+    Returns
+    -------
+    float
+        Mean negative log-likelihood across all test samples and
+        forecast steps.
+    """
+    n = len(x)
+    nlls: list[np.ndarray] = []
+    for i in range(0, n, batch_size):
+        batch_x = x[i : i + batch_size]
+        batch_y = y[i : i + batch_size]
+        dist = model(batch_x, training=False)
+        batch_nll = -dist.log_prob(batch_y)
+        nlls.append(batch_nll.numpy())
+    return float(np.mean(np.concatenate(nlls)))
 
 
 def plot_forecast_with_intervals(
@@ -72,11 +133,32 @@ def plot_forecast_with_intervals(
     n_show: int = 48,
     title: str = "",
     alpha: float = 0.25,
-) -> plt.Figure:
+) -> Figure:
+    """Plot forecast time series with prediction intervals.
+
+    Parameters
+    ----------
+    y_true : np.ndarray
+        True observed values, shape ``(n, prediction_horizon)``.
+    samples : np.ndarray
+        Samples from predictive distribution, shape
+        ``(n_samples, n, prediction_horizon)``.
+    n_show : int, optional
+        Number of test samples to show, by default ``48``.
+    title : str, optional
+        Plot title, by default ``""``.
+    alpha : float, optional
+        Base fill alpha, by default ``0.25``.
+
+    Returns
+    -------
+    Figure
+        The figure object.
+    """
     n_steps = y_true.shape[1]
     n_cols = min(4, n_steps)
     n_rows = int(np.ceil(n_steps / n_cols))
-    width, height = get_figsize("thesis", subplots=(n_rows, n_cols))
+    width, height = n_cols * 2.5, n_rows * 1.8
     fig, axes = plt.subplots(
         n_rows, n_cols, figsize=(width, height), sharex=True, sharey=True
     )
@@ -129,16 +211,35 @@ def plot_forecast_with_intervals(
     return fig
 
 
-def plot_pit_histogram(
+def plot_pit_histogram_grid(
     y_true: np.ndarray,
     samples: np.ndarray,
     n_bins: int = 20,
     title: str = "",
-) -> plt.Figure:
+) -> Figure:
+    """Plot PIT histograms for each forecast step.
+
+    Parameters
+    ----------
+    y_true : np.ndarray
+        True observed values, shape ``(n, prediction_horizon)``.
+    samples : np.ndarray
+        Samples from predictive distribution, shape
+        ``(n_samples, n, prediction_horizon)``.
+    n_bins : int, optional
+        Number of histogram bins, by default ``20``.
+    title : str, optional
+        Plot title, by default ``""``.
+
+    Returns
+    -------
+    Figure
+        The figure object.
+    """
     n_steps = y_true.shape[1]
     n_cols = min(4, n_steps)
     n_rows = int(np.ceil(n_steps / n_cols))
-    width, height = get_figsize("thesis", subplots=(n_rows, n_cols))
+    width, height = n_cols * 2.8, n_rows * 2.2
     fig, axes = plt.subplots(
         n_rows, n_cols, figsize=(width, height), sharex=True, sharey=True
     )
@@ -146,24 +247,13 @@ def plot_pit_histogram(
 
     for step in range(n_steps):
         ax = axes[step]
-        y = y_true[:, step]
-        s = samples[:, :, step]
-        pit = np.mean(s < y, axis=0)
-        ax.hist(
-            pit,
-            bins=n_bins,
-            density=True,
-            alpha=0.75,
-            color="steelblue",
-            edgecolor="white",
-            linewidth=0.5,
-        )
-        ax.axhline(
-            1.0, color="#d62728", linestyle="--", linewidth=0.7, label=r"Uniform"
+        plot_pit_histogram(
+            observations=y_true[:, step],
+            samples=samples[:, :, step],
+            n_bins=n_bins,
+            ax=ax,
         )
         ax.set_title(rf"$t + {step + 1}$", fontsize=9)
-        ax.set_xlim(0, 1)
-        ax.set_ylim(0, 2.5)
 
     for j in range(n_steps, len(axes)):
         axes[j].set_visible(False)
@@ -173,61 +263,54 @@ def plot_pit_histogram(
     return fig
 
 
-def plot_calibration(
+def plot_qq_grid(
     y_true: np.ndarray,
     samples: np.ndarray,
+    n_quantiles: int = 21,
     title: str = "",
-) -> plt.Figure:
+) -> Figure:
+    """Plot QQ plots for each forecast step.
+
+    Parameters
+    ----------
+    y_true : np.ndarray
+        True observed values, shape ``(n, prediction_horizon)``.
+    samples : np.ndarray
+        Samples from predictive distribution, shape
+        ``(n_samples, n, prediction_horizon)``.
+    n_quantiles : int, optional
+        Number of quantile levels, by default ``21``.
+    title : str, optional
+        Plot title, by default ``""``.
+
+    Returns
+    -------
+    Figure
+        The figure object.
+    """
     n_steps = y_true.shape[1]
     n_cols = min(4, n_steps)
     n_rows = int(np.ceil(n_steps / n_cols))
-    width, height = get_figsize("thesis", subplots=(n_rows, n_cols))
+    width, height = n_cols * 2.8, n_rows * 2.2
     fig, axes = plt.subplots(
         n_rows, n_cols, figsize=(width, height), sharex=True, sharey=True
     )
     axes = axes.flatten() if n_steps > 1 else [axes]
 
-    nominal = np.linspace(0, 1, 21)
     for step in range(n_steps):
         ax = axes[step]
-        y = y_true[:, step]
-        s = samples[:, :, step]
-        empirical = []
-        for q in nominal:
-            lower = np.percentile(s, 100 * (1 - q) / 2, axis=0)
-            upper = np.percentile(s, 100 * (1 + q) / 2, axis=0)
-            coverage = np.mean((y >= lower) & (y <= upper))
-            empirical.append(coverage)
-        ax.plot(
-            nominal,
-            empirical,
-            "o-",
-            markersize=3,
-            linewidth=0.7,
-            color="steelblue",
-            label=r"Empirical",
-        )
-        ax.plot(
-            [0, 1],
-            [0, 1],
-            linewidth=0.7,
-            color="#d62728",
-            linestyle="--",
-            label=r"Perfect",
+        plot_qq(
+            observations=y_true[:, step],
+            samples=samples[:, :, step],
+            n_quantiles=n_quantiles,
+            ax=ax,
         )
         ax.set_title(rf"$t + {step + 1}$", fontsize=9)
-        ax.set_xlim(0, 1)
-        ax.set_ylim(0, 1)
-        ax.set_aspect("equal")
-        if step == 0:
-            ax.legend(fontsize=7, loc="lower right", framealpha=0.9)
 
     for j in range(n_steps, len(axes)):
         axes[j].set_visible(False)
 
-    fig.suptitle(rf"Calibration Plot -- {title}", fontsize=11)
-    fig.supxlabel(r"Nominal coverage", fontsize=9)
-    fig.supylabel(r"Empirical coverage", fontsize=9)
+    fig.suptitle(rf"QQ Plot -- {title}", fontsize=11)
     fig.tight_layout()
     return fig
 
@@ -236,6 +319,21 @@ def compute_metrics(
     y_true: np.ndarray,
     samples: np.ndarray,
 ) -> dict:
+    """Compute point forecast metrics from samples.
+
+    Parameters
+    ----------
+    y_true : np.ndarray
+        True observed values, shape ``(n, prediction_horizon)``.
+    samples : np.ndarray
+        Samples from predictive distribution, shape
+        ``(n_samples, n, prediction_horizon)``.
+
+    Returns
+    -------
+    dict
+        Dictionary with ``rmse``, ``mae``, and ``mean_90_ci_width``.
+    """
     median = np.percentile(samples, 50, axis=0)
     rmse = float(np.sqrt(np.mean((y_true - median) ** 2)))
     mae = float(np.mean(np.abs(y_true - median)))
@@ -249,6 +347,7 @@ def compute_metrics(
 
 
 def main() -> None:
+    """Run evaluation: load model, compute NLL, sample, plot, log metrics."""
     parser = argparse.ArgumentParser(
         description="Evaluate a trained normalizing flow model on test data"
     )
@@ -281,7 +380,10 @@ def main() -> None:
     logger.info("n_samples=%d test_mode=%s", n_samples, test_mode)
 
     logger.info(
-        "Loaded test data: X=%s y=%s (n_eval=%d)", x_test.shape, y_test.shape, n_eval
+        "Loaded test data: X=%s y=%s (n_eval=%d)",
+        x_test.shape,
+        y_test.shape,
+        n_eval,
     )
 
     dims = args.prediction_horizon
@@ -308,6 +410,10 @@ def main() -> None:
 
             mlflow.tensorflow.autolog()
 
+            logger.info("Computing NLL on test data ...")
+            nll = compute_nll(model, x_test, y_test, batch_size)
+            logger.info("NLL: %.4f", nll)
+
             logger.info("Sampling %d draws from predictive distribution ...", n_samples)
             samples = sample_predictions(
                 model, x_test, n_samples=n_samples, batch_size=batch_size
@@ -322,34 +428,36 @@ def main() -> None:
                 y_test,
                 samples,
                 n_show=48,
-                title=f"{args.model} \u2013 {args.target_name}",
+                title=f"{args.model} -- {args.target_name}",
             )
             log_and_save_figure(fig, str(out_dir), "forecast", "pdf", dpi=300)
             log_and_save_figure(fig, str(out_dir), "forecast", "png", dpi=150)
             plt.close(fig)
 
             logger.info("Generating PIT histogram ...")
-            fig = plot_pit_histogram(
+            fig = plot_pit_histogram_grid(
                 y_test,
                 samples,
                 n_bins=20,
-                title=f"{args.model} \u2013 {args.target_name}",
+                title=f"{args.model} -- {args.target_name}",
             )
             log_and_save_figure(fig, str(out_dir), "pit_histogram", "pdf", dpi=300)
             log_and_save_figure(fig, str(out_dir), "pit_histogram", "png", dpi=150)
             plt.close(fig)
 
-            logger.info("Generating calibration plot ...")
-            fig = plot_calibration(
+            logger.info("Generating QQ plot ...")
+            fig = plot_qq_grid(
                 y_test,
                 samples,
-                title=f"{args.model} \u2013 {args.target_name}",
+                n_quantiles=21,
+                title=f"{args.model} -- {args.target_name}",
             )
-            log_and_save_figure(fig, str(out_dir), "calibration", "pdf", dpi=300)
-            log_and_save_figure(fig, str(out_dir), "calibration", "png", dpi=150)
+            log_and_save_figure(fig, str(out_dir), "qq_plot", "pdf", dpi=300)
+            log_and_save_figure(fig, str(out_dir), "qq_plot", "png", dpi=150)
             plt.close(fig)
 
             metrics = compute_metrics(y_test, samples)
+            metrics["nll"] = nll
             logger.info("Metrics: %s", metrics)
 
             mlflow.log_metrics(metrics)

@@ -14,11 +14,10 @@ model_kwargs:
   num_layers: 1
   bijector: BernsteinPolynomial
   bijector_kwargs:
-    domain:
-    - 0
-    - 1
     extrapolation: false
-  invert: true
+    domain:
+    - 0.0
+    - 1.0
   base_distribution_kwargs:
     distribution_name: lognormal
   num_parameters: 8

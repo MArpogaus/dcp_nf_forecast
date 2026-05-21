@@ -11,7 +11,8 @@ dependencies = [
   "tensorflow>=2.15",
   "tensorflow-probability>=0.23",
   "pyarrow==23.*",
-  "mlflow>=3,<4"
+  "mlflow>=3,<4",
+  "probabilistic-forecast-validation"
 ]
 description = "Forecasting with multivariate normalizing flows"
 dynamic = ["version"]
@@ -77,3 +78,6 @@ where = ["src"]
 # https://stackoverflow.com/a/74404703
 # omits local version, useful because pypi does not support it
 local_scheme = "no-local-version"
+
+[tool.uv.sources]
+probabilistic-forecast-validation = {path = "../probabilistic_forecast_validation", editable = true}

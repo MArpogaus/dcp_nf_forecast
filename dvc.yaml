@@ -155,6 +155,6 @@ stages:
     outs:
     - results/${item.dataset.name}/${item.model}/evaluation/forecast.pdf
     - results/${item.dataset.name}/${item.model}/evaluation/pit_histogram.pdf
-    - results/${item.dataset.name}/${item.model}/evaluation/calibration.pdf
+    - results/${item.dataset.name}/${item.model}/evaluation/qq_plot.pdf
     metrics:
     - results/${item.dataset.name}/${item.model}/evaluation/metrics.yaml

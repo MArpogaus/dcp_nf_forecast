@@ -81,29 +81,52 @@ lognormal_baseline                   nan         56       0.9091        0.8886
 
 ## Phase 2 — Cosine Decay LR
 
-## Phase 2 — Cosine Decay LR
+Switch from constant LR=0.001 to cosine decay (initial_lr=0.001, decay_steps=22000 = 200ep × 110 batches).
 
-Same as Phase 1, but switch `learning_rate` scalar → dict:
+**Results:**
 
-```yaml
-learning_rate:
-  scheduler_name: cosine_decay
-  scheduler_kwargs:
-    initial_learning_rate: 0.001
-    decay_steps: 200
+```
+Model                          Phase1_min_val   Phase2_min_val   Winner
+normal_baseline                 -22.541          -77.947          Phase2
+lognormal_baseline                  NaN         -164.999          Phase2 (NaN fixed)
+bernstein_nf                    -97.927          -98.710          Phase2
+bernstein_nf_lognormal         -131.670         -131.920          Phase2
+bernstein_nf_scale             -104.856         -102.989          Phase1
+bernstein_nf_scale_lognormal   -136.288         -134.587          Phase1
+spline_nf                      -161.133         -155.823          Phase1
+spline_nf_lognormal            -160.559         -159.103          Phase1
+spline_nf_scale                -166.046         -164.635          Phase1
+spline_nf_scale_lognormal           —           -124.250          —
 ```
 
-Compare val_loss vs constant LR for each model.
+**Findings:**
+- Cosine decay helps baselines (normal: 3.5× better, lognormal: NaN → -165)
+- Spline models prefer constant LR (simpler models benefit from fine-tuning)
+- Bernstein models are mixed (slight preference for cosine)
+- Top-3 NLL: spline_nf_scale(constant) -166.0, lognormal_baseline(cosine) -165.0, spline_nf_scale(cosine) -164.6
+
+**Per-model LR policy for Phase 3:**
+- Spline variants, normal baseline → constant LR (0.001)
+- Bernstein variants → mixed (pick winner per model)
+- Lognormal baseline → cosine decay (fixed NaN)
 
 ---
 
-## Phase 3 — Capacity Increase (if underfitting)
+## Phase 3 — Capacity Increase
 
-Apply only to models that plateau early or have poor val_loss:
+Apply to top-4 models with increased capacity:
+
+| Model | LR | Changes from Phase 1/2 |
+|-------|-----|----------------------|
+| spline_nf_v2 | constant 0.001 | nbins=12, params: 23→35 |
+| spline_nf_scale_v2 | constant 0.001 | nbins=12, params: 24→36 |
+| bernstein_nf_scale_lognormal_v2 | constant 0.001 | order=12, params: 9→13 |
+| lognormal_baseline_v2 | cosine decay | [256,256] from [128,128] |
+
+Further steps if underfitting:
 
 | Step | Bernstein order | Spline nbins | Hidden units |
 |------|----------------|--------------|--------------|
-| 3a | 12 | 12 | [128, 128] |
 | 3b | 16 | 16 | [256, 128] |
 | 3c | 16 | 16 | [256, 256] |
 | 3d | — | — | increase epochs to 400 |

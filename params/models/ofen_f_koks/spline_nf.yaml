@@ -2,8 +2,8 @@ compile_kwargs: {}
 fit_kwargs:
   batch_size: 256
   early_stopping_patience: 10
-  epochs: 100
-  learning_rate: 0.0005
+  epochs: 200
+  learning_rate: 0.001
   verbose: true
 model_kwargs:
   distribution: masked_autoregressive_flow
@@ -13,14 +13,16 @@ model_kwargs:
     range_min: -4
   base_distribution_kwargs:
     distribution_name: normal
-  num_parameters: 95
+  num_parameters: 35
   parameters_constraint_fn: hybrid_flows.activations.get_spline_param_constrain_fn
   parameters_constraint_fn_kwargs:
     interval_width: 8
     min_slope: 0.001
     min_bin_width: 0.001
-    nbins: 32
+    nbins: 12
   parameters_fn_kwargs:
     activation: relu
-    hidden_units: [256, 256, 256]
+    hidden_units:
+    - 128
+    - 128
     conditional: true
