@@ -168,12 +168,11 @@ def create_lag_features(
     """
     if not column_lags:
         return pd.DataFrame(index=df.index)
-    frames: list[pd.DataFrame] = []
+    columns: dict[str, pd.Series] = {}
     for col, num_lags in column_lags.items():
         for i in range(1, num_lags + 1):
-            lagged = df[[col]].shift(i).rename(columns={col: f"{col}_lag_{i}"})
-            frames.append(lagged)
-    return pd.concat(frames, axis=1)
+            columns[f"{col}_lag_{i}"] = df[col].shift(i)
+    return pd.DataFrame(columns, index=df.index)
 
 
 def build_target(
@@ -199,15 +198,10 @@ def build_target(
         will be ``NaN`` for each step.
 
     """
-    frames: list[pd.DataFrame] = []
+    columns: dict[str, pd.Series] = {}
     for step in range(1, prediction_horizon + 1):
-        shifted = (
-            df[[target_column]]
-            .shift(-step)
-            .rename(columns={target_column: f"target_{step}"})
-        )
-        frames.append(shifted)
-    return pd.concat(frames, axis=1)
+        columns[f"target_{step}"] = df[target_column].shift(-step)
+    return pd.DataFrame(columns, index=df.index)
 
 
 def _sample_noise(
@@ -328,7 +322,7 @@ def _parse_tabular_with_offset(
     specs: list[tuple[str, int]],
     df: pd.DataFrame,
 ) -> pd.DataFrame:
-    frames: list[pd.DataFrame] = []
+    columns: dict[str, pd.Series] = {}
     for col, offset in specs:
         series = df[col]
         if offset > 0:
@@ -339,8 +333,8 @@ def _parse_tabular_with_offset(
             col_name = f"{col}_lag_{abs(offset)}"
         else:
             col_name = col
-        frames.append(series.to_frame(col_name))
-    return pd.concat(frames, axis=1)
+        columns[col_name] = series
+    return pd.DataFrame(columns, index=df.index)
 
 
 def _create_lead_features(
@@ -365,12 +359,11 @@ def _create_lead_features(
     """
     if not column_leads:
         return pd.DataFrame(index=df.index)
-    frames: list[pd.DataFrame] = []
+    columns: dict[str, pd.Series] = {}
     for col, num in column_leads.items():
         for i in range(1, num + 1):
-            led = df[[col]].shift(-i).rename(columns={col: f"{col}_lead_{i}"})
-            frames.append(led)
-    return pd.concat(frames, axis=1)
+            columns[f"{col}_lead_{i}"] = df[col].shift(-i)
+    return pd.DataFrame(columns, index=df.index)
 
 
 def build_features_and_target(
