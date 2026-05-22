@@ -17,25 +17,11 @@ from hybrid_flows.utils.mlflow import (
     start_run_with_exception_logging,
 )
 
-from dcp_nf_forecast.utils import read_dataframe, setup_logging
+from dcp_nf_forecast.utils import read_dataframe, setup_logging, setup_plotting_style
 
 logger = logging.getLogger(__name__)
 
-plt.rcParams.update(
-    {
-        "figure.dpi": 150,
-        "savefig.dpi": 300,
-        "savefig.bbox": "tight",
-        "font.size": 10,
-        "axes.labelsize": 11,
-        "axes.titlesize": 12,
-        "legend.fontsize": 9,
-        "xtick.labelsize": 9,
-        "ytick.labelsize": 9,
-        "lines.linewidth": 0.8,
-        "figure.figsize": (8, 4.5),
-    }
-)
+setup_plotting_style()
 
 
 def compute_statistics(

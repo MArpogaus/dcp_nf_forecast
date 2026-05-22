@@ -130,3 +130,25 @@ def read_dataframe(
     if data_format == "feather":
         return pd.read_feather(full_path)  # type: ignore[no-any-return]
     return pd.read_csv(full_path, index_col=index_col, parse_dates=parse_dates)
+
+
+def setup_plotting_style() -> None:
+    """Set standard global Matplotlib parameters for consistent paper figures."""
+    import matplotlib.pyplot as plt
+
+    plt.rcParams.update(
+        {
+            "figure.dpi": 150,
+            "savefig.dpi": 300,
+            "savefig.bbox": "tight",
+            "font.size": 10,
+            "axes.labelsize": 10,
+            "axes.titlesize": 11,
+            "legend.fontsize": 8,
+            "xtick.labelsize": 8,
+            "ytick.labelsize": 8,
+            "lines.linewidth": 0.8,
+            "figure.figsize": (8, 4.5),
+            "font.family": "sans-serif",
+        }
+    )

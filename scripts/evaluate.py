@@ -22,27 +22,12 @@ from hybrid_flows.utils.mlflow import (
 from matplotlib.figure import Figure
 
 from dcp_nf_forecast.models import build_model
-from dcp_nf_forecast.utils import load_data, setup_logging
+from dcp_nf_forecast.utils import load_data, setup_logging, setup_plotting_style
 from dcp_nf_forecast.validation import plot_pit_histogram, plot_qq
 
 logger = logging.getLogger(__name__)
 
-plt.rcParams.update(
-    {
-        "figure.dpi": 150,
-        "savefig.dpi": 300,
-        "savefig.bbox": "tight",
-        "font.size": 10,
-        "axes.labelsize": 10,
-        "axes.titlesize": 11,
-        "legend.fontsize": 8,
-        "xtick.labelsize": 8,
-        "ytick.labelsize": 8,
-        "lines.linewidth": 0.8,
-        "figure.figsize": (8, 4.5),
-        "font.family": "sans-serif",
-    }
-)
+setup_plotting_style()
 
 
 def sample_predictions(
