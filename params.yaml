@@ -2,7 +2,7 @@ experiment_name: dcp_nf_forecast
 log_level: info
 log_file: logs/pipeline.log
 seed: 42
-test_mode: false
+test_mode: true
 
 paths:
   raw_data: data/raw/norm_fondium_15_min_data_2023.csv
@@ -12,9 +12,8 @@ paths:
 data:
   datetime_column: new_time
   data_format: feather
-  tabular_covariate_columns: none
   time_components: time,day_of_week,day_of_year
-  holiday_country: none
+  holiday_country: DE-BW
   end_date: '2023-10-31'
 
 eval:
@@ -30,18 +29,42 @@ targets:
   y_column: dla_stromverbrauch_kwh
   prediction_horizon: 48
   lag_columns: dla_stromverbrauch_kwh:96
+  tabular_covariate_columns: none
+  future_columns: none
+  fillna_columns: none
+  fillna_value: 0.0
+  fillna_noise_type: lognormal
+  fillna_noise_scale: 0.0
 - name: ofen_g_koks
   y_column: ofen_g_koks_kg
   prediction_horizon: 48
   lag_columns: ofen_g_koks_kg:96
+  tabular_covariate_columns: none
+  future_columns: ofen_metall_kg:48
+  fillna_columns: ofen_g_koks_kg,ofen_f_koks_kg
+  fillna_value: 0.0
+  fillna_noise_type: lognormal
+  fillna_noise_scale: 0.005
 - name: ofen_f_koks
   y_column: ofen_f_koks_kg
   prediction_horizon: 48
   lag_columns: ofen_f_koks_kg:96
+  tabular_covariate_columns: none
+  future_columns: ofen_metall_kg:48
+  fillna_columns: ofen_g_koks_kg,ofen_f_koks_kg
+  fillna_value: 0.0
+  fillna_noise_type: lognormal
+  fillna_noise_scale: 0.005
 - name: pl2
   y_column: pl2_stromverbrauch_kwh
   prediction_horizon: 48
   lag_columns: pl2_stromverbrauch_kwh:96
+  tabular_covariate_columns: none
+  future_columns: none
+  fillna_columns: none
+  fillna_value: 0.0
+  fillna_noise_type: lognormal
+  fillna_noise_scale: 0.0
   # TODO: Anzahl der Kästen noch als covariate einführen
   # TODO: Feiertage einfügen
 
