@@ -26,8 +26,8 @@ model_kwargs:
   parameters_constraint_fn_kwargs:
     allow_flexible_bounds: false
     bounds: none
-    low: 0.007
-    high: 148
+    low: -5.0
+    high: 5.0
   parameters_fn_kwargs:
     activation: relu
     hidden_units:
