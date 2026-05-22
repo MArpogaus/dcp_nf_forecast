@@ -328,3 +328,19 @@ Once optimal DLA params are found, apply to `ofen_g_koks`, `ofen_f_koks`, `pl2` 
 | spline_nf_scale | FINISHED | -126.0304 |
 | spline_nf_scale_lognormal | FINISHED | -126.0304 |
 
+
+## DLA Full Run — 2026-05-22 15:11:12 — Status: FINAL
+
+| Model | Status | Min Val Loss |
+|-------|--------|-------------|
+| lognormal_baseline_dla_training | FINISHED | -159.9537 |
+| lognormal_baseline_dla_training | FINISHED | -159.9537 |
+| bernstein_nf_scale_lognormal_dla_training | FINISHED | -145.8355 |
+| bernstein_nf_lognormal_dla_training | FINISHED | -135.1432 |
+| bernstein_nf_scale_lognormal_dla_training | FINISHED | -145.8355 |
+| bernstein_nf_scale_lognormal_dla_training | FINISHED | -145.8355 |
+| spline_nf_scale_lognormal_dla_training | FINISHED | -126.0304 |
+| spline_nf_lognormal_dla_training | FINISHED | -153.9878 |
+| spline_nf_scale_lognormal_dla_training | FINISHED | -126.0304 |
+| spline_nf_scale_lognormal_dla_training | FINISHED | -126.0304 |
+
