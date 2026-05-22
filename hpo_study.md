@@ -136,3 +136,19 @@ Further steps if underfitting:
 ## Phase 4 — Export Best Params to All Targets
 
 Once optimal DLA params are found, apply to `ofen_g_koks`, `ofen_f_koks`, `pl2` and run full pipeline. Commit final results.
+
+## DLA Full Run — 2026-05-22 14:49:10 — Status: RUNNING
+
+| Model | Status | Min Val Loss |
+|-------|--------|-------------|
+| normal_baseline | RUNNING | -52.7867 |
+| lognormal_baseline | PENDING | - |
+| bernstein_nf | FINISHED | -142.7449 |
+| bernstein_nf_lognormal | PENDING | - |
+| bernstein_nf_scale | FINISHED | -142.7449 |
+| bernstein_nf_scale_lognormal | PENDING | - |
+| spline_nf | RUNNING | -148.4261 |
+| spline_nf_lognormal | RUNNING | -148.4261 |
+| spline_nf_scale | RUNNING | -128.9820 |
+| spline_nf_scale_lognormal | RUNNING | -128.9820 |
+
