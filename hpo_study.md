@@ -178,3 +178,14 @@ Baseline: lr=0.001 const, nbins=8, h=[128,128] → min_val_loss=-154.27
 ## Full Pipeline — All 4 targets × 10 models
 
 Launching full pipeline with best configs after DLA HPO.
+
+## Config Bug Fix (2026-05-22)
+
+**Root cause:** `build_fully_connected_net()` requires `batch_norm: bool` and `dropout: float` positional args. Nested bijectors using `parameter_vector_or_simple_network` call `build_fully_connected_net`, so they NEED these kwargs. The top-level MAF outer network uses `get_masked_autoregressive_network_fn` → `tfb.AutoregressiveNetwork`, which does NOT accept `batch_norm`/`dropout`, so they must be absent from top-level.
+
+**Previous incorrect fix (ea5ae75):** Removed `dropout`/`batch_norm` from all `parameters_fn_kwargs` (both top-level and nested). This broke nested bijectors.
+
+**Current fix:** 
+- Remove `dropout`/`batch_norm` from top-level `parameters_fn_kwargs` of all `masked_autoregressive_flow` models (16 non-baseline MAF configs had them)
+- Add `dropout: 0, batch_norm: false` to ALL nested bijectors' `parameters_fn_kwargs` (22 files: 4 targets × 4 scale models = 16 files for nested add, plus 6 non-DLA MAF files for top-level removal only)
+- Baseline models (`multivariate_normal`/`multivariate_lognormal`) use `get_parameter_vector_or_simple_network_fn` directly → keep their `dropout`/`batch_norm` unchanged
