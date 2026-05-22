@@ -30,7 +30,7 @@ targets:
   prediction_horizon: 48
   lag_columns: dla_stromverbrauch_kwh:96
   tabular_covariate_columns: none
-  future_columns: none
+  future_columns: is_holiday:48
   fillna_columns: none
   fillna_value: 0.0
   fillna_noise_type: lognormal
@@ -40,7 +40,7 @@ targets:
   prediction_horizon: 48
   lag_columns: ofen_g_koks_kg:96
   tabular_covariate_columns: none
-  future_columns: ofen_metall_kg:48
+  future_columns: is_holiday:48,ofen_metall_kg:48
   fillna_columns: ofen_g_koks_kg,ofen_f_koks_kg,ofen_metall_kg
   fillna_value: 0.0
   fillna_noise_type: lognormal
@@ -50,7 +50,7 @@ targets:
   prediction_horizon: 48
   lag_columns: ofen_f_koks_kg:96
   tabular_covariate_columns: none
-  future_columns: ofen_metall_kg:48
+  future_columns: is_holiday:48,ofen_metall_kg:48
   fillna_columns: ofen_g_koks_kg,ofen_f_koks_kg,ofen_metall_kg
   fillna_value: 0.0
   fillna_noise_type: lognormal
@@ -60,7 +60,7 @@ targets:
   prediction_horizon: 48
   lag_columns: pl2_stromverbrauch_kwh:96
   tabular_covariate_columns: none
-  future_columns: none
+  future_columns: is_holiday:48
   fillna_columns: none
   fillna_value: 0.0
   fillna_noise_type: lognormal
