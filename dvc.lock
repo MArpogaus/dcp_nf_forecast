@@ -2,11 +2,13 @@ schema: '2.0'
 stages:
   prepare@0:
     cmd: "python scripts/prepare_features.py --raw-data-path data/raw/norm_fondium_15_min_data_2023.csv
-      --datetime-column new_time --tabular-covariate-columns none --time-components
+      --datetime-column new_time --tabular-covariate-columns 'none' --time-components
       time,day_of_week,day_of_year --target-name dla --y-column dla_stromverbrauch_kwh
       --prediction-horizon 48 --lag-columns dla_stromverbrauch_kwh:96 --output-dir
       data/interim/dla --data-format feather --log-level info --log-file logs/pipeline.log
-      --holiday-country none --end-date 2023-10-31\n"
+      --holiday-country DE-BW --end-date 2023-10-31 --fillna-columns 'none' --fillna-value
+      0.0 --fillna-noise-type lognormal --fillna-noise-scale 0.0 --future-columns
+      'none'\n"
     deps:
     - path: data/raw/norm_fondium_15_min_data_2023.csv
       hash: md5
@@ -14,20 +16,19 @@ stages:
       size: 7781885
     - path: scripts/prepare_features.py
       hash: md5
-      md5: 6189a6b39d5291b0dd843559c005d686
-      size: 3465
+      md5: 0934583807e14992373bed41a9a8fb66
+      size: 5035
     - path: src/dcp_nf_forecast/
       hash: md5
-      md5: 79aed56110d20f6ea822ac1123d831ae.dir
-      size: 43344
+      md5: 4eccec26d11a67bb042ed5367d8889e7.dir
+      size: 53703
       nfiles: 13
     params:
       params.yaml:
         data.data_format: feather
         data.datetime_column: new_time
         data.end_date: '2023-10-31'
-        data.holiday_country: none
-        data.tabular_covariate_columns: none
+        data.holiday_country: DE-BW
         data.time_components: time,day_of_week,day_of_year
         log_file: logs/pipeline.log
         log_level: info
@@ -38,23 +39,47 @@ stages:
           y_column: dla_stromverbrauch_kwh
           prediction_horizon: 48
           lag_columns: dla_stromverbrauch_kwh:96
+          tabular_covariate_columns: none
+          future_columns: none
+          fillna_columns: none
+          fillna_value: 0.0
+          fillna_noise_type: lognormal
+          fillna_noise_scale: 0.0
         - name: ofen_g_koks
           y_column: ofen_g_koks_kg
           prediction_horizon: 48
           lag_columns: ofen_g_koks_kg:96
+          tabular_covariate_columns: none
+          future_columns: ofen_metall_kg:48
+          fillna_columns: ofen_g_koks_kg,ofen_f_koks_kg
+          fillna_value: 0.0
+          fillna_noise_type: lognormal
+          fillna_noise_scale: 0.005
         - name: ofen_f_koks
           y_column: ofen_f_koks_kg
           prediction_horizon: 48
           lag_columns: ofen_f_koks_kg:96
+          tabular_covariate_columns: none
+          future_columns: ofen_metall_kg:48
+          fillna_columns: ofen_g_koks_kg,ofen_f_koks_kg
+          fillna_value: 0.0
+          fillna_noise_type: lognormal
+          fillna_noise_scale: 0.005
         - name: pl2
           y_column: pl2_stromverbrauch_kwh
           prediction_horizon: 48
           lag_columns: pl2_stromverbrauch_kwh:96
+          tabular_covariate_columns: none
+          future_columns: none
+          fillna_columns: none
+          fillna_value: 0.0
+          fillna_noise_type: lognormal
+          fillna_noise_scale: 0.0
     outs:
     - path: data/interim/dla/X.feather
       hash: md5
-      md5: e424a8d29ccf525e416ed73d372f2fec
-      size: 8895018
+      md5: 52277d6eb3a135898754f0c9df8d039e
+      size: 8896442
     - path: data/interim/dla/y.feather
       hash: md5
       md5: 4e95a0071538603bb9c37ea01f51b79b
@@ -66,8 +91,8 @@ stages:
     deps:
     - path: data/interim/dla/
       hash: md5
-      md5: 90302fe3f08fad787b11dfb39d876d63.dir
-      size: 13331460
+      md5: 40aee732f68cf501412175a271eaf7aa.dir
+      size: 13332884
       nfiles: 2
     - path: scripts/split_data.py
       hash: md5
@@ -75,8 +100,8 @@ stages:
       size: 1858
     - path: src/dcp_nf_forecast/
       hash: md5
-      md5: 79aed56110d20f6ea822ac1123d831ae.dir
-      size: 43344
+      md5: 4eccec26d11a67bb042ed5367d8889e7.dir
+      size: 53703
       nfiles: 13
     params:
       params.yaml:
@@ -92,16 +117,16 @@ stages:
     outs:
     - path: data/processed/dla/X_test.feather
       hash: md5
-      md5: 7b5760aad5667c18537c8ec73529f168
-      size: 1067330
+      md5: 8ffda2cbf64921506cbdaf90bcbb0058
+      size: 1067882
     - path: data/processed/dla/X_train.feather
       hash: md5
-      md5: 3277e82c321cf2b62d66a1209d6a05ca
-      size: 7119194
+      md5: 4332c40a033b1e23bc1e48653292e781
+      size: 7120418
     - path: data/processed/dla/X_val.feather
       hash: md5
-      md5: d7dc14006b6374a77af522d9e5a912ff
-      size: 1065514
+      md5: 049a2c030960f4873695f706d5140662
+      size: 1066058
     - path: data/processed/dla/y_test.feather
       hash: md5
       md5: 1a96236519d45984adccb276bbfbf055
@@ -218,8 +243,8 @@ stages:
     deps:
     - path: data/processed/dla/
       hash: md5
-      md5: 0a4228c60ad08b7cc54c64d7b88fc3cd.dir
-      size: 16692796
+      md5: 510578434f081d796948043a8adf92ad.dir
+      size: 13855876
       nfiles: 6
     - path: scripts/describe_data.py
       hash: md5
@@ -227,9 +252,9 @@ stages:
       size: 8375
     - path: src/dcp_nf_forecast/
       hash: md5
-      md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
-      size: 35957
-      nfiles: 10
+      md5: 00cbe80e012281272f43749153a6c383.dir
+      size: 47283
+      nfiles: 13
     params:
       params.yaml:
         data.data_format: feather
@@ -241,109 +266,151 @@ stages:
           y_column: dla_stromverbrauch_kwh
           prediction_horizon: 48
           lag_columns: dla_stromverbrauch_kwh:96
+          tabular_covariate_columns: none
+          fillna_columns: none
+          fillna_value: 0.0
+          fillna_noise_scale: 0.0
         - name: ofen_g_koks
           y_column: ofen_g_koks_kg
           prediction_horizon: 48
           lag_columns: ofen_g_koks_kg:96
+          tabular_covariate_columns: ofen_metall_kg
+          fillna_columns: ofen_g_koks_kg,ofen_f_koks_kg
+          fillna_value: 0.0
+          fillna_noise_scale: 0.05
         - name: ofen_f_koks
           y_column: ofen_f_koks_kg
           prediction_horizon: 48
           lag_columns: ofen_f_koks_kg:96
+          tabular_covariate_columns: ofen_metall_kg
+          fillna_columns: ofen_g_koks_kg,ofen_f_koks_kg
+          fillna_value: 0.0
+          fillna_noise_scale: 0.05
         - name: pl2
           y_column: pl2_stromverbrauch_kwh
           prediction_horizon: 48
           lag_columns: pl2_stromverbrauch_kwh:96
+          tabular_covariate_columns: none
+          fillna_columns: none
+          fillna_value: 0.0
+          fillna_noise_scale: 0.0
     outs:
     - path: results/dla/data_description/correlation_train.pdf
       hash: md5
-      md5: 34710907d399f76263e39c27e828fb30
-      size: 31774
+      md5: 90048bd9935d8e7e5f9cc1e2b2400edd
+      size: 33370
     - path: results/dla/data_description/correlation_val.pdf
       hash: md5
-      md5: d2436c1398cca52ee15712210a72e2f6
-      size: 39415
+      md5: 58244e0bded48c781ed0b1af46bad312
+      size: 41599
     - path: results/dla/data_description/histograms_train.pdf
       hash: md5
-      md5: a2067617d68f3b4ac2dfa0bf083c9d84
-      size: 33758
+      md5: f868457d12363a123025230e014aea9d
+      size: 40472
     - path: results/dla/data_description/histograms_val.pdf
       hash: md5
-      md5: 4a4032c0dd76868502ff750329d6560b
-      size: 36757
+      md5: d727f889f3022f4d5b825352c6462240
+      size: 39613
     - path: results/dla/data_description/statistics_train.yaml
       hash: md5
-      md5: 1fd97204751ab2b943f0e560f10bf544
-      size: 20863
+      md5: a7a6687364ca987ca127df5b531ffef7
+      size: 21719
     - path: results/dla/data_description/statistics_val.yaml
       hash: md5
-      md5: ec9917d577e612c8ddb3dfa0a2906494
-      size: 21636
+      md5: 47b9aa8f42c8c5dee08c4160ef4d675b
+      size: 21731
     - path: results/dla/data_description/timeseries_train.pdf
       hash: md5
-      md5: 233c1bd7cedeb46db1eeed944bd963c5
-      size: 228656
+      md5: 4ccbc0f6db385e8efb2933e2a376a312
+      size: 205745
     - path: results/dla/data_description/timeseries_val.pdf
       hash: md5
-      md5: 25f09a4fb0a391cc3ad5ec632636bf78
-      size: 99592
+      md5: 05463caee6f5c1913c822d11ee67c3da
+      size: 88846
   prepare@1:
-    cmd: "python scripts/prepare_features.py --raw-data-path ../dcp/norm_data/norm_fondium_15_min_data_2023.csv
-      --datetime-column new_time --fillna-method ffill --tabular-covariate-columns
-      none --time-components time,day_of_week,day_of_year --target-name ofen_g_koks
-      --y-column ofen_g_koks_kg --prediction-horizon 48 --lag-columns ofen_g_koks_kg:96
-      --output-dir data/interim/ofen_g_koks --data-format feather --log-level info
-      --log-file logs/pipeline.log\n"
+    cmd: "python scripts/prepare_features.py --raw-data-path data/raw/norm_fondium_15_min_data_2023.csv
+      --datetime-column new_time --tabular-covariate-columns 'none' --time-components
+      time,day_of_week,day_of_year --target-name ofen_g_koks --y-column ofen_g_koks_kg
+      --prediction-horizon 48 --lag-columns ofen_g_koks_kg:96 --output-dir data/interim/ofen_g_koks
+      --data-format feather --log-level info --log-file logs/pipeline.log --holiday-country
+      DE-BW --end-date 2023-10-31 --fillna-columns 'ofen_g_koks_kg,ofen_f_koks_kg'
+      --fillna-value 0.0 --fillna-noise-type lognormal --fillna-noise-scale 0.005
+      --future-columns 'ofen_metall_kg:48'\n"
     deps:
-    - path: ../dcp/norm_data/norm_fondium_15_min_data_2023.csv
+    - path: data/raw/norm_fondium_15_min_data_2023.csv
       hash: md5
       md5: eb8c9dbf528fea5a3334dfae8c6325a7
       size: 7781885
     - path: scripts/prepare_features.py
       hash: md5
-      md5: 2d3c4c33cad24cb3b37023b7e1f2faed
-      size: 3178
+      md5: a08758f69581c062edc2291f332dfe66
+      size: 5029
     - path: src/dcp_nf_forecast/
       hash: md5
-      md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
-      size: 35957
-      nfiles: 10
+      md5: 4eccec26d11a67bb042ed5367d8889e7.dir
+      size: 53703
+      nfiles: 13
     params:
       params.yaml:
         data.data_format: feather
         data.datetime_column: new_time
-        data.fillna_method: ffill
-        data.tabular_covariate_columns: none
+        data.end_date: '2023-10-31'
+        data.holiday_country: DE-BW
         data.time_components: time,day_of_week,day_of_year
         log_file: logs/pipeline.log
         log_level: info
         paths.data_interim: data/interim
-        paths.raw_data: ../dcp/norm_data/norm_fondium_15_min_data_2023.csv
+        paths.raw_data: data/raw/norm_fondium_15_min_data_2023.csv
         targets:
         - name: dla
           y_column: dla_stromverbrauch_kwh
           prediction_horizon: 48
           lag_columns: dla_stromverbrauch_kwh:96
+          tabular_covariate_columns: none
+          future_columns: none
+          fillna_columns: none
+          fillna_value: 0.0
+          fillna_noise_type: lognormal
+          fillna_noise_scale: 0.0
         - name: ofen_g_koks
           y_column: ofen_g_koks_kg
           prediction_horizon: 48
           lag_columns: ofen_g_koks_kg:96
+          tabular_covariate_columns: none
+          future_columns: ofen_metall_kg:48
+          fillna_columns: ofen_g_koks_kg,ofen_f_koks_kg
+          fillna_value: 0.0
+          fillna_noise_type: lognormal
+          fillna_noise_scale: 0.005
         - name: ofen_f_koks
           y_column: ofen_f_koks_kg
           prediction_horizon: 48
           lag_columns: ofen_f_koks_kg:96
+          tabular_covariate_columns: none
+          future_columns: ofen_metall_kg:48
+          fillna_columns: ofen_g_koks_kg,ofen_f_koks_kg
+          fillna_value: 0.0
+          fillna_noise_type: lognormal
+          fillna_noise_scale: 0.005
         - name: pl2
           y_column: pl2_stromverbrauch_kwh
           prediction_horizon: 48
           lag_columns: pl2_stromverbrauch_kwh:96
+          tabular_covariate_columns: none
+          future_columns: none
+          fillna_columns: none
+          fillna_value: 0.0
+          fillna_noise_type: lognormal
+          fillna_noise_scale: 0.0
     outs:
     - path: data/interim/ofen_g_koks/X.feather
       hash: md5
-      md5: 35f2069deca79406838ca384a9be4f0d
-      size: 19022690
+      md5: 851cf8f6ae211aaf3e1a3ed147a4aee1
+      size: 4819242
     - path: data/interim/ofen_g_koks/y.feather
       hash: md5
-      md5: 58043a80fe4ae963f157849ba571fa15
-      size: 9498290
+      md5: 54a5e29d5d9eec3dd68472a098971346
+      size: 1599962
   split@1:
     cmd: "python scripts/split_data.py --input-dir data/interim/ofen_g_koks --output-dir
       data/processed/ofen_g_koks --train-ratio 0.8 --val-ratio 0.1 --test-ratio 0.1
@@ -351,8 +418,8 @@ stages:
     deps:
     - path: data/interim/ofen_g_koks/
       hash: md5
-      md5: da4048bd138b65cf7c29189ca4926cbb.dir
-      size: 28520980
+      md5: 8372361d7c7e9a97098a7a40548bf697.dir
+      size: 6419204
       nfiles: 2
     - path: scripts/split_data.py
       hash: md5
@@ -360,9 +427,9 @@ stages:
       size: 1858
     - path: src/dcp_nf_forecast/
       hash: md5
-      md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
-      size: 35957
-      nfiles: 10
+      md5: 4eccec26d11a67bb042ed5367d8889e7.dir
+      size: 53703
+      nfiles: 13
     params:
       params.yaml:
         data.data_format: feather
@@ -377,28 +444,28 @@ stages:
     outs:
     - path: data/processed/ofen_g_koks/X_test.feather
       hash: md5
-      md5: 8318ba2322580c1e21f8aadc875dceb0
-      size: 1291962
+      md5: 58aaa3ef80e4d1f86ecd7328be15cdf7
+      size: 550506
     - path: data/processed/ofen_g_koks/X_train.feather
       hash: md5
-      md5: 4e53682f445f0176726222797edc6213
-      size: 15697130
+      md5: 0101a64618c94443edabcb68e6a6e57c
+      size: 3869914
     - path: data/processed/ofen_g_koks/X_val.feather
       hash: md5
-      md5: 7841b57c7703147d28f1705dc72546a1
-      size: 2130282
+      md5: dfb33170b4c6c80010d61125168a5c87
+      size: 549610
     - path: data/processed/ofen_g_koks/y_test.feather
       hash: md5
-      md5: 7f77bc781f51e0d1beaf7fe5b361b9f3
-      size: 612738
+      md5: 225c13710ad152aa5c94360ab82a3ffe
+      size: 179162
     - path: data/processed/ofen_g_koks/y_train.feather
       hash: md5
-      md5: 95b29404abcab78a91f5f67860e9aa5c
-      size: 7863370
+      md5: 9a54c093ec25cbfff9027c66ab6f4a85
+      size: 1283930
     - path: data/processed/ofen_g_koks/y_val.feather
       hash: md5
-      md5: fb1f72785fad52b44df7e666b0244582
-      size: 1062274
+      md5: 737d1e7a8d4d1a7d6acec438c9902fe1
+      size: 178778
   describe@1:
     cmd: "python scripts/describe_data.py --processed-dir data/processed/ofen_g_koks
       --target-name ofen_g_koks --data-format feather --log-level info --log-file
@@ -406,8 +473,8 @@ stages:
     deps:
     - path: data/processed/ofen_g_koks/
       hash: md5
-      md5: 6fd5cf3061b1dd3a8cf8579adc597439.dir
-      size: 28657756
+      md5: c4b664bc99752639b93763961abfcf39.dir
+      size: 23889684
       nfiles: 6
     - path: scripts/describe_data.py
       hash: md5
@@ -415,9 +482,9 @@ stages:
       size: 8375
     - path: src/dcp_nf_forecast/
       hash: md5
-      md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
-      size: 35957
-      nfiles: 10
+      md5: 00cbe80e012281272f43749153a6c383.dir
+      size: 47283
+      nfiles: 13
     params:
       params.yaml:
         data.data_format: feather
@@ -429,109 +496,151 @@ stages:
           y_column: dla_stromverbrauch_kwh
           prediction_horizon: 48
           lag_columns: dla_stromverbrauch_kwh:96
+          tabular_covariate_columns: none
+          fillna_columns: none
+          fillna_value: 0.0
+          fillna_noise_scale: 0.0
         - name: ofen_g_koks
           y_column: ofen_g_koks_kg
           prediction_horizon: 48
           lag_columns: ofen_g_koks_kg:96
+          tabular_covariate_columns: ofen_metall_kg
+          fillna_columns: ofen_g_koks_kg,ofen_f_koks_kg
+          fillna_value: 0.0
+          fillna_noise_scale: 0.05
         - name: ofen_f_koks
           y_column: ofen_f_koks_kg
           prediction_horizon: 48
           lag_columns: ofen_f_koks_kg:96
+          tabular_covariate_columns: ofen_metall_kg
+          fillna_columns: ofen_g_koks_kg,ofen_f_koks_kg
+          fillna_value: 0.0
+          fillna_noise_scale: 0.05
         - name: pl2
           y_column: pl2_stromverbrauch_kwh
           prediction_horizon: 48
           lag_columns: pl2_stromverbrauch_kwh:96
+          tabular_covariate_columns: none
+          fillna_columns: none
+          fillna_value: 0.0
+          fillna_noise_scale: 0.0
     outs:
     - path: results/ofen_g_koks/data_description/correlation_train.pdf
       hash: md5
-      md5: cd0c2d49fa937ef6cfe39c275baeb0a1
-      size: 39271
+      md5: 0176739b48a79271afe54cb29df7e913
+      size: 42419
     - path: results/ofen_g_koks/data_description/correlation_val.pdf
       hash: md5
-      md5: 8809e9552ac972f033a5ae37871d5300
-      size: 38360
+      md5: fdb9b3262fd3f40ff53d59cbdc5055de
+      size: 54961
     - path: results/ofen_g_koks/data_description/histograms_train.pdf
       hash: md5
-      md5: 10753e71d7ff8e00c849df324d870c27
-      size: 39296
+      md5: 685bffa1a1994dcf7c70b026265667d2
+      size: 40346
     - path: results/ofen_g_koks/data_description/histograms_val.pdf
       hash: md5
-      md5: ae64e576255cc2d073bf384fe9d8c83c
-      size: 39752
+      md5: 3a0304d107ed7a5ea9ed2130d1134e5f
+      size: 42878
     - path: results/ofen_g_koks/data_description/statistics_train.yaml
       hash: md5
-      md5: 324761db04114afa7ebe6d74f78b4845
-      size: 20198
+      md5: 166d01e373f4506ffdd18b2a314e4adc
+      size: 21019
     - path: results/ofen_g_koks/data_description/statistics_val.yaml
       hash: md5
-      md5: 7f12f98fbeca49a5ca024ffd63328b0b
-      size: 20901
+      md5: bb3d78a2a268759047e9f2cf91ddcd52
+      size: 21386
     - path: results/ofen_g_koks/data_description/timeseries_train.pdf
       hash: md5
-      md5: b145c20e506ab9d509b4240af2dedd99
-      size: 235963
+      md5: 720e52eb28e9768c52bb26687a44d29a
+      size: 262792
     - path: results/ofen_g_koks/data_description/timeseries_val.pdf
       hash: md5
-      md5: d9c17cd1697b387fe39f0e32b6443819
-      size: 102928
+      md5: 012cf1f7b7331f4565d96ac4c21acc65
+      size: 88637
   prepare@2:
-    cmd: "python scripts/prepare_features.py --raw-data-path ../dcp/norm_data/norm_fondium_15_min_data_2023.csv
-      --datetime-column new_time --fillna-method ffill --tabular-covariate-columns
-      none --time-components time,day_of_week,day_of_year --target-name ofen_f_koks
-      --y-column ofen_f_koks_kg --prediction-horizon 48 --lag-columns ofen_f_koks_kg:96
-      --output-dir data/interim/ofen_f_koks --data-format feather --log-level info
-      --log-file logs/pipeline.log\n"
+    cmd: "python scripts/prepare_features.py --raw-data-path data/raw/norm_fondium_15_min_data_2023.csv
+      --datetime-column new_time --tabular-covariate-columns 'none' --time-components
+      time,day_of_week,day_of_year --target-name ofen_f_koks --y-column ofen_f_koks_kg
+      --prediction-horizon 48 --lag-columns ofen_f_koks_kg:96 --output-dir data/interim/ofen_f_koks
+      --data-format feather --log-level info --log-file logs/pipeline.log --holiday-country
+      DE-BW --end-date 2023-10-31 --fillna-columns 'ofen_g_koks_kg,ofen_f_koks_kg'
+      --fillna-value 0.0 --fillna-noise-type lognormal --fillna-noise-scale 0.005
+      --future-columns 'ofen_metall_kg:48'\n"
     deps:
-    - path: ../dcp/norm_data/norm_fondium_15_min_data_2023.csv
+    - path: data/raw/norm_fondium_15_min_data_2023.csv
       hash: md5
       md5: eb8c9dbf528fea5a3334dfae8c6325a7
       size: 7781885
     - path: scripts/prepare_features.py
       hash: md5
-      md5: 2d3c4c33cad24cb3b37023b7e1f2faed
-      size: 3178
+      md5: a08758f69581c062edc2291f332dfe66
+      size: 5029
     - path: src/dcp_nf_forecast/
       hash: md5
-      md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
-      size: 35957
-      nfiles: 10
+      md5: 4eccec26d11a67bb042ed5367d8889e7.dir
+      size: 53703
+      nfiles: 13
     params:
       params.yaml:
         data.data_format: feather
         data.datetime_column: new_time
-        data.fillna_method: ffill
-        data.tabular_covariate_columns: none
+        data.end_date: '2023-10-31'
+        data.holiday_country: DE-BW
         data.time_components: time,day_of_week,day_of_year
         log_file: logs/pipeline.log
         log_level: info
         paths.data_interim: data/interim
-        paths.raw_data: ../dcp/norm_data/norm_fondium_15_min_data_2023.csv
+        paths.raw_data: data/raw/norm_fondium_15_min_data_2023.csv
         targets:
         - name: dla
           y_column: dla_stromverbrauch_kwh
           prediction_horizon: 48
           lag_columns: dla_stromverbrauch_kwh:96
+          tabular_covariate_columns: none
+          future_columns: none
+          fillna_columns: none
+          fillna_value: 0.0
+          fillna_noise_type: lognormal
+          fillna_noise_scale: 0.0
         - name: ofen_g_koks
           y_column: ofen_g_koks_kg
           prediction_horizon: 48
           lag_columns: ofen_g_koks_kg:96
+          tabular_covariate_columns: none
+          future_columns: ofen_metall_kg:48
+          fillna_columns: ofen_g_koks_kg,ofen_f_koks_kg
+          fillna_value: 0.0
+          fillna_noise_type: lognormal
+          fillna_noise_scale: 0.005
         - name: ofen_f_koks
           y_column: ofen_f_koks_kg
           prediction_horizon: 48
           lag_columns: ofen_f_koks_kg:96
+          tabular_covariate_columns: none
+          future_columns: ofen_metall_kg:48
+          fillna_columns: ofen_g_koks_kg,ofen_f_koks_kg
+          fillna_value: 0.0
+          fillna_noise_type: lognormal
+          fillna_noise_scale: 0.005
         - name: pl2
           y_column: pl2_stromverbrauch_kwh
           prediction_horizon: 48
           lag_columns: pl2_stromverbrauch_kwh:96
+          tabular_covariate_columns: none
+          future_columns: none
+          fillna_columns: none
+          fillna_value: 0.0
+          fillna_noise_type: lognormal
+          fillna_noise_scale: 0.0
     outs:
     - path: data/interim/ofen_f_koks/X.feather
       hash: md5
-      md5: 47f1e4b49aa015b6998eff43768a8336
-      size: 18230290
+      md5: 0aff4daf145ea411584d5ec243ac875b
+      size: 4816410
     - path: data/interim/ofen_f_koks/y.feather
       hash: md5
-      md5: 4e558b44b2857ecf8b3b4a51382f1221
-      size: 9097586
+      md5: c7170c71462293803198a90a8dacc95b
+      size: 1598498
   split@2:
     cmd: "python scripts/split_data.py --input-dir data/interim/ofen_f_koks --output-dir
       data/processed/ofen_f_koks --train-ratio 0.8 --val-ratio 0.1 --test-ratio 0.1
@@ -539,8 +648,8 @@ stages:
     deps:
     - path: data/interim/ofen_f_koks/
       hash: md5
-      md5: 5d445f436363a6b186058b3e6a52cb4f.dir
-      size: 27327876
+      md5: 4102d48aa595c793f556dc3432cd60f1.dir
+      size: 6414908
       nfiles: 2
     - path: scripts/split_data.py
       hash: md5
@@ -548,9 +657,9 @@ stages:
       size: 1858
     - path: src/dcp_nf_forecast/
       hash: md5
-      md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
-      size: 35957
-      nfiles: 10
+      md5: 4eccec26d11a67bb042ed5367d8889e7.dir
+      size: 53703
+      nfiles: 13
     params:
       params.yaml:
         data.data_format: feather
@@ -565,28 +674,28 @@ stages:
     outs:
     - path: data/processed/ofen_f_koks/X_test.feather
       hash: md5
-      md5: f3856d69dcc32371a8c5ef2ec3f20ef9
-      size: 1228266
+      md5: eb1ccd299070849a6cc1f5220db5c57d
+      size: 550466
     - path: data/processed/ofen_f_koks/X_train.feather
       hash: md5
-      md5: 6ea07857f8f4823a4a7dbd28beb26190
-      size: 14991986
+      md5: 5feee73693a27ac93c166aa47da74b64
+      size: 3867962
     - path: data/processed/ofen_f_koks/X_val.feather
       hash: md5
-      md5: e0f9210c97cd095b54581441708a9057
-      size: 2102218
+      md5: 4749dce978ce0019203b485af5e451ce
+      size: 547522
     - path: data/processed/ofen_f_koks/y_test.feather
       hash: md5
-      md5: f241923c95a7a7d328755d8964e2c085
-      size: 580882
+      md5: 5e30b310a0c32e7d90726acfcd26219a
+      size: 179162
     - path: data/processed/ofen_f_koks/y_train.feather
       hash: md5
-      md5: f66730ec76c2b55c0b0f4980abbcf2a1
-      size: 7505410
+      md5: 6e93605d1092143f3e71f1f090ba8a6a
+      size: 1281994
     - path: data/processed/ofen_f_koks/y_val.feather
       hash: md5
-      md5: 3f3e54545311c825308d02652d18c3ca
-      size: 1048410
+      md5: d7ff13c6fea5c02a016746dd0e187952
+      size: 178778
   describe@2:
     cmd: "python scripts/describe_data.py --processed-dir data/processed/ofen_f_koks
       --target-name ofen_f_koks --data-format feather --log-level info --log-file
@@ -594,8 +703,8 @@ stages:
     deps:
     - path: data/processed/ofen_f_koks/
       hash: md5
-      md5: 9856bca90cc5c0413c771deef3debeea.dir
-      size: 27457172
+      md5: 4102c34340cb3455b1e9d54f38220c26.dir
+      size: 23575692
       nfiles: 6
     - path: scripts/describe_data.py
       hash: md5
@@ -603,9 +712,9 @@ stages:
       size: 8375
     - path: src/dcp_nf_forecast/
       hash: md5
-      md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
-      size: 35957
-      nfiles: 10
+      md5: 00cbe80e012281272f43749153a6c383.dir
+      size: 47283
+      nfiles: 13
     params:
       params.yaml:
         data.data_format: feather
@@ -617,109 +726,151 @@ stages:
           y_column: dla_stromverbrauch_kwh
           prediction_horizon: 48
           lag_columns: dla_stromverbrauch_kwh:96
+          tabular_covariate_columns: none
+          fillna_columns: none
+          fillna_value: 0.0
+          fillna_noise_scale: 0.0
         - name: ofen_g_koks
           y_column: ofen_g_koks_kg
           prediction_horizon: 48
           lag_columns: ofen_g_koks_kg:96
+          tabular_covariate_columns: ofen_metall_kg
+          fillna_columns: ofen_g_koks_kg,ofen_f_koks_kg
+          fillna_value: 0.0
+          fillna_noise_scale: 0.05
         - name: ofen_f_koks
           y_column: ofen_f_koks_kg
           prediction_horizon: 48
           lag_columns: ofen_f_koks_kg:96
+          tabular_covariate_columns: ofen_metall_kg
+          fillna_columns: ofen_g_koks_kg,ofen_f_koks_kg
+          fillna_value: 0.0
+          fillna_noise_scale: 0.05
         - name: pl2
           y_column: pl2_stromverbrauch_kwh
           prediction_horizon: 48
           lag_columns: pl2_stromverbrauch_kwh:96
+          tabular_covariate_columns: none
+          fillna_columns: none
+          fillna_value: 0.0
+          fillna_noise_scale: 0.0
     outs:
     - path: results/ofen_f_koks/data_description/correlation_train.pdf
       hash: md5
-      md5: 0edfe720c9639b1d369486db41eaf05e
-      size: 34194
+      md5: 3f5f0fc01042d5ecc51846a7f29d1f22
+      size: 45226
     - path: results/ofen_f_koks/data_description/correlation_val.pdf
       hash: md5
-      md5: 1161972f3c889c3a1f7144d805d73fe2
-      size: 35797
+      md5: 9ccc2c03630ada6dcd22f5fe79dfe69f
+      size: 54205
     - path: results/ofen_f_koks/data_description/histograms_train.pdf
       hash: md5
-      md5: 256b658dea17488eebdfa29f0a68b497
-      size: 34952
+      md5: 6b20b2f2f7640cfa9d5df7d3f0019ddd
+      size: 40828
     - path: results/ofen_f_koks/data_description/histograms_val.pdf
       hash: md5
-      md5: 58a694f52024e14f42ac5472b5444dac
-      size: 38790
+      md5: 4b6776d17ee9a70fc1119ac6661c6b62
+      size: 40893
     - path: results/ofen_f_koks/data_description/statistics_train.yaml
       hash: md5
-      md5: f704b4752f0b4930f283e346799e2b03
-      size: 20213
+      md5: b1018e50414d7ee4d17add0fd4c511ef
+      size: 21048
     - path: results/ofen_f_koks/data_description/statistics_val.yaml
       hash: md5
-      md5: c1771fd63d34e918ae109f473b43f101
-      size: 21635
+      md5: d8d011f4bc605d6800842fcb50cfe575
+      size: 21176
     - path: results/ofen_f_koks/data_description/timeseries_train.pdf
       hash: md5
-      md5: 4f37d8a36f2bb7382314fd7a60e9aea5
-      size: 218423
+      md5: 26786161c282a7f0fa3c4433404689d1
+      size: 255262
     - path: results/ofen_f_koks/data_description/timeseries_val.pdf
       hash: md5
-      md5: 62fd3865086222f5934b1c6630ed8846
-      size: 99713
+      md5: 2153cd60d1515e918d705dc8a1d155c4
+      size: 88777
   prepare@3:
-    cmd: "python scripts/prepare_features.py --raw-data-path ../dcp/norm_data/norm_fondium_15_min_data_2023.csv
-      --datetime-column new_time --fillna-method ffill --tabular-covariate-columns
-      none --time-components time,day_of_week,day_of_year --target-name pl2 --y-column
-      pl2_stromverbrauch_kwh --prediction-horizon 48 --lag-columns pl2_stromverbrauch_kwh:96
-      --output-dir data/interim/pl2 --data-format feather --log-level info --log-file
-      logs/pipeline.log\n"
+    cmd: "python scripts/prepare_features.py --raw-data-path data/raw/norm_fondium_15_min_data_2023.csv
+      --datetime-column new_time --tabular-covariate-columns 'none' --time-components
+      time,day_of_week,day_of_year --target-name pl2 --y-column pl2_stromverbrauch_kwh
+      --prediction-horizon 48 --lag-columns pl2_stromverbrauch_kwh:96 --output-dir
+      data/interim/pl2 --data-format feather --log-level info --log-file logs/pipeline.log
+      --holiday-country DE-BW --end-date 2023-10-31 --fillna-columns 'none' --fillna-value
+      0.0 --fillna-noise-type lognormal --fillna-noise-scale 0.0 --future-columns
+      'none'\n"
     deps:
-    - path: ../dcp/norm_data/norm_fondium_15_min_data_2023.csv
+    - path: data/raw/norm_fondium_15_min_data_2023.csv
       hash: md5
       md5: eb8c9dbf528fea5a3334dfae8c6325a7
       size: 7781885
     - path: scripts/prepare_features.py
       hash: md5
-      md5: 2d3c4c33cad24cb3b37023b7e1f2faed
-      size: 3178
+      md5: a08758f69581c062edc2291f332dfe66
+      size: 5029
     - path: src/dcp_nf_forecast/
       hash: md5
-      md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
-      size: 35957
-      nfiles: 10
+      md5: 4eccec26d11a67bb042ed5367d8889e7.dir
+      size: 53703
+      nfiles: 13
     params:
       params.yaml:
         data.data_format: feather
         data.datetime_column: new_time
-        data.fillna_method: ffill
-        data.tabular_covariate_columns: none
+        data.end_date: '2023-10-31'
+        data.holiday_country: DE-BW
         data.time_components: time,day_of_week,day_of_year
         log_file: logs/pipeline.log
         log_level: info
         paths.data_interim: data/interim
-        paths.raw_data: ../dcp/norm_data/norm_fondium_15_min_data_2023.csv
+        paths.raw_data: data/raw/norm_fondium_15_min_data_2023.csv
         targets:
         - name: dla
           y_column: dla_stromverbrauch_kwh
           prediction_horizon: 48
           lag_columns: dla_stromverbrauch_kwh:96
+          tabular_covariate_columns: none
+          future_columns: none
+          fillna_columns: none
+          fillna_value: 0.0
+          fillna_noise_type: lognormal
+          fillna_noise_scale: 0.0
         - name: ofen_g_koks
           y_column: ofen_g_koks_kg
           prediction_horizon: 48
           lag_columns: ofen_g_koks_kg:96
+          tabular_covariate_columns: none
+          future_columns: ofen_metall_kg:48
+          fillna_columns: ofen_g_koks_kg,ofen_f_koks_kg
+          fillna_value: 0.0
+          fillna_noise_type: lognormal
+          fillna_noise_scale: 0.005
         - name: ofen_f_koks
           y_column: ofen_f_koks_kg
           prediction_horizon: 48
           lag_columns: ofen_f_koks_kg:96
+          tabular_covariate_columns: none
+          future_columns: ofen_metall_kg:48
+          fillna_columns: ofen_g_koks_kg,ofen_f_koks_kg
+          fillna_value: 0.0
+          fillna_noise_type: lognormal
+          fillna_noise_scale: 0.005
         - name: pl2
           y_column: pl2_stromverbrauch_kwh
           prediction_horizon: 48
           lag_columns: pl2_stromverbrauch_kwh:96
+          tabular_covariate_columns: none
+          future_columns: none
+          fillna_columns: none
+          fillna_value: 0.0
+          fillna_noise_type: lognormal
+          fillna_noise_scale: 0.0
     outs:
     - path: data/interim/pl2/X.feather
       hash: md5
-      md5: d240927413f264367274dfd24411684d
-      size: 22644842
+      md5: d618e5d00ee913c077e2a53fc9052152
+      size: 21859538
     - path: data/interim/pl2/y.feather
       hash: md5
-      md5: 2f720cb2c411a93423e0a10d43ba0882
-      size: 11279570
+      md5: 987372c3919834c794e14df5fb3ec090
+      size: 10916202
   split@3:
     cmd: "python scripts/split_data.py --input-dir data/interim/pl2 --output-dir data/processed/pl2
       --train-ratio 0.8 --val-ratio 0.1 --test-ratio 0.1 --data-format feather --log-level
@@ -727,8 +878,8 @@ stages:
     deps:
     - path: data/interim/pl2/
       hash: md5
-      md5: 8dc69a2f0cb95cf7d22d8908d1426bf9.dir
-      size: 33924412
+      md5: d22928cb7a398f568f667553eb3e8c1d.dir
+      size: 32775740
       nfiles: 2
     - path: scripts/split_data.py
       hash: md5
@@ -736,9 +887,9 @@ stages:
       size: 1858
     - path: src/dcp_nf_forecast/
       hash: md5
-      md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
-      size: 35957
-      nfiles: 10
+      md5: 4eccec26d11a67bb042ed5367d8889e7.dir
+      size: 53703
+      nfiles: 13
     params:
       params.yaml:
         data.data_format: feather
@@ -753,36 +904,36 @@ stages:
     outs:
     - path: data/processed/pl2/X_test.feather
       hash: md5
-      md5: 8296dc5c035e866983f35debb618c788
-      size: 70018
+      md5: 6fba8eeea45297599b9fb1c14bc93201
+      size: 2281362
     - path: data/processed/pl2/X_train.feather
       hash: md5
-      md5: bf2eeb55c73fc55e2da7a6e6f01e07df
-      size: 21064258
+      md5: 062380302c34fa3c32c66d8b6434d79b
+      size: 17756770
     - path: data/processed/pl2/X_val.feather
       hash: md5
-      md5: 40cad44eb17795cef9faba6d48c43339
-      size: 1603122
+      md5: ce47a3d87c54612d5372d7a1b166a309
+      size: 1923482
     - path: data/processed/pl2/y_test.feather
       hash: md5
-      md5: b35b49068bd7a5f497a124409dcb6717
-      size: 27098
+      md5: f3b76817e8b7ab4da5330beed148da87
+      size: 1132634
     - path: data/processed/pl2/y_train.feather
       hash: md5
-      md5: 9c3329fcad626298b3d27d067edf0568
-      size: 10519498
+      md5: 8e4d9462bf5731c986f6b613fb4b95d6
+      size: 8865738
     - path: data/processed/pl2/y_val.feather
       hash: md5
-      md5: 58be123ca416174cc86350356539a218
-      size: 764538
+      md5: 3b461684e4404aceb02691ad07ae2954
+      size: 953642
   describe@3:
     cmd: "python scripts/describe_data.py --processed-dir data/processed/pl2 --target-name
       pl2 --data-format feather --log-level info --log-file logs/pipeline.log\n"
     deps:
     - path: data/processed/pl2/
       hash: md5
-      md5: ace540117f66c965120462f17290eb8c.dir
-      size: 34048532
+      md5: c4b2b6072a111a2f73b868e7103a3b82.dir
+      size: 32913628
       nfiles: 6
     - path: scripts/describe_data.py
       hash: md5
@@ -790,9 +941,9 @@ stages:
       size: 8375
     - path: src/dcp_nf_forecast/
       hash: md5
-      md5: 52ad309186f3ed455fab3a0f04e0fc74.dir
-      size: 35957
-      nfiles: 10
+      md5: 00cbe80e012281272f43749153a6c383.dir
+      size: 47283
+      nfiles: 13
     params:
       params.yaml:
         data.data_format: feather
@@ -804,51 +955,67 @@ stages:
           y_column: dla_stromverbrauch_kwh
           prediction_horizon: 48
           lag_columns: dla_stromverbrauch_kwh:96
+          tabular_covariate_columns: none
+          fillna_columns: none
+          fillna_value: 0.0
+          fillna_noise_scale: 0.0
         - name: ofen_g_koks
           y_column: ofen_g_koks_kg
           prediction_horizon: 48
           lag_columns: ofen_g_koks_kg:96
+          tabular_covariate_columns: ofen_metall_kg
+          fillna_columns: ofen_g_koks_kg,ofen_f_koks_kg
+          fillna_value: 0.0
+          fillna_noise_scale: 0.05
         - name: ofen_f_koks
           y_column: ofen_f_koks_kg
           prediction_horizon: 48
           lag_columns: ofen_f_koks_kg:96
+          tabular_covariate_columns: ofen_metall_kg
+          fillna_columns: ofen_g_koks_kg,ofen_f_koks_kg
+          fillna_value: 0.0
+          fillna_noise_scale: 0.05
         - name: pl2
           y_column: pl2_stromverbrauch_kwh
           prediction_horizon: 48
           lag_columns: pl2_stromverbrauch_kwh:96
+          tabular_covariate_columns: none
+          fillna_columns: none
+          fillna_value: 0.0
+          fillna_noise_scale: 0.0
     outs:
     - path: results/pl2/data_description/correlation_train.pdf
       hash: md5
-      md5: f086bbdd9416f4de7c09557e4fe2fcdc
-      size: 33335
+      md5: 31d4cea25ae59fc74f41506ef9a50b3b
+      size: 30430
     - path: results/pl2/data_description/correlation_val.pdf
       hash: md5
-      md5: a37f9e734d8167a72d688e353286c1b9
-      size: 34488
+      md5: 783996edd1ca517ba1acb1283a693034
+      size: 38386
     - path: results/pl2/data_description/histograms_train.pdf
       hash: md5
-      md5: f53a9e43cfe5f2244d24f1710e83cdbc
-      size: 33842
+      md5: b3d17d21f56afd0aec8913fb40ac3018
+      size: 32810
     - path: results/pl2/data_description/histograms_val.pdf
       hash: md5
-      md5: 4cedfd68da4dbe16f9fcd64d57240083
-      size: 41502
+      md5: 1d12d1b8430766c3e3091e332798428a
+      size: 39082
     - path: results/pl2/data_description/statistics_train.yaml
       hash: md5
-      md5: f4be2d3467afc964d9ded5efb3d5eb46
-      size: 20206
+      md5: 020b7f24aa8a90d195ccb7f63540dba2
+      size: 20349
     - path: results/pl2/data_description/statistics_val.yaml
       hash: md5
-      md5: ee2e25a9c565b8f1af8cfb4babf16da8
-      size: 21669
+      md5: 5c66aecff71c30e4f68975911cb5eb08
+      size: 20895
     - path: results/pl2/data_description/timeseries_train.pdf
       hash: md5
-      md5: f4b51da87da756f3cd905a28718fba83
-      size: 258581
+      md5: d960ac2ebade68b8afb422b3d6b3b699
+      size: 243054
     - path: results/pl2/data_description/timeseries_val.pdf
       hash: md5
-      md5: a4efbfd6845370be7704bf2fef51fd54
-      size: 83536
+      md5: c038ef5cbcb6881053402b46fc26b894
+      size: 96983
   train_bernstein@1:
     cmd: "python scripts/train.py --processed-dir data/processed/ofen_g_koks --target-name
       ofen_g_koks --model bernstein_nf --data-format feather --prediction-horizon
