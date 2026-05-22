@@ -1,3 +1,5 @@
+"""Package for normalizing flow forecasting models."""
+
 import hybrid_flows.distributions as _hf_d
 
 from dcp_nf_forecast.distributions import (

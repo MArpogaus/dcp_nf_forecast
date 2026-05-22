@@ -1,3 +1,5 @@
+"""Train a normalizing flow forecasting model on a target dataset."""
+
 import argparse
 from pathlib import Path
 
@@ -16,6 +18,7 @@ from dcp_nf_forecast.utils import load_data, setup_logging
 
 
 def main() -> None:
+    """Entry point: parse CLI args, build model, train, log to MLflow."""
     parser = argparse.ArgumentParser(
         description="Train a normalizing flow forecasting model"
     )

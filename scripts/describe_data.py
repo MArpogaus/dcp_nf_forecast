@@ -42,6 +42,22 @@ def compute_statistics(
     x: np.ndarray,
     y: np.ndarray,
 ) -> dict:
+    """Compute descriptive statistics for feature and target arrays.
+
+    Parameters
+    ----------
+    x : np.ndarray
+        Feature matrix.
+    y : np.ndarray
+        Target matrix.
+
+    Returns
+    -------
+    dict
+        Dictionary containing ``n_samples``, ``n_features``, ``n_targets``,
+        and a ``columns`` list with per-column statistics.
+
+    """
     n_cols_x = x.shape[1]
     n_cols_y = y.shape[1]
 
@@ -89,6 +105,25 @@ def plot_histograms(
     title: str = "",
     max_cols: int = 20,
 ) -> plt.Figure:
+    """Plot histograms for each column in the combined feature-target array.
+
+    Parameters
+    ----------
+    x : np.ndarray
+        Feature matrix.
+    y : np.ndarray
+        Target matrix.
+    title : str, optional
+        Plot title suffix, by default ``""``.
+    max_cols : int, optional
+        Maximum number of columns to plot, by default ``20``.
+
+    Returns
+    -------
+    plt.Figure
+        The histogram grid figure.
+
+    """
     combined = np.concatenate([x, y], axis=1)
     n_cols_plot = min(combined.shape[1], max_cols)
     plot_cols = min(4, n_cols_plot)
@@ -119,6 +154,25 @@ def plot_timeseries(
     title: str = "",
     max_cols: int = 10,
 ) -> plt.Figure:
+    """Plot time series line plots for each column.
+
+    Parameters
+    ----------
+    x : np.ndarray
+        Feature matrix.
+    y : np.ndarray
+        Target matrix.
+    title : str, optional
+        Plot title suffix, by default ``""``.
+    max_cols : int, optional
+        Maximum number of columns to plot, by default ``10``.
+
+    Returns
+    -------
+    plt.Figure
+        The time series grid figure.
+
+    """
     combined = np.concatenate([x, y], axis=1)
     n_plot = combined.shape[1] if max_cols <= 0 else min(combined.shape[1], max_cols)
     plot_cols = min(3, n_plot)
@@ -147,6 +201,23 @@ def plot_correlation_matrix(
     y: np.ndarray,
     title: str = "",
 ) -> plt.Figure:
+    """Plot a correlation matrix heatmap for the combined feature-target array.
+
+    Parameters
+    ----------
+    x : np.ndarray
+        Feature matrix.
+    y : np.ndarray
+        Target matrix.
+    title : str, optional
+        Plot title suffix, by default ``""``.
+
+    Returns
+    -------
+    plt.Figure
+        The correlation matrix figure.
+
+    """
     combined = np.concatenate([x, y], axis=1)
     corr = np.corrcoef(combined.T)
     fig, ax = plt.subplots(figsize=(6, 5))
@@ -159,6 +230,7 @@ def plot_correlation_matrix(
 
 
 def main() -> None:
+    """Entry point: parse CLI args, generate statistics and plots, log to MLflow."""
     parser = argparse.ArgumentParser(
         description="Generate descriptive stats and plots from train/val splits"
     )
