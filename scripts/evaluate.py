@@ -74,43 +74,6 @@ def sample_predictions(
     return result
 
 
-def compute_nll(
-    model: tf.keras.Model,
-    x: np.ndarray,
-    y: np.ndarray,
-    batch_size: int,
-) -> float:
-    """Compute mean negative log-likelihood on test data.
-
-    Parameters
-    ----------
-    model : tf.keras.Model
-        Trained forecasting model.
-    x : np.ndarray
-        Input covariates, shape ``(n, cov_dim)``.
-    y : np.ndarray
-        True target values, shape ``(n, prediction_horizon)``.
-    batch_size : int
-        Batch size for evaluation.
-
-    Returns
-    -------
-    float
-        Mean negative log-likelihood across all test samples and
-        forecast steps.
-
-    """
-    n = len(x)
-    nlls: list[np.ndarray] = []
-    for i in range(0, n, batch_size):
-        batch_x = x[i : i + batch_size]
-        batch_y = y[i : i + batch_size]
-        dist = model(batch_x, training=False)
-        batch_nll = -dist.log_prob(batch_y)
-        nlls.append(batch_nll.numpy())
-    return float(np.mean(np.concatenate(nlls)))
-
-
 def plot_forecast_with_intervals(
     y_true: np.ndarray,
     samples: np.ndarray,
@@ -399,7 +362,9 @@ def main() -> None:
             mlflow.tensorflow.autolog()
 
             logger.info("Computing NLL on test data ...")
-            nll = compute_nll(model, x_test, y_test, batch_size)
+            nll = float(
+                model.evaluate(x_test, y_test, batch_size=batch_size, verbose=0)
+            )
             logger.info("NLL: %.4f", nll)
 
             logger.info("Sampling %d draws from predictive distribution ...", n_samples)
