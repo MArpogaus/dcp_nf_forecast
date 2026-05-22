@@ -56,6 +56,33 @@ class TestLoadRawData:
         )
         assert len(result) == 1
 
+    def test_unsorted_raw_data_gets_sorted(self, tmp_path):
+        path = tmp_path / "unsorted.csv"
+        df = pd.DataFrame(
+            {"target": [1.0, 2.0]},
+            index=pd.DatetimeIndex(["2023-01-02", "2023-01-01"]),
+        )
+        df.reset_index().rename(columns={"index": "time"}).to_csv(path, index=False)
+        result = load_raw_data(path, "time")
+        assert result.index.is_monotonic_increasing
+        assert result["target"].iloc[0] == 2.0
+
+    def test_duplicate_raw_data_logs_warning(self, tmp_path, caplog):
+        import logging
+
+        path = tmp_path / "duplicates.csv"
+        df = pd.DataFrame(
+            {"target": [1.0, 2.0]},
+            index=pd.DatetimeIndex(["2023-01-01", "2023-01-01"]),
+        )
+        df.reset_index().rename(columns={"index": "time"}).to_csv(path, index=False)
+        with caplog.at_level(logging.WARNING):
+            load_raw_data(path, "time")
+        assert any(
+            "contains duplicate timestamps" in record.message
+            for record in caplog.records
+        )
+
 
 class TestFillnaWithNoise:
     def test_no_columns(self):
@@ -153,6 +180,14 @@ class TestAddHolidayIndicator:
         )
         result = add_holiday_indicator(df, "DE")
         assert result["is_holiday"].iloc[0] == 0
+
+    def test_holiday_indicator_with_subregion(self):
+        df = pd.DataFrame(
+            {"v": [1]},
+            index=pd.DatetimeIndex(["2023-01-06"]),  # Epiphany, BW-only
+        )
+        result = add_holiday_indicator(df, "DE-BW")
+        assert result["is_holiday"].iloc[0] == 1
 
 
 class TestCreateLeadFeatures:
