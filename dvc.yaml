@@ -97,12 +97,18 @@ stages:
       outs:
       - results/${item.name}/data_description/statistics_train.yaml
       - results/${item.name}/data_description/statistics_val.yaml
-      - results/${item.name}/data_description/histograms_train.pdf
-      - results/${item.name}/data_description/histograms_val.pdf
-      - results/${item.name}/data_description/timeseries_train.pdf
-      - results/${item.name}/data_description/timeseries_val.pdf
-      - results/${item.name}/data_description/correlation_train.pdf
-      - results/${item.name}/data_description/correlation_val.pdf
+      - results/${item.name}/data_description/histograms_features_train.pdf
+      - results/${item.name}/data_description/histograms_features_val.pdf
+      - results/${item.name}/data_description/histograms_targets_train.pdf
+      - results/${item.name}/data_description/histograms_targets_val.pdf
+      - results/${item.name}/data_description/timeseries_features_train.pdf
+      - results/${item.name}/data_description/timeseries_features_val.pdf
+      - results/${item.name}/data_description/timeseries_targets_train.pdf
+      - results/${item.name}/data_description/timeseries_targets_val.pdf
+      - results/${item.name}/data_description/correlation_features_train.pdf
+      - results/${item.name}/data_description/correlation_features_val.pdf
+      - results/${item.name}/data_description/correlation_targets_train.pdf
+      - results/${item.name}/data_description/correlation_targets_val.pdf
 
   train:
     matrix:
