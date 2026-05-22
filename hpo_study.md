@@ -8,7 +8,7 @@
 
 ---
 
-## Models (all 8 for DLA)
+## Models (all 10 for DLA)
 
 | Model | Base | Bijector | Notes |
 |-------|------|----------|-------|
@@ -25,7 +25,7 @@
 
 ---
 
-## Phase 1 — Constant LR Benchmark
+## Phase 1 — Old data: Constant LR Benchmark
 
 **Hyperparams:**
 | Param | Value |
@@ -48,14 +48,7 @@
 | spline_nf | 23 | 3×nbins-1 = 23 |
 | spline_nf_lognormal | 23 | same |
 
-**Commands:**
-```bash
-nohup dvc repro train@dataset0-normal_baseline train@dataset0-lognormal_baseline train@dataset0-bernstein_nf train@dataset0-bernstein_nf_lognormal train@dataset0-bernstein_nf_scale train@dataset0-bernstein_nf_scale_lognormal train@dataset0-spline_nf train@dataset0-spline_nf_lognormal > phase1_training.log 2>&1 &
-# Followed by: dvc repro evaluate@dataset0-* (auto-runs after training stages complete)
-```
-
 **Results:**
-
 ```
 Model                          min_val_loss   best_ep   RMSE (eval)    MAE (eval)
 spline_nf                       -161.133         77       0.0813        0.0622
@@ -68,23 +61,11 @@ normal_baseline                  -22.541          4       0.2676        0.2180
 lognormal_baseline                   nan         56       0.9091        0.8886
 ```
 
-**Findings:**
-- **spline_nf** (Normal base, [128,128], order=8, nbins=8): best NLL (-161.133) but 3rd best RMSE (0.0813)
-- **bernstein_nf_scale_lognormal**: best RMSE (0.0197) and tight 90% CI (width=0.067) — excellent point forecasts
-- **spline_nf_lognormal**: near-best NLL but poor RMSE (0.44) and very wide CIs (width=4.42) — overconfident uncertainty
-- **lognormal_baseline**: NaN — full-covariance lognormal + Exp bijector unstable with small data
-- **Scale bijector helps LogNormal base** (RMSE 0.020 vs 0.044) but **hurts Normal base** (RMSE 0.247 vs 0.178)
+## Phase 2 — Old data: Cosine Decay LR
 
-**Decision:** Continue Phase 2 with all 8 models. Cosine decay may help models that plateaued early (spline_nf at ep 77, bernstein_nf_scale at ep 58).
-
----
-
-## Phase 2 — Cosine Decay LR
-
-Switch from constant LR=0.001 to cosine decay (initial_lr=0.001, decay_steps=22000 = 200ep × 110 batches).
+Switch from constant LR=0.001 to cosine decay (initial_lr=0.001, decay_steps=22000).
 
 **Results:**
-
 ```
 Model                          Phase1_min_val   Phase2_min_val   Winner
 normal_baseline                 -22.541          -77.947          Phase2
@@ -99,22 +80,7 @@ spline_nf_scale                -166.046         -164.635          Phase1
 spline_nf_scale_lognormal           —           -124.250          —
 ```
 
-**Findings:**
-- Cosine decay helps baselines (normal: 3.5× better, lognormal: NaN → -165)
-- Spline models prefer constant LR (simpler models benefit from fine-tuning)
-- Bernstein models are mixed (slight preference for cosine)
-- Top-3 NLL: spline_nf_scale(constant) -166.0, lognormal_baseline(cosine) -165.0, spline_nf_scale(cosine) -164.6
-
-**Per-model LR policy for Phase 3:**
-- Spline variants, normal baseline → constant LR (0.001)
-- Bernstein variants → mixed (pick winner per model)
-- Lognormal baseline → cosine decay (fixed NaN)
-
----
-
-## Phase 3 — Capacity Increase
-
-Apply to top-4 models with increased capacity:
+## Phase 3 — Old data: Capacity Increase
 
 | Model | LR | Changes from Phase 1/2 |
 |-------|-----|----------------------|
@@ -123,224 +89,59 @@ Apply to top-4 models with increased capacity:
 | bernstein_nf_scale_lognormal_v2 | constant 0.001 | order=12, params: 9→13 |
 | lognormal_baseline_v2 | cosine decay | [256,256] from [128,128] |
 
-Further steps if underfitting:
+---
 
-| Step | Bernstein order | Spline nbins | Hidden units |
-|------|----------------|--------------|--------------|
-| 3b | 16 | 16 | [256, 128] |
-| 3c | 16 | 16 | [256, 256] |
-| 3d | — | — | increase epochs to 400 |
+## Baseline Re-run (new data with is_holiday + fillna)
+
+**Config:** Constant LR=0.001, nbins=12, order=8, hidden=[128,128]
+
+Results from MLflow after full pipeline re-run on updated data:
+
+| Model | Epochs | BestEp | min_val_loss |
+|-------|--------|--------|-------------|
+| normal_baseline | 25 | 14 | -106.44 |
+| lognormal_baseline | 33 | 22 | **-163.31** |
+| bernstein_nf | 200 | 199 | -81.14 |
+| bernstein_nf_lognormal | 200 | 197 | -135.15 |
+| bernstein_nf_scale | 17 | 6 | -148.97 |
+| bernstein_nf_scale_lognormal | 130 | 119 | -146.04 |
+| spline_nf | 33 | 22 | -146.35 |
+| spline_nf_lognormal | 177 | 166 | -154.27 |
+| **spline_nf_scale** | 46 | 35 | **-156.61** |
+| spline_nf_scale_lognormal | 38 | 27 | -128.28 |
+
+**Findings:**
+- Data changes dramatically improved baselines (lognormal went from NaN → -163.31)
+- **spline_nf_scale** is the best NF model (-156.61, close to lognormal_baseline)
+- Baselines now competitive with NFs, suggesting simpler models benefit more from new features
+- The `_scale` bijector consistently helps normal-base models
 
 ---
 
-## Phase 4 — Export Best Params to All Targets
+## HPO Study: spline_nf_scale on DLA
 
-Once optimal DLA params are found, apply to `ofen_g_koks`, `ofen_f_koks`, `pl2` and run full pipeline. Commit final results.
+**Target:** Optimize spline_nf_scale min_val_loss
 
-## DLA Full Run — 2026-05-22 14:49:10 — Status: RUNNING
+**Starting config:** `params/models/dla/spline_nf_scale.yaml` (nbins=12, hidden=[128,128], lr=0.001 constant, epochs=200, patience=10)
 
-| Model | Status | Min Val Loss |
-|-------|--------|-------------|
-| normal_baseline | RUNNING | -52.7867 |
-| lognormal_baseline | PENDING | - |
-| bernstein_nf | FINISHED | -142.7449 |
-| bernstein_nf_lognormal | PENDING | - |
-| bernstein_nf_scale | FINISHED | -142.7449 |
-| bernstein_nf_scale_lognormal | PENDING | - |
-| spline_nf | RUNNING | -148.4261 |
-| spline_nf_lognormal | RUNNING | -148.4261 |
-| spline_nf_scale | RUNNING | -128.9820 |
-| spline_nf_scale_lognormal | RUNNING | -128.9820 |
+**Baseline:** min_val_loss = -156.61 (epoch 35/46)
 
+**Search space (one param change per iteration):**
+| Order | Param | Values | Strategy |
+|-------|-------|--------|----------|
+| 1 | learning_rate | [5e-4, 1e-3, 3e-3, 1e-4, 5e-3] | Log sweep, constant → cosine |
+| 2 | nbins | [8, 12, 16, 24] | Increase once LR is settled |
+| 3 | hidden_units | [[128,64],[128,128],[256,128],[256,256]] | Capacity after overfit check |
+| 4 | regularization | dropout, batch_norm | Only if overfitting |
+| 5 | epochs | [200, 400] | Budget increase last |
 
-## DLA Full Run — 2026-05-22 14:51:10 — Status: RUNNING
+**Stopping criteria:**
+1. Target min_val_loss ≤ -170
+2. Plateau: 5 consecutive iterations without improvement
+3. Max iterations: 20
 
-| Model | Status | Min Val Loss |
-|-------|--------|-------------|
-| normal_baseline | RUNNING | -52.7867 |
-| lognormal_baseline | PENDING | - |
-| bernstein_nf | FINISHED | -142.7449 |
-| bernstein_nf_lognormal | PENDING | - |
-| bernstein_nf_scale | FINISHED | -142.7449 |
-| bernstein_nf_scale_lognormal | PENDING | - |
-| spline_nf | RUNNING | -152.4902 |
-| spline_nf_lognormal | RUNNING | -152.4902 |
-| spline_nf_scale | RUNNING | -128.9820 |
-| spline_nf_scale_lognormal | RUNNING | -128.9820 |
+**HPO log:**
 
-
-## DLA Full Run — 2026-05-22 14:53:10 — Status: RUNNING
-
-| Model | Status | Min Val Loss |
-|-------|--------|-------------|
-| normal_baseline | FINISHED | -53.7762 |
-| lognormal_baseline | PENDING | - |
-| bernstein_nf | RUNNING | -125.3643 |
-| bernstein_nf_lognormal | RUNNING | -125.3643 |
-| bernstein_nf_scale | FINISHED | -142.7449 |
-| bernstein_nf_scale_lognormal | PENDING | - |
-| spline_nf | FINISHED | -153.9878 |
-| spline_nf_lognormal | FINISHED | -153.9878 |
-| spline_nf_scale | RUNNING | -128.9820 |
-| spline_nf_scale_lognormal | RUNNING | -128.9820 |
-
-
-## DLA Full Run — 2026-05-22 14:55:10 — Status: RUNNING
-
-| Model | Status | Min Val Loss |
-|-------|--------|-------------|
-| normal_baseline | FINISHED | -53.7762 |
-| lognormal_baseline | PENDING | - |
-| bernstein_nf | RUNNING | -134.8092 |
-| bernstein_nf_lognormal | RUNNING | -134.8092 |
-| bernstein_nf_scale | FINISHED | -142.7449 |
-| bernstein_nf_scale_lognormal | PENDING | - |
-| spline_nf | FINISHED | -153.9878 |
-| spline_nf_lognormal | FINISHED | -153.9878 |
-| spline_nf_scale | RUNNING | -128.9820 |
-| spline_nf_scale_lognormal | RUNNING | -128.9820 |
-
-
-## DLA Full Run — 2026-05-22 14:57:10 — Status: RUNNING
-
-| Model | Status | Min Val Loss |
-|-------|--------|-------------|
-| normal_baseline | FINISHED | -53.7762 |
-| lognormal_baseline | PENDING | - |
-| bernstein_nf | FINISHED | -135.1432 |
-| bernstein_nf_lognormal | FINISHED | -135.1432 |
-| bernstein_nf_scale | FINISHED | -142.7449 |
-| bernstein_nf_scale_lognormal | PENDING | - |
-| spline_nf | RUNNING | -131.3480 |
-| spline_nf_lognormal | FINISHED | -153.9878 |
-| spline_nf_scale | RUNNING | -128.9820 |
-| spline_nf_scale_lognormal | RUNNING | -128.9820 |
-
-
-## DLA Full Run — 2026-05-22 14:59:10 — Status: RUNNING
-
-| Model | Status | Min Val Loss |
-|-------|--------|-------------|
-| normal_baseline | FINISHED | -53.7762 |
-| lognormal_baseline | PENDING | - |
-| bernstein_nf | FINISHED | -135.1432 |
-| bernstein_nf_lognormal | FINISHED | -135.1432 |
-| bernstein_nf_scale | FINISHED | -142.7449 |
-| bernstein_nf_scale_lognormal | PENDING | - |
-| spline_nf | RUNNING | -151.9763 |
-| spline_nf_lognormal | FINISHED | -153.9878 |
-| spline_nf_scale | RUNNING | -151.9763 |
-| spline_nf_scale_lognormal | RUNNING | -128.9820 |
-
-
-## DLA Full Run — 2026-05-22 15:01:11 — Status: RUNNING
-
-| Model | Status | Min Val Loss |
-|-------|--------|-------------|
-| normal_baseline | FINISHED | -159.9537 |
-| lognormal_baseline | FINISHED | -159.9537 |
-| bernstein_nf | RUNNING | -80.4127 |
-| bernstein_nf_lognormal | FINISHED | -135.1432 |
-| bernstein_nf_scale | FINISHED | -142.7449 |
-| bernstein_nf_scale_lognormal | PENDING | - |
-| spline_nf | FINISHED | -153.8930 |
-| spline_nf_lognormal | FINISHED | -153.9878 |
-| spline_nf_scale | FINISHED | -153.8930 |
-| spline_nf_scale_lognormal | RUNNING | -128.9820 |
-
-
-## DLA Full Run — 2026-05-22 15:03:11 — Status: RUNNING
-
-| Model | Status | Min Val Loss |
-|-------|--------|-------------|
-| normal_baseline | FINISHED | -159.9537 |
-| lognormal_baseline | FINISHED | -159.9537 |
-| bernstein_nf | RUNNING | -81.1339 |
-| bernstein_nf_lognormal | FINISHED | -135.1432 |
-| bernstein_nf_scale | FINISHED | -142.7449 |
-| bernstein_nf_scale_lognormal | PENDING | - |
-| spline_nf | FINISHED | -153.8930 |
-| spline_nf_lognormal | FINISHED | -153.9878 |
-| spline_nf_scale | FINISHED | -153.8930 |
-| spline_nf_scale_lognormal | RUNNING | -128.9820 |
-
-
-## DLA Full Run — 2026-05-22 15:05:11 — Status: RUNNING
-
-| Model | Status | Min Val Loss |
-|-------|--------|-------------|
-| normal_baseline | FINISHED | -159.9537 |
-| lognormal_baseline | FINISHED | -159.9537 |
-| bernstein_nf | FINISHED | -81.1403 |
-| bernstein_nf_lognormal | FINISHED | -135.1432 |
-| bernstein_nf_scale | FINISHED | -142.7449 |
-| bernstein_nf_scale_lognormal | PENDING | - |
-| spline_nf | RUNNING | -126.3985 |
-| spline_nf_lognormal | FINISHED | -153.9878 |
-| spline_nf_scale | RUNNING | -126.3985 |
-| spline_nf_scale_lognormal | RUNNING | -126.3985 |
-
-
-## DLA Full Run — 2026-05-22 15:07:11 — Status: RUNNING
-
-| Model | Status | Min Val Loss |
-|-------|--------|-------------|
-| normal_baseline | FINISHED | -159.9537 |
-| lognormal_baseline | FINISHED | -159.9537 |
-| bernstein_nf | RUNNING | -141.1975 |
-| bernstein_nf_lognormal | FINISHED | -135.1432 |
-| bernstein_nf_scale | RUNNING | -141.1975 |
-| bernstein_nf_scale_lognormal | RUNNING | -141.1975 |
-| spline_nf | FINISHED | -126.0304 |
-| spline_nf_lognormal | FINISHED | -153.9878 |
-| spline_nf_scale | FINISHED | -126.0304 |
-| spline_nf_scale_lognormal | FINISHED | -126.0304 |
-
-
-## DLA Full Run — 2026-05-22 15:09:11 — Status: RUNNING
-
-| Model | Status | Min Val Loss |
-|-------|--------|-------------|
-| normal_baseline | FINISHED | -159.9537 |
-| lognormal_baseline | FINISHED | -159.9537 |
-| bernstein_nf | RUNNING | -145.4636 |
-| bernstein_nf_lognormal | FINISHED | -135.1432 |
-| bernstein_nf_scale | RUNNING | -145.4636 |
-| bernstein_nf_scale_lognormal | RUNNING | -145.4636 |
-| spline_nf | FINISHED | -126.0304 |
-| spline_nf_lognormal | FINISHED | -153.9878 |
-| spline_nf_scale | FINISHED | -126.0304 |
-| spline_nf_scale_lognormal | FINISHED | -126.0304 |
-
-
-## DLA Full Run — 2026-05-22 15:11:11 — Status: COMPLETE
-
-| Model | Status | Min Val Loss |
-|-------|--------|-------------|
-| normal_baseline | FINISHED | -159.9537 |
-| lognormal_baseline | FINISHED | -159.9537 |
-| bernstein_nf | FINISHED | -145.8355 |
-| bernstein_nf_lognormal | FINISHED | -135.1432 |
-| bernstein_nf_scale | FINISHED | -145.8355 |
-| bernstein_nf_scale_lognormal | FINISHED | -145.8355 |
-| spline_nf | FINISHED | -126.0304 |
-| spline_nf_lognormal | FINISHED | -153.9878 |
-| spline_nf_scale | FINISHED | -126.0304 |
-| spline_nf_scale_lognormal | FINISHED | -126.0304 |
-
-
-## DLA Full Run — 2026-05-22 15:11:12 — Status: FINAL
-
-| Model | Status | Min Val Loss |
-|-------|--------|-------------|
-| lognormal_baseline_dla_training | FINISHED | -159.9537 |
-| lognormal_baseline_dla_training | FINISHED | -159.9537 |
-| bernstein_nf_scale_lognormal_dla_training | FINISHED | -145.8355 |
-| bernstein_nf_lognormal_dla_training | FINISHED | -135.1432 |
-| bernstein_nf_scale_lognormal_dla_training | FINISHED | -145.8355 |
-| bernstein_nf_scale_lognormal_dla_training | FINISHED | -145.8355 |
-| spline_nf_scale_lognormal_dla_training | FINISHED | -126.0304 |
-| spline_nf_lognormal_dla_training | FINISHED | -153.9878 |
-| spline_nf_scale_lognormal_dla_training | FINISHED | -126.0304 |
-| spline_nf_scale_lognormal_dla_training | FINISHED | -126.0304 |
-
+| # | Date | Param change | min_val_loss | Δ | Commit | Status |
+|---|------|-------------|-------------|---|--------|--------|
+| 0 | 2026-05-22 | baseline (lr=0.001, nbins=12, h=[128,128]) | -156.61 | — | — | committed |
