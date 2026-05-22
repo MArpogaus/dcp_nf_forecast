@@ -1,3 +1,5 @@
+"""Custom probability distributions for normalizing flows."""
+
 from collections.abc import Callable
 from functools import partial
 
@@ -18,9 +20,7 @@ def _get_multivariate_lognormal_fn(
 
     def dist(parameters: tf.Tensor) -> tfd.Distribution:
         mv_normal = mv_normal_dist(parameters)
-        return tfp.distributions.TransformedDistribution(
-            mv_normal, tfp.bijectors.Softplus()
-        )
+        return tfp.distributions.TransformedDistribution(mv_normal, tfp.bijectors.Exp())
 
     return dist, parameters_shape
 
