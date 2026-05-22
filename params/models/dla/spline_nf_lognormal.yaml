@@ -13,13 +13,13 @@ model_kwargs:
     range_min: 0
   base_distribution_kwargs:
     distribution_name: lognormal
-  num_parameters: 23
+  num_parameters: 35
   parameters_constraint_fn: hybrid_flows.activations.get_spline_param_constrain_fn
   parameters_constraint_fn_kwargs:
-    interval_width: 4
+    interval_width: 8
     min_slope: 0.001
     min_bin_width: 0.001
-    nbins: 8
+    nbins: 12
   parameters_fn_kwargs:
     activation: relu
     hidden_units:

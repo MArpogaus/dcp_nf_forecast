@@ -182,14 +182,14 @@ stages:
             range_min: 0
           base_distribution_kwargs:
             distribution_name: lognormal
-          num_parameters: 23
+          num_parameters: 35
           parameters_constraint_fn: 
             hybrid_flows.activations.get_spline_param_constrain_fn
           parameters_constraint_fn_kwargs:
-            interval_width: 4
+            interval_width: 8
             min_slope: 0.001
             min_bin_width: 0.001
-            nbins: 8
+            nbins: 12
           parameters_fn_kwargs:
             activation: relu
             hidden_units:
@@ -199,15 +199,15 @@ stages:
     outs:
     - path: results/dla/spline_nf_lognormal/metrics.yaml
       hash: md5
-      md5: 0905b6f9eeb4eaf31be4f10fdbefbe84
+      md5: 392219bdd9a98e4f674178be5ca645b7
       size: 153
     - path: results/dla/spline_nf_lognormal/model_weights.h5
       hash: md5
-      md5: b895e0f2f706977c4571f5a987c155fa
-      size: 677024
+      md5: 7d0cae0878405873a8baf993422d5383
+      size: 974240
     - path: results/dla/spline_nf_lognormal/parent_run_id.txt
       hash: md5
-      md5: 6ec0d16cccd80e18cd8035d3d7751df6
+      md5: 78337e8f54ebf0542078fa7d4e40a0ed
       size: 32
   train@dataset0-normal_baseline:
     cmd: "python scripts/train.py --model normal_baseline --stage-name train@dataset0-normal_baseline
