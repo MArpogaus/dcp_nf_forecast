@@ -13,8 +13,7 @@
 
 Probabilistic multi-step time series forecasting using normalizing flows.
 Each target variable gets its own univariate model (Bernstein polynomial or
-rational quadratic spline MAF). The data pipeline supports configurable lag
-features, sin/cos time encoding, and temporal train/val/test splits.
+rational quadratic spline MAF).
 
 #+begin_src bash
 .
@@ -34,28 +33,47 @@ features, sin/cos time encoding, and temporal train/val/test splits.
 ├── scripts
 │   ├── prepare_features.py         # build X (features) and Y (target)
 │   ├── split_data.py               # temporal train/val/test split
-│   └── train.py                    # train normalizing flow model
+│   ├── train.py                    # train normalizing flow model
+│   └── evaluate.py                 # evaluate model with PIT / QQ plots
 ├── src
 │   └── dcp_nf_forecast
 │       ├── __init__.py
 │       ├── data.py                 # core data pipeline functions
-│       └── utils.py                # logging, I/O helpers
-└── test
-    ├── conftest.py
-    ├── test_data.py
-    └── test_utils.py
+│       ├── models.py               # model builder
+│       ├── utils.py                # logging, I/O helpers
+│       └── validation/             # PIT histogram, QQ plot
+├── test
+│   ├── conftest.py
+│   ├── test_data.py
+│   └── test_utils.py
+└── AGENTS.md                       # agent conventions
 #+end_src
 
 *** Input Data (X)
-- *Arbitrary tabular covariates* – static per-timestep columns passed through as-is.
-- *Sin/cos encoded time/date variables* – configurable frequencies for time-of-day, day-of-week, day-of-year.
-- *Configurable lag features* – independent history lengths per column, e.g. 96 steps of the target + 48 steps of a related covariate.
+
+- *Tabular covariates with optional offset* – columns can be included at their
+  current timestep (e.g. ~ofen_metall_kg~) or shifted forward/backward
+  (~col_name:N~, positive N = lead, negative N = lag).
+- *Sin/cos encoded time/date variables* – configurable components for
+  time-of-day, day-of-week, day-of-year.
+- *Lag features* – configurable history length per column (e.g.
+  ~target:96~ creates 96 past values).
+- *Lead (future) features* – forward-looking values per column (e.g.
+  ~covariate:48~ creates 48 future values). Useful when future covariate
+  values are known (scheduled production plans, weather forecasts, etc.).
+- *Holiday indicator* – binary flag per timestep via the ~holidays~ library
+  with configurable country / region code (e.g. ~DE-BW~).
+- *NaN filling with configurable noise* – fills missing values in selected
+  columns with a constant plus optional random noise drawn from any
+  ~numpy.random.Generator~ distribution (e.g. ~lognormal~, ~uniform~).
 
 *** Output Data (Y)
-- *Multi-step forecast horizon* – future values of a single target column, configurable horizon length.
 
-The pipeline is orchestrated with *DVC* using =foreach= over the four
-targets (=dla=, =ofen_g_koks=, =ofen_f_koks=, =pl2=). All intermediate and
+- *Multi-step forecast horizon* – future values of a single target column,
+  configurable horizon length.
+
+The pipeline is orchestrated with *DVC* using ~foreach~ over the four
+targets (~dla~, ~ofen_g_koks~, ~ofen_f_koks~, ~pl2~). All intermediate and
 processed data uses the feather format for fast I/O.
 
 ** Getting Started
@@ -85,36 +103,58 @@ The DVC pipeline consists of four stages per target (16 total):
 dvc repro
 #+end_src
 
-This executes:
+Run a single target / model:
 
-1. *prepare* – loads the raw CSV, builds time features, lag features, and
-   target matrix, validates, saves to =data/interim/<target>/=.
-2. *split* – loads interim X/y, splits temporally into train/val/test,
-   saves to =data/processed/<target>/=.
-3. *train_bernstein* / *train_spline* – trains a normalizing flow model,
-   saves weights to =results/<target>/<model>/=.
+#+begin_src bash
+# data stages for DLA only
+dvc repro prepare@0 split@0
+
+# train Bernstein NF on DLA with test mode (1 epoch)
+# set test_mode: true in params.yaml first
+dvc repro train@dataset0-bernstein_nf
+#+end_src
 
 Each stage can also be run directly:
 
 #+begin_src bash
 python scripts/prepare_features.py \
-  --raw-data-path <path> \
+  --raw-data-path data/raw/norm_fondium_15_min_data_2023.csv \
   --datetime-column new_time \
-  --fillna-method ffill \
-  --tabular-covariate-columns "ofen_g_koks_kg,ofen_f_koks_kg,pl2_stromverbrauch_kwh" \
-  --time-components "time:4,day_of_week:4,day_of_year:4" \
-  --target-name dla \
-  --y-column dla_stromverbrauch_kwh \
-  --prediction-horizon 12 \
-  --lag-columns "dla_stromverbrauch_kwh:96,ofen_g_koks_kg:48" \
-  --output-dir data/interim/dla \
+  --tabular-covariate-columns "ofen_metall_kg:1" \
+  --time-components "time,day_of_week,day_of_year" \
+  --target-name ofen_g_koks \
+  --y-column ofen_g_koks_kg \
+  --prediction-horizon 48 \
+  --lag-columns "ofen_g_koks_kg:96" \
+  --output-dir data/interim/ofen_g_koks \
   --data-format feather \
   --log-level info \
-  --log-file logs/pipeline.log
+  --log-file logs/pipeline.log \
+  --holiday-country "DE-BW" \
+  --end-date "2023-10-31" \
+  --fillna-columns "ofen_g_koks_kg,ofen_f_koks_kg" \
+  --fillna-value 0.0 \
+  --fillna-noise-type lognormal \
+  --fillna-noise-scale 0.005 \
+  --future-columns "ofen_metall_kg:48"
 #+end_src
 
-All CLI arguments are mandatory and carry no defaults. The scripts are fully
-decoupled from the DVC API – they read no params files internally.
+All CLI arguments of ~prepare_features.py~ are mandatory and carry no defaults.
+This script is fully decoupled from the DVC API – it reads no params files
+internally.  ~train.py~ and ~evaluate.py~, in contrast, load model
+hyperparameters from the per-target config files under
+~params/models/<target>/<model>.yaml~ (via DVC's param injection).
+
+Per-target configuration is stored in [[./params.yaml][params.yaml]].  Each target
+entry can specify its own:
+
+- ~tabular_covariate_columns~ – static covariates with optional ~col:offset~
+- ~future_columns~ – lead (future) columns with the same ~col:N~ syntax as
+  ~lag_columns~
+- ~fillna_columns~ / ~fillna_value~ / ~fillna_noise_type~ / ~fillna_noise_scale~
+  – NaN handling with configurable noise distribution
+- ~lag_columns~ – lag history length
+- ~prediction_horizon~ – number of future steps to predict
 
 *** Running Tests
 
@@ -127,6 +167,33 @@ uv run pytest -n auto
 #+end_src
 
 Current coverage: >98%.
+
+** NaN Filling
+
+Missing values in the raw data (common in ~ofen_g_koks_kg~ and
+~ofen_f_koks_kg~) can be filled with a constant plus optional noise.
+
+Example configuration (in ~params.yaml~):
+
+#+begin_src yaml
+- name: ofen_g_koks
+  fillna_columns: ofen_g_koks_kg,ofen_f_koks_kg
+  fillna_value: 0.0
+  fillna_noise_type: lognormal
+  fillna_noise_scale: 0.005
+#+end_src
+
+The ~fillna_noise_type~ parameter accepts any ~numpy.random.Generator~ method
+name (e.g. ~lognormal~, ~uniform~, ~exponential~, ~normal~). The
+~fillna_noise_scale~ is passed as the distribution's scale parameter.
+
+** Lead (Future) Features
+
+~future_columns~ works like ~lag_columns~ but in the forward direction.
+For example ~ofen_metall_kg:48~ creates 48 columns
+~ofen_metall_kg_lead_1~ through ~ofen_metall_kg_lead_48~, each holding the
+covariate value that many steps ahead.  This is useful when future covariate
+values are known (e.g. planned production schedules).
 
 ** Contributing
 
