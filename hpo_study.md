@@ -169,3 +169,6 @@ Baseline: lr=0.001 const, nbins=8, h=[128,128] → min_val_loss=-154.27
 | 3 | 2026-05-22 | learning_rate: 0.001→0.0005 | -154.27 | — | — | — | launched |
 | 3 | 2026-05-22 | learning_rate: 0.001→0.0005 | -154.27 | -155.48 | +1.21 | db8432c | committed |
 | 4 | 2026-05-22 | nbins: 8→12 (params: 23→35) | -155.48 | — | — | — | launched |
+| 4 | 2026-05-22 | nbins: 8→12 (params: 23→35) | -155.48 | -157.51 | +2.03 | 02a5f91 | committed |
+| 5 | 2026-05-22 | nbins: 12→16 (params: 35→47) | -157.51 | — | — | — | launched |
+| 5 | 2026-05-22 | nbins: 12→16 (params: 35→47) | -157.51 | -154.91 | -2.60 | — | reverted |
