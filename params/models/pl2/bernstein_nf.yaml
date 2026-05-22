@@ -34,3 +34,5 @@ model_kwargs:
     - 128
     - 128
     conditional: true
+    dropout: 0.1
+    batch_norm: true
