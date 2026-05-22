@@ -4,15 +4,15 @@ requires = ["setuptools >= 61", "setuptools_scm>=7"]
 
 [project]
 dependencies = [
-  "numpy>=1.26",
-  "pandas>=2.0",
-  "pyyaml>=6.0",
+  "holidays==0.97",
+  "numpy==1.26.4",
+  "pandas==2.3.3",
+  "pyyaml==6.0.3",
   "hybrid-flows @ git+https://github.com/MArpogaus/hybrid-flows.git@v0.1.0",
-  "tensorflow>=2.15",
-  "tensorflow-probability>=0.23",
-  "pyarrow==23.*",
-  "mlflow>=3,<4",
-  "probabilistic-forecast-validation"
+  "tensorflow==2.15.1",
+  "tensorflow-probability==0.23.0",
+  "pyarrow==23.0.1",
+  "mlflow==3.12.0"
 ]
 description = "Forecasting with multivariate normalizing flows"
 dynamic = ["version"]
@@ -25,18 +25,18 @@ cuda = [
   'tensorflow[and-cuda]'
 ]
 dev = [
-  "commitizen",
-  "mypy",
-  "pre-commit",
-  "pytest",
-  "pytest-cov",
-  "pytest-xdist",
-  "python-lsp-ruff",
-  "python-lsp-server",
-  "ruff"
+  "commitizen==4.16.2",
+  "mypy==2.1.0",
+  "pre-commit==4.6.0",
+  "pytest==9.0.3",
+  "pytest-cov==7.1.0",
+  "pytest-xdist==3.8.0",
+  "python-lsp-ruff==2.3.1",
+  "python-lsp-server==1.14.0",
+  "ruff==0.15.13"
 ]
 train = [
-  "dvc[webdav,ssh]==3.*"
+  "dvc[webdav,ssh]==3.67.1"
 ]
 
 [tool.commitizen]
@@ -78,6 +78,3 @@ where = ["src"]
 # https://stackoverflow.com/a/74404703
 # omits local version, useful because pypi does not support it
 local_scheme = "no-local-version"
-
-[tool.uv.sources]
-probabilistic-forecast-validation = {path = "../probabilistic_forecast_validation", editable = true}
