@@ -1,15 +1,14 @@
 """Evaluate a trained normalizing flow forecasting model on test data."""
 
-import matplotlib
-
-matplotlib.use("Agg")
-
 import argparse
 import logging
 from pathlib import Path
 
 import dvc.api
-import matplotlib.pyplot as plt
+import matplotlib
+
+matplotlib.use("Agg")  # noqa: I001
+import matplotlib.pyplot as plt  # noqa: I001, E402
 import mlflow
 import numpy as np
 import tensorflow as tf
@@ -26,8 +25,6 @@ from dcp_nf_forecast.utils import load_data, setup_logging, setup_plotting_style
 from dcp_nf_forecast.validation import plot_pit_histogram, plot_qq
 
 logger = logging.getLogger(__name__)
-
-setup_plotting_style()
 
 
 def sample_predictions(
@@ -289,16 +286,17 @@ def compute_metrics(
     rmse = float(np.sqrt(np.mean((y_true - median) ** 2)))
     mae = float(np.mean(np.abs(y_true - median)))
     q_skill = np.percentile(samples, [5, 95], axis=0)
-    interval_score = float(np.mean(q_skill[1] - q_skill[0]))
+    mean_90_ci_width = float(np.mean(q_skill[1] - q_skill[0]))
     return {
         "rmse": rmse,
         "mae": mae,
-        "mean_90_ci_width": interval_score,
+        "mean_90_ci_width": mean_90_ci_width,
     }
 
 
 def main() -> None:
     """Run evaluation: load model, compute NLL, sample, plot, log metrics."""
+    setup_plotting_style()
     parser = argparse.ArgumentParser(
         description="Evaluate a trained normalizing flow model on test data"
     )
