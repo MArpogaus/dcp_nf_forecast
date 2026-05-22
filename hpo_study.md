@@ -155,3 +155,15 @@ Results from MLflow after full pipeline re-run on updated data:
 | 4 | 2026-05-22 | nbins: 12→8 (params: 36→24) | -156.61 | -154.27 | -2.34 | — | reverted |
 | 5 | 2026-05-22 | nbins: 12→16 (params: 36→48) | -156.61 | — | — | — | launched |
 | 5 | 2026-05-22 | nbins: 12→16 (params: 36→48) | -156.61 | -154.75 | -1.86 | — | reverted |
+
+## HPO: spline_nf_lognormal on DLA
+
+Baseline: lr=0.001 const, nbins=8, h=[128,128] → min_val_loss=-154.27
+
+| # | Date | Param change | Old val | New val | Δ | Commit | Status |
+|---|------|-------------|---------|---------|---|--------|--------|
+| 1 | 2026-05-22 | schedule: const→CosineDecay(lr=0.001) | -154.27 | — | — | — | launched |
+| 1 | 2026-05-22 | schedule: const→CosineDecay(lr=0.001) | -154.27 | -152.26 | -2.01 | — | reverted |
+| 2 | 2026-05-22 | learning_rate: 0.001→0.003 | -154.27 | — | — | — | launched |
+| 2 | 2026-05-22 | learning_rate: 0.001→0.003 | -154.27 | -152.63 | -1.64 | — | reverted |
+| 3 | 2026-05-22 | learning_rate: 0.001→0.0005 | -154.27 | — | — | — | launched |

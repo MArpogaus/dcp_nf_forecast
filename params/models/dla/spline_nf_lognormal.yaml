@@ -3,7 +3,7 @@ fit_kwargs:
   batch_size: 256
   early_stopping_patience: 10
   epochs: 200
-  learning_rate: 0.001
+  learning_rate: 0.0005
   verbose: true
 model_kwargs:
   distribution: masked_autoregressive_flow
