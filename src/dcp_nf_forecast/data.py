@@ -43,6 +43,20 @@ def load_raw_data(
     end = _parse_date(end_date)
     if end is not None:
         df = df[df.index <= end]  # type: ignore[index]
+
+    # Defensive validations for time-series shifting
+    if not df.index.is_unique:
+        __LOGGER__.warning(
+            "Datetime index contains duplicate timestamps! "
+            "This can cause major alignment issues."
+        )
+    if not df.index.is_monotonic_increasing:
+        __LOGGER__.warning(
+            "Datetime index is not monotonically increasing! "
+            "Sorting to prevent incorrect shifting."
+        )
+        df = df.sort_index()
+
     return df
 
 
