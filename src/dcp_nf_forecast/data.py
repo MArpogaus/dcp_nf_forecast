@@ -318,7 +318,7 @@ def add_holiday_indicator(
     if state_code:
         kwargs["state"] = state_code
     cal = cls(**kwargs)
-    is_holiday = pd.Series(df.index.isin(cal), index=df.index, dtype=int)  # type: ignore[arg-type]
+    is_holiday = pd.Series(df.index.date, index=df.index).isin(cal).astype(int)
     df_out = df.copy()
     df_out["is_holiday"] = is_holiday
     return df_out
