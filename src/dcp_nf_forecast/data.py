@@ -188,6 +188,85 @@ def build_target(
     return pd.concat(frames, axis=1)
 
 
+def _sample_noise(
+    rng: np.random.Generator,
+    noise_type: str,
+    noise_scale: float,
+    size: int,
+) -> np.ndarray:
+    """Draw noise samples from *noise_type* distribution using *getattr*.
+
+    Maps the generic *noise_scale* parameter to the appropriate keyword
+    for each distribution family.
+    """
+    dist_fn = getattr(rng, noise_type)
+    if noise_type == "lognormal":
+        return dist_fn(mean=np.log(noise_scale), sigma=0.5, size=size)
+    if noise_type == "uniform":
+        return dist_fn(0, noise_scale, size=size)
+    return dist_fn(scale=noise_scale, size=size)
+
+
+def fillna_with_noise(
+    df: pd.DataFrame,
+    columns: list[str],
+    fill_value: float = 0.0,
+    noise_type: str | None = None,
+    noise_scale: float | None = None,
+    seed: int | None = None,
+) -> pd.DataFrame:
+    """Fill NaN values in specified columns with a constant plus optional noise.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Source data.
+    columns : list[str]
+        Column names to fill NaNs in.
+    fill_value : float, optional
+        Constant value to replace NaNs with.
+    noise_type : str | None, optional
+        Name of a ``numpy.random.Generator`` method (e.g. ``"lognormal"``,
+        ``"uniform"``, ``"exponential"``, ``"normal"``).
+    noise_scale : float | None, optional
+        Scale parameter passed to the distribution.  Semantics depend on
+        *noise_type* (e.g. ``sigma`` for lognormal, ``high`` for uniform,
+        ``scale`` for exponential/normal).
+    seed : int | None, optional
+        Random seed for reproducibility.
+
+    Returns
+    -------
+    pd.DataFrame
+        Copy of *df* with NaNs filled in the specified columns.
+    """
+    if not columns:
+        return df
+    df = df.copy()
+    rng = np.random.default_rng(seed)
+    for col in columns:
+        if col not in df.columns:
+            __LOGGER__.warning("Column '%s' not found, skipping fillna", col)
+            continue
+        mask = df[col].isna()
+        n = int(mask.sum())
+        if n == 0:
+            continue
+        if noise_scale is not None and noise_scale > 0:
+            noise = _sample_noise(rng, noise_type, noise_scale, n)
+            df.loc[mask, col] = fill_value + noise
+        else:
+            df.loc[mask, col] = fill_value
+        __LOGGER__.info(
+            "Filled %d NaNs in '%s' with %s%s",
+            n,
+            col,
+            fill_value,
+            f" + {noise_type}(scale={noise_scale})" if noise_scale else "",
+        )
+    return df
+
+
 def add_holiday_indicator(
     df: pd.DataFrame,
     country: str,
@@ -207,32 +286,87 @@ def add_holiday_indicator(
     return df_out
 
 
+def _parse_tabular_with_offset(
+    specs: list[tuple[str, int]],
+    df: pd.DataFrame,
+) -> pd.DataFrame:
+    frames: list[pd.DataFrame] = []
+    for col, offset in specs:
+        series = df[col]
+        if offset > 0:
+            series = series.shift(-offset)
+            col_name = f"{col}_lead_{offset}"
+        elif offset < 0:
+            series = series.shift(-offset)
+            col_name = f"{col}_lag_{abs(offset)}"
+        else:
+            col_name = col
+        frames.append(series.to_frame(col_name))
+    return pd.concat(frames, axis=1)
+
+
+def _create_lead_features(
+    df: pd.DataFrame,
+    column_leads: dict[str, int],
+) -> pd.DataFrame:
+    """Create leading (future) copies of specified columns.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Source data.
+    column_leads : dict[str, int]
+        Maps column names to the number of future steps to include.
+
+    Returns
+    -------
+    pd.DataFrame
+        Columns named ``{column}_lead_{step}``, same index as *df*.
+        Trailing rows will be ``NaN`` for each step.
+    """
+    if not column_leads:
+        return pd.DataFrame(index=df.index)
+    frames: list[pd.DataFrame] = []
+    for col, num in column_leads.items():
+        for i in range(1, num + 1):
+            led = df[[col]].shift(-i).rename(columns={col: f"{col}_lead_{i}"})
+            frames.append(led)
+    return pd.concat(frames, axis=1)
+
+
 def build_features_and_target(
     df: pd.DataFrame,
-    tabular_covariate_columns: list[str],
+    tabular_covariate_columns: list[tuple[str, int]],
     time_components: list[str],
     column_lags: dict[str, int],
     target_column: str,
     prediction_horizon: int,
+    column_leads: dict[str, int] | None = None,
     holiday_country: str | None = None,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Assemble the feature matrix X and target matrix Y.
 
-    X is formed by concatenating time features, lag features, tabular
-    covariates, and optionally a holiday indicator.  Y contains the future
-    values of the target column.  Rows that contain ``NaN`` from lag or
-    shift operations are dropped (counted and logged).
+    X is formed by concatenating time features, lag features, lead
+    (future) features, tabular covariates, and optionally a holiday
+    indicator.  Y contains the future values of the target column.
+    Rows that contain ``NaN`` from lag / lead / shift operations are
+    dropped (counted and logged).
 
     Parameters
     ----------
     df : pd.DataFrame
         Source data with a ``DatetimeIndex``.
-    tabular_covariate_columns : list[str]
-        Columns to include as-is (current-timestep values).
+    tabular_covariate_columns : list[tuple[str, int]]
+        ``(col_name, offset)`` pairs.  *offset* > 0 shifts forward
+        (lead), *offset* < 0 shifts backward (lag), 0 uses current
+        timestep.
     time_components : list[str]
         Time-component names for sin/cos encoding.
     column_lags : dict[str, int]
-        Column / lag-count mapping for lag features.
+        Column / lag-count mapping for lag features (past values).
+    column_leads : dict[str, int] | None, optional
+        Column / lead-count mapping for future values.  Positive
+        integer means include that many forward-looking steps.
     target_column : str
         Column to predict.
     prediction_horizon : int
@@ -254,8 +388,11 @@ def build_features_and_target(
     lag_df = create_lag_features(df, column_lags)
     if not lag_df.empty:
         parts.append(lag_df)
+    lead_df = _create_lead_features(df, column_leads or {})
+    if not lead_df.empty:
+        parts.append(lead_df)
     if tabular_covariate_columns:
-        parts.append(df[tabular_covariate_columns])
+        parts.append(_parse_tabular_with_offset(tabular_covariate_columns, df))
     if holiday_country is not None:
         parts.append(df[["is_holiday"]])
     df_x = pd.concat(parts, axis=1)
