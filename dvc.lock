@@ -1,39 +1,38 @@
 schema: '2.0'
 stages:
   prepare@0:
-    cmd: 'python scripts/prepare_features.py --raw-data-path ../dcp/norm_data/norm_fondium_15_min_data_2023.csv
-      --datetime-column new_time --fillna-method ffill --tabular-covariate-columns
-      none --time-components time,day_of_week,day_of_year --target-name dla --y-column
-      dla_stromverbrauch_kwh --prediction-horizon 48 --lag-columns dla_stromverbrauch_kwh:96
-      --output-dir data/interim/dla --data-format feather --log-level info --log-file
-      logs/pipeline.log
-
-      '
+    cmd: "python scripts/prepare_features.py --raw-data-path data/raw/norm_fondium_15_min_data_2023.csv
+      --datetime-column new_time --tabular-covariate-columns none --time-components
+      time,day_of_week,day_of_year --target-name dla --y-column dla_stromverbrauch_kwh
+      --prediction-horizon 48 --lag-columns dla_stromverbrauch_kwh:96 --output-dir
+      data/interim/dla --data-format feather --log-level info --log-file logs/pipeline.log
+      --holiday-country none --end-date 2023-10-31\n"
     deps:
-    - path: ../dcp/norm_data/norm_fondium_15_min_data_2023.csv
+    - path: data/raw/norm_fondium_15_min_data_2023.csv
       hash: md5
       md5: eb8c9dbf528fea5a3334dfae8c6325a7
       size: 7781885
     - path: scripts/prepare_features.py
       hash: md5
-      md5: 2d3c4c33cad24cb3b37023b7e1f2faed
-      size: 3178
+      md5: 6189a6b39d5291b0dd843559c005d686
+      size: 3465
     - path: src/dcp_nf_forecast/
       hash: md5
-      md5: 370bdb7f0d1fe60b878077b7d8a3de0f.dir
-      size: 33816
-      nfiles: 10
+      md5: 79aed56110d20f6ea822ac1123d831ae.dir
+      size: 43344
+      nfiles: 13
     params:
       params.yaml:
         data.data_format: feather
         data.datetime_column: new_time
-        data.fillna_method: ffill
+        data.end_date: '2023-10-31'
+        data.holiday_country: none
         data.tabular_covariate_columns: none
         data.time_components: time,day_of_week,day_of_year
         log_file: logs/pipeline.log
         log_level: info
         paths.data_interim: data/interim
-        paths.raw_data: ../dcp/norm_data/norm_fondium_15_min_data_2023.csv
+        paths.raw_data: data/raw/norm_fondium_15_min_data_2023.csv
         targets:
         - name: dla
           y_column: dla_stromverbrauch_kwh
@@ -54,23 +53,21 @@ stages:
     outs:
     - path: data/interim/dla/X.feather
       hash: md5
-      md5: ada8e3fd3f3048b41afa3339ff1e98d8
-      size: 10793106
+      md5: e424a8d29ccf525e416ed73d372f2fec
+      size: 8895018
     - path: data/interim/dla/y.feather
       hash: md5
-      md5: 2b240aa0b0505c04af4153d293376ff4
-      size: 5375314
+      md5: 4e95a0071538603bb9c37ea01f51b79b
+      size: 4436442
   split@0:
-    cmd: 'python scripts/split_data.py --input-dir data/interim/dla --output-dir data/processed/dla
+    cmd: "python scripts/split_data.py --input-dir data/interim/dla --output-dir data/processed/dla
       --train-ratio 0.8 --val-ratio 0.1 --test-ratio 0.1 --data-format feather --log-level
-      info --log-file logs/pipeline.log
-
-      '
+      info --log-file logs/pipeline.log\n"
     deps:
     - path: data/interim/dla/
       hash: md5
-      md5: 7e7f13cf138b34d40adf2b08aebdda7d.dir
-      size: 16168420
+      md5: 90302fe3f08fad787b11dfb39d876d63.dir
+      size: 13331460
       nfiles: 2
     - path: scripts/split_data.py
       hash: md5
@@ -78,9 +75,9 @@ stages:
       size: 1858
     - path: src/dcp_nf_forecast/
       hash: md5
-      md5: 370bdb7f0d1fe60b878077b7d8a3de0f.dir
-      size: 33816
-      nfiles: 10
+      md5: 79aed56110d20f6ea822ac1123d831ae.dir
+      size: 43344
+      nfiles: 13
     params:
       params.yaml:
         data.data_format: feather
@@ -95,35 +92,33 @@ stages:
     outs:
     - path: data/processed/dla/X_test.feather
       hash: md5
-      md5: d02e4ad41c9caf6e3ccc865cf7301089
-      size: 1185938
+      md5: 7b5760aad5667c18537c8ec73529f168
+      size: 1067330
     - path: data/processed/dla/X_train.feather
       hash: md5
-      md5: 919c2b370b1d43cc86a2b886111839bd
-      size: 8716594
+      md5: 3277e82c321cf2b62d66a1209d6a05ca
+      size: 7119194
     - path: data/processed/dla/X_val.feather
       hash: md5
-      md5: 295567fc4ef6e2c7f0cb825dbbb89da3
-      size: 1248986
+      md5: d7dc14006b6374a77af522d9e5a912ff
+      size: 1065514
     - path: data/processed/dla/y_test.feather
       hash: md5
-      md5: 7b0279d8efebaa6fa52b95b8622dc982
-      size: 580098
+      md5: 1a96236519d45984adccb276bbfbf055
+      size: 524978
     - path: data/processed/dla/y_train.feather
       hash: md5
-      md5: 1b49b1888637c60aa7ba7a308ec2c07f
-      size: 4344690
+      md5: 20b402977c28809d0784f1a0e9794c1c
+      size: 3550506
     - path: data/processed/dla/y_val.feather
       hash: md5
-      md5: 915830aa297857786c5d0523895bd844
-      size: 616490
+      md5: 20c9ab5967ee01134cbeaa1f0891113d
+      size: 526034
   train_bernstein@0:
-    cmd: 'python scripts/train.py --processed-dir data/processed/dla --target-name
+    cmd: "python scripts/train.py --processed-dir data/processed/dla --target-name
       dla --model bernstein_nf --data-format feather --prediction-horizon 12 --stage-name
       train_bernstein --experiment-name dcp_nf_forecast-dla --test-mode false --log-level
-      info --log-file logs/pipeline.log
-
-      '
+      info --log-file logs/pipeline.log\n"
     deps:
     - path: data/processed/dla/
       hash: md5
@@ -190,7 +185,8 @@ stages:
           base_distribution_kwargs:
             distribution_name: normal
           num_parameters: 96
-          parameters_constraint_fn: hybrid_flows.activations.get_thetas_constrain_fn
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_thetas_constrain_fn
           parameters_constraint_fn_kwargs:
             allow_flexible_bounds: false
             bounds: none
@@ -217,10 +213,8 @@ stages:
       md5: 8f037eefdbc5906a568d1323ef29295f
       size: 32
   describe@0:
-    cmd: 'python scripts/describe_data.py --processed-dir data/processed/dla --target-name
-      dla --data-format feather --log-level info --log-file logs/pipeline.log
-
-      '
+    cmd: "python scripts/describe_data.py --processed-dir data/processed/dla --target-name
+      dla --data-format feather --log-level info --log-file logs/pipeline.log\n"
     deps:
     - path: data/processed/dla/
       hash: md5
@@ -293,14 +287,12 @@ stages:
       md5: 25f09a4fb0a391cc3ad5ec632636bf78
       size: 99592
   prepare@1:
-    cmd: 'python scripts/prepare_features.py --raw-data-path ../dcp/norm_data/norm_fondium_15_min_data_2023.csv
+    cmd: "python scripts/prepare_features.py --raw-data-path ../dcp/norm_data/norm_fondium_15_min_data_2023.csv
       --datetime-column new_time --fillna-method ffill --tabular-covariate-columns
       none --time-components time,day_of_week,day_of_year --target-name ofen_g_koks
       --y-column ofen_g_koks_kg --prediction-horizon 48 --lag-columns ofen_g_koks_kg:96
       --output-dir data/interim/ofen_g_koks --data-format feather --log-level info
-      --log-file logs/pipeline.log
-
-      '
+      --log-file logs/pipeline.log\n"
     deps:
     - path: ../dcp/norm_data/norm_fondium_15_min_data_2023.csv
       hash: md5
@@ -353,11 +345,9 @@ stages:
       md5: 58043a80fe4ae963f157849ba571fa15
       size: 9498290
   split@1:
-    cmd: 'python scripts/split_data.py --input-dir data/interim/ofen_g_koks --output-dir
+    cmd: "python scripts/split_data.py --input-dir data/interim/ofen_g_koks --output-dir
       data/processed/ofen_g_koks --train-ratio 0.8 --val-ratio 0.1 --test-ratio 0.1
-      --data-format feather --log-level info --log-file logs/pipeline.log
-
-      '
+      --data-format feather --log-level info --log-file logs/pipeline.log\n"
     deps:
     - path: data/interim/ofen_g_koks/
       hash: md5
@@ -410,11 +400,9 @@ stages:
       md5: fb1f72785fad52b44df7e666b0244582
       size: 1062274
   describe@1:
-    cmd: 'python scripts/describe_data.py --processed-dir data/processed/ofen_g_koks
+    cmd: "python scripts/describe_data.py --processed-dir data/processed/ofen_g_koks
       --target-name ofen_g_koks --data-format feather --log-level info --log-file
-      logs/pipeline.log
-
-      '
+      logs/pipeline.log\n"
     deps:
     - path: data/processed/ofen_g_koks/
       hash: md5
@@ -487,14 +475,12 @@ stages:
       md5: d9c17cd1697b387fe39f0e32b6443819
       size: 102928
   prepare@2:
-    cmd: 'python scripts/prepare_features.py --raw-data-path ../dcp/norm_data/norm_fondium_15_min_data_2023.csv
+    cmd: "python scripts/prepare_features.py --raw-data-path ../dcp/norm_data/norm_fondium_15_min_data_2023.csv
       --datetime-column new_time --fillna-method ffill --tabular-covariate-columns
       none --time-components time,day_of_week,day_of_year --target-name ofen_f_koks
       --y-column ofen_f_koks_kg --prediction-horizon 48 --lag-columns ofen_f_koks_kg:96
       --output-dir data/interim/ofen_f_koks --data-format feather --log-level info
-      --log-file logs/pipeline.log
-
-      '
+      --log-file logs/pipeline.log\n"
     deps:
     - path: ../dcp/norm_data/norm_fondium_15_min_data_2023.csv
       hash: md5
@@ -547,11 +533,9 @@ stages:
       md5: 4e558b44b2857ecf8b3b4a51382f1221
       size: 9097586
   split@2:
-    cmd: 'python scripts/split_data.py --input-dir data/interim/ofen_f_koks --output-dir
+    cmd: "python scripts/split_data.py --input-dir data/interim/ofen_f_koks --output-dir
       data/processed/ofen_f_koks --train-ratio 0.8 --val-ratio 0.1 --test-ratio 0.1
-      --data-format feather --log-level info --log-file logs/pipeline.log
-
-      '
+      --data-format feather --log-level info --log-file logs/pipeline.log\n"
     deps:
     - path: data/interim/ofen_f_koks/
       hash: md5
@@ -604,11 +588,9 @@ stages:
       md5: 3f3e54545311c825308d02652d18c3ca
       size: 1048410
   describe@2:
-    cmd: 'python scripts/describe_data.py --processed-dir data/processed/ofen_f_koks
+    cmd: "python scripts/describe_data.py --processed-dir data/processed/ofen_f_koks
       --target-name ofen_f_koks --data-format feather --log-level info --log-file
-      logs/pipeline.log
-
-      '
+      logs/pipeline.log\n"
     deps:
     - path: data/processed/ofen_f_koks/
       hash: md5
@@ -681,14 +663,12 @@ stages:
       md5: 62fd3865086222f5934b1c6630ed8846
       size: 99713
   prepare@3:
-    cmd: 'python scripts/prepare_features.py --raw-data-path ../dcp/norm_data/norm_fondium_15_min_data_2023.csv
+    cmd: "python scripts/prepare_features.py --raw-data-path ../dcp/norm_data/norm_fondium_15_min_data_2023.csv
       --datetime-column new_time --fillna-method ffill --tabular-covariate-columns
       none --time-components time,day_of_week,day_of_year --target-name pl2 --y-column
       pl2_stromverbrauch_kwh --prediction-horizon 48 --lag-columns pl2_stromverbrauch_kwh:96
       --output-dir data/interim/pl2 --data-format feather --log-level info --log-file
-      logs/pipeline.log
-
-      '
+      logs/pipeline.log\n"
     deps:
     - path: ../dcp/norm_data/norm_fondium_15_min_data_2023.csv
       hash: md5
@@ -741,11 +721,9 @@ stages:
       md5: 2f720cb2c411a93423e0a10d43ba0882
       size: 11279570
   split@3:
-    cmd: 'python scripts/split_data.py --input-dir data/interim/pl2 --output-dir data/processed/pl2
+    cmd: "python scripts/split_data.py --input-dir data/interim/pl2 --output-dir data/processed/pl2
       --train-ratio 0.8 --val-ratio 0.1 --test-ratio 0.1 --data-format feather --log-level
-      info --log-file logs/pipeline.log
-
-      '
+      info --log-file logs/pipeline.log\n"
     deps:
     - path: data/interim/pl2/
       hash: md5
@@ -798,10 +776,8 @@ stages:
       md5: 58be123ca416174cc86350356539a218
       size: 764538
   describe@3:
-    cmd: 'python scripts/describe_data.py --processed-dir data/processed/pl2 --target-name
-      pl2 --data-format feather --log-level info --log-file logs/pipeline.log
-
-      '
+    cmd: "python scripts/describe_data.py --processed-dir data/processed/pl2 --target-name
+      pl2 --data-format feather --log-level info --log-file logs/pipeline.log\n"
     deps:
     - path: data/processed/pl2/
       hash: md5
@@ -874,12 +850,10 @@ stages:
       md5: a4efbfd6845370be7704bf2fef51fd54
       size: 83536
   train_bernstein@1:
-    cmd: 'python scripts/train.py --processed-dir data/processed/ofen_g_koks --target-name
+    cmd: "python scripts/train.py --processed-dir data/processed/ofen_g_koks --target-name
       ofen_g_koks --model bernstein_nf --data-format feather --prediction-horizon
       12 --stage-name train_bernstein --experiment-name dcp_nf_forecast-ofen_g_koks
-      --test-mode false --log-level info --log-file logs/pipeline.log
-
-      '
+      --test-mode false --log-level info --log-file logs/pipeline.log\n"
     deps:
     - path: data/processed/ofen_g_koks/
       hash: md5
@@ -946,7 +920,8 @@ stages:
           base_distribution_kwargs:
             distribution_name: normal
           num_parameters: 96
-          parameters_constraint_fn: hybrid_flows.activations.get_thetas_constrain_fn
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_thetas_constrain_fn
           parameters_constraint_fn_kwargs:
             allow_flexible_bounds: false
             bounds: none
@@ -973,12 +948,10 @@ stages:
       md5: 397a63854250bfe986d2636b05c4f725
       size: 32
   train_bernstein@2:
-    cmd: 'python scripts/train.py --processed-dir data/processed/ofen_f_koks --target-name
+    cmd: "python scripts/train.py --processed-dir data/processed/ofen_f_koks --target-name
       ofen_f_koks --model bernstein_nf --data-format feather --prediction-horizon
       12 --stage-name train_bernstein --test-mode true --log-level info --log-file
-      logs/pipeline.log
-
-      '
+      logs/pipeline.log\n"
     deps:
     - path: data/processed/ofen_f_koks/
       hash: md5
@@ -1044,7 +1017,8 @@ stages:
           base_distribution_kwargs:
             distribution_name: lognormal
           num_parameters: 96
-          parameters_constraint_fn: hybrid_flows.activations.get_thetas_constrain_fn
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_thetas_constrain_fn
           parameters_constraint_fn_kwargs:
             allow_flexible_bounds: false
             bounds: linear
@@ -1066,11 +1040,9 @@ stages:
       md5: ee9a40a5ba5ab26117bd4769a89cbd54
       size: 683360
   train_bernstein@3:
-    cmd: 'python scripts/train.py --processed-dir data/processed/pl2 --target-name
+    cmd: "python scripts/train.py --processed-dir data/processed/pl2 --target-name
       pl2 --model bernstein_nf --data-format feather --prediction-horizon 12 --stage-name
-      train_bernstein --test-mode true --log-level info --log-file logs/pipeline.log
-
-      '
+      train_bernstein --test-mode true --log-level info --log-file logs/pipeline.log\n"
     deps:
     - path: data/processed/pl2/
       hash: md5
@@ -1136,7 +1108,8 @@ stages:
           base_distribution_kwargs:
             distribution_name: lognormal
           num_parameters: 96
-          parameters_constraint_fn: hybrid_flows.activations.get_thetas_constrain_fn
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_thetas_constrain_fn
           parameters_constraint_fn_kwargs:
             allow_flexible_bounds: false
             bounds: linear
@@ -1158,12 +1131,10 @@ stages:
       md5: ee9a40a5ba5ab26117bd4769a89cbd54
       size: 683360
   train_spline@0:
-    cmd: 'python scripts/train.py --processed-dir data/processed/dla --target-name
+    cmd: "python scripts/train.py --processed-dir data/processed/dla --target-name
       dla --model spline_nf --data-format feather --prediction-horizon 12 --stage-name
       train_spline --experiment-name dcp_nf_forecast-dla --test-mode false --log-level
-      info --log-file logs/pipeline.log
-
-      '
+      info --log-file logs/pipeline.log\n"
     deps:
     - path: data/processed/dla/
       hash: md5
@@ -1226,7 +1197,8 @@ stages:
           base_distribution_kwargs:
             distribution_name: normal
           num_parameters: 95
-          parameters_constraint_fn: hybrid_flows.activations.get_spline_param_constrain_fn
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_spline_param_constrain_fn
           parameters_constraint_fn_kwargs:
             interval_width: 8
             min_slope: 0.001
@@ -1253,12 +1225,10 @@ stages:
       md5: 8ddbe15567d696beedc0a2101e148f6e
       size: 32
   train_spline@1:
-    cmd: 'python scripts/train.py --processed-dir data/processed/ofen_g_koks --target-name
+    cmd: "python scripts/train.py --processed-dir data/processed/ofen_g_koks --target-name
       ofen_g_koks --model spline_nf --data-format feather --prediction-horizon 12
       --stage-name train_spline --experiment-name dcp_nf_forecast-ofen_g_koks --test-mode
-      false --log-level info --log-file logs/pipeline.log
-
-      '
+      false --log-level info --log-file logs/pipeline.log\n"
     deps:
     - path: data/processed/ofen_g_koks/
       hash: md5
@@ -1321,7 +1291,8 @@ stages:
           base_distribution_kwargs:
             distribution_name: normal
           num_parameters: 95
-          parameters_constraint_fn: hybrid_flows.activations.get_spline_param_constrain_fn
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_spline_param_constrain_fn
           parameters_constraint_fn_kwargs:
             interval_width: 8
             min_slope: 0.001
@@ -1348,11 +1319,9 @@ stages:
       md5: 8afd4af1da44f19993da94aa3afd3f2f
       size: 32
   train_spline@2:
-    cmd: 'python scripts/train.py --processed-dir data/processed/ofen_f_koks --target-name
+    cmd: "python scripts/train.py --processed-dir data/processed/ofen_f_koks --target-name
       ofen_f_koks --model spline_nf --data-format feather --prediction-horizon 12
-      --stage-name train_spline --test-mode true --log-level info --log-file logs/pipeline.log
-
-      '
+      --stage-name train_spline --test-mode true --log-level info --log-file logs/pipeline.log\n"
     deps:
     - path: data/processed/ofen_f_koks/
       hash: md5
@@ -1414,7 +1383,8 @@ stages:
           base_distribution_kwargs:
             distribution_name: lognormal
           num_parameters: 95
-          parameters_constraint_fn: hybrid_flows.activations.get_spline_param_constrain_fn
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_spline_param_constrain_fn
           parameters_constraint_fn_kwargs:
             interval_width: 8
             min_slope: 0.001
@@ -1436,11 +1406,9 @@ stages:
       md5: 5a6d08c9138262a56846fdef68738ea9
       size: 677168
   train_spline@3:
-    cmd: 'python scripts/train.py --processed-dir data/processed/pl2 --target-name
+    cmd: "python scripts/train.py --processed-dir data/processed/pl2 --target-name
       pl2 --model spline_nf --data-format feather --prediction-horizon 12 --stage-name
-      train_spline --test-mode true --log-level info --log-file logs/pipeline.log
-
-      '
+      train_spline --test-mode true --log-level info --log-file logs/pipeline.log\n"
     deps:
     - path: data/processed/pl2/
       hash: md5
@@ -1502,7 +1470,8 @@ stages:
           base_distribution_kwargs:
             distribution_name: lognormal
           num_parameters: 95
-          parameters_constraint_fn: hybrid_flows.activations.get_spline_param_constrain_fn
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_spline_param_constrain_fn
           parameters_constraint_fn_kwargs:
             interval_width: 8
             min_slope: 0.001
@@ -1524,12 +1493,10 @@ stages:
       md5: b5efd55603ccbb0d9c4f2253677719eb
       size: 677168
   evaluate_bernstein@0:
-    cmd: 'python scripts/evaluate.py --processed-dir data/processed/dla --target-name
+    cmd: "python scripts/evaluate.py --processed-dir data/processed/dla --target-name
       dla --model bernstein_nf --data-format feather --prediction-horizon 12 --n-samples
       1000 --stage-name evaluate_bernstein --test-mode true --log-level info --log-file
-      logs/pipeline.log
-
-      '
+      logs/pipeline.log\n"
     deps:
     - path: data/processed/dla/
       hash: md5
@@ -1599,7 +1566,8 @@ stages:
           base_distribution_kwargs:
             distribution_name: lognormal
           num_parameters: 96
-          parameters_constraint_fn: hybrid_flows.activations.get_thetas_constrain_fn
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_thetas_constrain_fn
           parameters_constraint_fn_kwargs:
             allow_flexible_bounds: false
             bounds: linear
@@ -1629,12 +1597,10 @@ stages:
       md5: 58ded1f336449a2bf8c621f09c806d0e
       size: 19826
   train_bernstein_lognormal@0:
-    cmd: 'python scripts/train.py --processed-dir data/processed/dla --target-name
+    cmd: "python scripts/train.py --processed-dir data/processed/dla --target-name
       dla --model bernstein_nf_lognormal --data-format feather --prediction-horizon
       48 --stage-name train_bernstein_lognormal --experiment-name dcp_nf_forecast-dla
-      --test-mode false --log-level info --log-file logs/pipeline.log
-
-      '
+      --test-mode false --log-level info --log-file logs/pipeline.log\n"
     deps:
     - path: data/processed/dla/
       hash: md5
@@ -1701,7 +1667,8 @@ stages:
           base_distribution_kwargs:
             distribution_name: lognormal
           num_parameters: 96
-          parameters_constraint_fn: hybrid_flows.activations.get_thetas_constrain_fn
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_thetas_constrain_fn
           parameters_constraint_fn_kwargs:
             allow_flexible_bounds: false
             bounds: none
@@ -1728,12 +1695,10 @@ stages:
       md5: 1da8a8f30ea726cd931e83daf257347f
       size: 32
   train_spline_lognormal@0:
-    cmd: 'python scripts/train.py --processed-dir data/processed/dla --target-name
+    cmd: "python scripts/train.py --processed-dir data/processed/dla --target-name
       dla --model spline_nf_lognormal --data-format feather --prediction-horizon 12
       --stage-name train_spline_lognormal --experiment-name dcp_nf_forecast-dla --test-mode
-      false --log-level info --log-file logs/pipeline.log
-
-      '
+      false --log-level info --log-file logs/pipeline.log\n"
     deps:
     - path: data/processed/dla/
       hash: md5
@@ -1796,7 +1761,8 @@ stages:
           base_distribution_kwargs:
             distribution_name: lognormal
           num_parameters: 95
-          parameters_constraint_fn: hybrid_flows.activations.get_spline_param_constrain_fn
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_spline_param_constrain_fn
           parameters_constraint_fn_kwargs:
             interval_width: 4
             min_slope: 0.001
@@ -1823,12 +1789,10 @@ stages:
       md5: 61682433529fd8623cde252976affabd
       size: 32
   evaluate_bernstein_lognormal@0:
-    cmd: 'python scripts/evaluate.py --processed-dir data/processed/dla --target-name
+    cmd: "python scripts/evaluate.py --processed-dir data/processed/dla --target-name
       dla --model bernstein_nf_lognormal --data-format feather --prediction-horizon
       12 --n-samples 1000 --stage-name evaluate_bernstein_lognormal --experiment-name
-      dcp_nf_forecast-dla --test-mode true --log-level info --log-file logs/pipeline.log
-
-      '
+      dcp_nf_forecast-dla --test-mode true --log-level info --log-file logs/pipeline.log\n"
     deps:
     - path: data/processed/dla/
       hash: md5
@@ -1903,7 +1867,8 @@ stages:
           base_distribution_kwargs:
             distribution_name: lognormal
           num_parameters: 96
-          parameters_constraint_fn: hybrid_flows.activations.get_thetas_constrain_fn
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_thetas_constrain_fn
           parameters_constraint_fn_kwargs:
             allow_flexible_bounds: false
             bounds: none
@@ -1934,12 +1899,10 @@ stages:
       md5: 2644ec2aa5f976e356abf92fbc0fb4fa
       size: 21626
   evaluate_spline@0:
-    cmd: 'python scripts/evaluate.py --processed-dir data/processed/dla --target-name
+    cmd: "python scripts/evaluate.py --processed-dir data/processed/dla --target-name
       dla --model spline_nf --data-format feather --prediction-horizon 12 --n-samples
       1000 --stage-name evaluate_spline --experiment-name dcp_nf_forecast-dla --test-mode
-      false --log-level info --log-file logs/pipeline.log
-
-      '
+      false --log-level info --log-file logs/pipeline.log\n"
     deps:
     - path: data/processed/dla/
       hash: md5
@@ -2010,7 +1973,8 @@ stages:
           base_distribution_kwargs:
             distribution_name: normal
           num_parameters: 95
-          parameters_constraint_fn: hybrid_flows.activations.get_spline_param_constrain_fn
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_spline_param_constrain_fn
           parameters_constraint_fn_kwargs:
             interval_width: 8
             min_slope: 0.001
@@ -2041,12 +2005,10 @@ stages:
       md5: bd0af7062e057012b8fdccc15cb4872b
       size: 21536
   evaluate_spline_lognormal@0:
-    cmd: 'python scripts/evaluate.py --processed-dir data/processed/dla --target-name
+    cmd: "python scripts/evaluate.py --processed-dir data/processed/dla --target-name
       dla --model spline_nf_lognormal --data-format feather --prediction-horizon 12
       --n-samples 1000 --stage-name evaluate_spline_lognormal --experiment-name dcp_nf_forecast-dla
-      --test-mode false --log-level info --log-file logs/pipeline.log
-
-      '
+      --test-mode false --log-level info --log-file logs/pipeline.log\n"
     deps:
     - path: data/processed/dla/
       hash: md5
@@ -2117,7 +2079,8 @@ stages:
           base_distribution_kwargs:
             distribution_name: lognormal
           num_parameters: 95
-          parameters_constraint_fn: hybrid_flows.activations.get_spline_param_constrain_fn
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_spline_param_constrain_fn
           parameters_constraint_fn_kwargs:
             interval_width: 4
             min_slope: 0.001
@@ -2148,12 +2111,10 @@ stages:
       md5: dcfcdd4d9c0c297b487f1fd1b58f2acb
       size: 21564
   train_bernstein_lognormal@1:
-    cmd: 'python scripts/train.py --processed-dir data/processed/ofen_g_koks --target-name
+    cmd: "python scripts/train.py --processed-dir data/processed/ofen_g_koks --target-name
       ofen_g_koks --model bernstein_nf_lognormal --data-format feather --prediction-horizon
       12 --stage-name train_bernstein_lognormal --experiment-name dcp_nf_forecast-ofen_g_koks
-      --test-mode false --log-level info --log-file logs/pipeline.log
-
-      '
+      --test-mode false --log-level info --log-file logs/pipeline.log\n"
     deps:
     - path: data/processed/ofen_g_koks/
       hash: md5
@@ -2220,7 +2181,8 @@ stages:
           base_distribution_kwargs:
             distribution_name: lognormal
           num_parameters: 96
-          parameters_constraint_fn: hybrid_flows.activations.get_thetas_constrain_fn
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_thetas_constrain_fn
           parameters_constraint_fn_kwargs:
             allow_flexible_bounds: false
             bounds: none
@@ -2247,10 +2209,8 @@ stages:
       md5: 948e131483974f891dbb94af9d4bb957
       size: 32
   train@dataset0-bernstein_nf:
-    cmd: 'python scripts/train.py --model bernstein_nf --stage-name train@dataset0-bernstein_nf
-      --target-name dla
-
-      '
+    cmd: "python scripts/train.py --model bernstein_nf --stage-name train@dataset0-bernstein_nf
+      --target-name dla\n"
     deps:
     - path: data/processed/dla/
       hash: md5
@@ -2299,7 +2259,8 @@ stages:
           base_distribution_kwargs:
             distribution_name: normal
           num_parameters: 8
-          parameters_constraint_fn: hybrid_flows.activations.get_thetas_constrain_fn
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_thetas_constrain_fn
           parameters_constraint_fn_kwargs:
             allow_flexible_bounds: false
             bounds: none
@@ -2325,10 +2286,8 @@ stages:
       md5: 94758592d3ed8279c53e9c08b2d423f7
       size: 33
   train@dataset0-spline_nf:
-    cmd: 'python scripts/train.py --model spline_nf --stage-name train@dataset0-spline_nf
-      --target-name dla
-
-      '
+    cmd: "python scripts/train.py --model spline_nf --stage-name train@dataset0-spline_nf
+      --target-name dla\n"
     deps:
     - path: data/processed/dla/
       hash: md5
@@ -2370,7 +2329,8 @@ stages:
           base_distribution_kwargs:
             distribution_name: normal
           num_parameters: 35
-          parameters_constraint_fn: hybrid_flows.activations.get_spline_param_constrain_fn
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_spline_param_constrain_fn
           parameters_constraint_fn_kwargs:
             interval_width: 8
             min_slope: 0.001
@@ -2396,10 +2356,8 @@ stages:
       md5: 3557ad9b03d1be690db8b07f1a30bb68
       size: 32
   train@dataset0-bernstein_nf_lognormal:
-    cmd: 'python scripts/train.py --model bernstein_nf_lognormal --stage-name train@dataset0-bernstein_nf_lognormal
-      --target-name dla
-
-      '
+    cmd: "python scripts/train.py --model bernstein_nf_lognormal --stage-name train@dataset0-bernstein_nf_lognormal
+      --target-name dla\n"
     deps:
     - path: data/processed/dla/
       hash: md5
@@ -2448,7 +2406,8 @@ stages:
           base_distribution_kwargs:
             distribution_name: lognormal
           num_parameters: 8
-          parameters_constraint_fn: hybrid_flows.activations.get_thetas_constrain_fn
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_thetas_constrain_fn
           parameters_constraint_fn_kwargs:
             allow_flexible_bounds: false
             bounds: none
@@ -2474,10 +2433,8 @@ stages:
       md5: c8fa75e167dc74cbb130b77201f70ef6
       size: 33
   train@dataset0-spline_nf_lognormal:
-    cmd: 'python scripts/train.py --model spline_nf_lognormal --stage-name train@dataset0-spline_nf_lognormal
-      --target-name dla
-
-      '
+    cmd: "python scripts/train.py --model spline_nf_lognormal --stage-name train@dataset0-spline_nf_lognormal
+      --target-name dla\n"
     deps:
     - path: data/processed/dla/
       hash: md5
@@ -2519,7 +2476,8 @@ stages:
           base_distribution_kwargs:
             distribution_name: lognormal
           num_parameters: 23
-          parameters_constraint_fn: hybrid_flows.activations.get_spline_param_constrain_fn
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_spline_param_constrain_fn
           parameters_constraint_fn_kwargs:
             interval_width: 4
             min_slope: 0.001
@@ -2545,10 +2503,8 @@ stages:
       md5: 9f949b4ab188ec08a757e765f95ee955
       size: 33
   train@dataset1-bernstein_nf:
-    cmd: 'python scripts/train.py --model bernstein_nf --stage-name train@dataset1-bernstein_nf
-      --target-name ofen_g_koks
-
-      '
+    cmd: "python scripts/train.py --model bernstein_nf --stage-name train@dataset1-bernstein_nf
+      --target-name ofen_g_koks\n"
     deps:
     - path: data/processed/ofen_g_koks/
       hash: md5
@@ -2594,7 +2550,8 @@ stages:
           base_distribution_kwargs:
             distribution_name: normal
           num_parameters: 96
-          parameters_constraint_fn: hybrid_flows.activations.get_thetas_constrain_fn
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_thetas_constrain_fn
           parameters_constraint_fn_kwargs:
             allow_flexible_bounds: false
             bounds: none
@@ -2621,10 +2578,8 @@ stages:
       md5: ae07bf6f6ea7492b119a6cba6d210c16
       size: 32
   train@dataset1-spline_nf:
-    cmd: 'python scripts/train.py --model spline_nf --stage-name train@dataset1-spline_nf
-      --target-name ofen_g_koks
-
-      '
+    cmd: "python scripts/train.py --model spline_nf --stage-name train@dataset1-spline_nf
+      --target-name ofen_g_koks\n"
     deps:
     - path: data/processed/ofen_g_koks/
       hash: md5
@@ -2666,7 +2621,8 @@ stages:
           base_distribution_kwargs:
             distribution_name: normal
           num_parameters: 95
-          parameters_constraint_fn: hybrid_flows.activations.get_spline_param_constrain_fn
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_spline_param_constrain_fn
           parameters_constraint_fn_kwargs:
             interval_width: 8
             min_slope: 0.001
@@ -2693,10 +2649,8 @@ stages:
       md5: 5bf772f42a174db5801c673ebebd12b4
       size: 32
   train@dataset1-bernstein_nf_lognormal:
-    cmd: 'python scripts/train.py --model bernstein_nf_lognormal --stage-name train@dataset1-bernstein_nf_lognormal
-      --target-name ofen_g_koks
-
-      '
+    cmd: "python scripts/train.py --model bernstein_nf_lognormal --stage-name train@dataset1-bernstein_nf_lognormal
+      --target-name ofen_g_koks\n"
     deps:
     - path: data/processed/ofen_g_koks/
       hash: md5
@@ -2742,7 +2696,8 @@ stages:
           base_distribution_kwargs:
             distribution_name: lognormal
           num_parameters: 96
-          parameters_constraint_fn: hybrid_flows.activations.get_thetas_constrain_fn
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_thetas_constrain_fn
           parameters_constraint_fn_kwargs:
             allow_flexible_bounds: false
             bounds: none
@@ -2769,10 +2724,8 @@ stages:
       md5: a167c131c71fa1a13328f2b59c6e11d0
       size: 32
   train@dataset1-spline_nf_lognormal:
-    cmd: 'python scripts/train.py --model spline_nf_lognormal --stage-name train@dataset1-spline_nf_lognormal
-      --target-name ofen_g_koks
-
-      '
+    cmd: "python scripts/train.py --model spline_nf_lognormal --stage-name train@dataset1-spline_nf_lognormal
+      --target-name ofen_g_koks\n"
     deps:
     - path: data/processed/ofen_g_koks/
       hash: md5
@@ -2814,7 +2767,8 @@ stages:
           base_distribution_kwargs:
             distribution_name: lognormal
           num_parameters: 95
-          parameters_constraint_fn: hybrid_flows.activations.get_spline_param_constrain_fn
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_spline_param_constrain_fn
           parameters_constraint_fn_kwargs:
             interval_width: 4
             min_slope: 0.001
@@ -2841,10 +2795,8 @@ stages:
       md5: 0c94a711a2d05404c446d3e64c7fd29c
       size: 32
   train@dataset2-bernstein_nf:
-    cmd: 'python scripts/train.py --model bernstein_nf --stage-name train@dataset2-bernstein_nf
-      --target-name ofen_f_koks
-
-      '
+    cmd: "python scripts/train.py --model bernstein_nf --stage-name train@dataset2-bernstein_nf
+      --target-name ofen_f_koks\n"
     deps:
     - path: data/processed/ofen_f_koks/
       hash: md5
@@ -2890,7 +2842,8 @@ stages:
           base_distribution_kwargs:
             distribution_name: normal
           num_parameters: 96
-          parameters_constraint_fn: hybrid_flows.activations.get_thetas_constrain_fn
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_thetas_constrain_fn
           parameters_constraint_fn_kwargs:
             allow_flexible_bounds: false
             bounds: none
@@ -2917,10 +2870,8 @@ stages:
       md5: 22a68a73854eb378fe4b4c7cb4b4c176
       size: 32
   train@dataset2-spline_nf:
-    cmd: 'python scripts/train.py --model spline_nf --stage-name train@dataset2-spline_nf
-      --target-name ofen_f_koks
-
-      '
+    cmd: "python scripts/train.py --model spline_nf --stage-name train@dataset2-spline_nf
+      --target-name ofen_f_koks\n"
     deps:
     - path: data/processed/ofen_f_koks/
       hash: md5
@@ -2962,7 +2913,8 @@ stages:
           base_distribution_kwargs:
             distribution_name: normal
           num_parameters: 95
-          parameters_constraint_fn: hybrid_flows.activations.get_spline_param_constrain_fn
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_spline_param_constrain_fn
           parameters_constraint_fn_kwargs:
             interval_width: 8
             min_slope: 0.001
@@ -2989,10 +2941,8 @@ stages:
       md5: a9cc9cee9f6c4498321cea260e9932b2
       size: 32
   train@dataset2-bernstein_nf_lognormal:
-    cmd: 'python scripts/train.py --model bernstein_nf_lognormal --stage-name train@dataset2-bernstein_nf_lognormal
-      --target-name ofen_f_koks
-
-      '
+    cmd: "python scripts/train.py --model bernstein_nf_lognormal --stage-name train@dataset2-bernstein_nf_lognormal
+      --target-name ofen_f_koks\n"
     deps:
     - path: data/processed/ofen_f_koks/
       hash: md5
@@ -3038,7 +2988,8 @@ stages:
           base_distribution_kwargs:
             distribution_name: lognormal
           num_parameters: 96
-          parameters_constraint_fn: hybrid_flows.activations.get_thetas_constrain_fn
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_thetas_constrain_fn
           parameters_constraint_fn_kwargs:
             allow_flexible_bounds: false
             bounds: none
@@ -3065,10 +3016,8 @@ stages:
       md5: b35031615b9042a6d65cd73eca7da49b
       size: 32
   train@dataset2-spline_nf_lognormal:
-    cmd: 'python scripts/train.py --model spline_nf_lognormal --stage-name train@dataset2-spline_nf_lognormal
-      --target-name ofen_f_koks
-
-      '
+    cmd: "python scripts/train.py --model spline_nf_lognormal --stage-name train@dataset2-spline_nf_lognormal
+      --target-name ofen_f_koks\n"
     deps:
     - path: data/processed/ofen_f_koks/
       hash: md5
@@ -3110,7 +3059,8 @@ stages:
           base_distribution_kwargs:
             distribution_name: lognormal
           num_parameters: 95
-          parameters_constraint_fn: hybrid_flows.activations.get_spline_param_constrain_fn
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_spline_param_constrain_fn
           parameters_constraint_fn_kwargs:
             interval_width: 4
             min_slope: 0.001
@@ -3137,10 +3087,8 @@ stages:
       md5: df53f48d7910874ee47d6f9a2504b28d
       size: 32
   train@dataset3-bernstein_nf:
-    cmd: 'python scripts/train.py --model bernstein_nf --stage-name train@dataset3-bernstein_nf
-      --target-name pl2
-
-      '
+    cmd: "python scripts/train.py --model bernstein_nf --stage-name train@dataset3-bernstein_nf
+      --target-name pl2\n"
     deps:
     - path: data/processed/pl2/
       hash: md5
@@ -3186,7 +3134,8 @@ stages:
           base_distribution_kwargs:
             distribution_name: normal
           num_parameters: 96
-          parameters_constraint_fn: hybrid_flows.activations.get_thetas_constrain_fn
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_thetas_constrain_fn
           parameters_constraint_fn_kwargs:
             allow_flexible_bounds: false
             bounds: none
@@ -3213,10 +3162,8 @@ stages:
       md5: 03e6a7e1cfee2cacf7989eee4a8c0429
       size: 32
   train@dataset3-spline_nf:
-    cmd: 'python scripts/train.py --model spline_nf --stage-name train@dataset3-spline_nf
-      --target-name pl2
-
-      '
+    cmd: "python scripts/train.py --model spline_nf --stage-name train@dataset3-spline_nf
+      --target-name pl2\n"
     deps:
     - path: data/processed/pl2/
       hash: md5
@@ -3258,7 +3205,8 @@ stages:
           base_distribution_kwargs:
             distribution_name: normal
           num_parameters: 95
-          parameters_constraint_fn: hybrid_flows.activations.get_spline_param_constrain_fn
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_spline_param_constrain_fn
           parameters_constraint_fn_kwargs:
             interval_width: 8
             min_slope: 0.001
@@ -3285,10 +3233,8 @@ stages:
       md5: 51783f7b4c539039e1e8c79811f07db8
       size: 32
   train@dataset3-bernstein_nf_lognormal:
-    cmd: 'python scripts/train.py --model bernstein_nf_lognormal --stage-name train@dataset3-bernstein_nf_lognormal
-      --target-name pl2
-
-      '
+    cmd: "python scripts/train.py --model bernstein_nf_lognormal --stage-name train@dataset3-bernstein_nf_lognormal
+      --target-name pl2\n"
     deps:
     - path: data/processed/pl2/
       hash: md5
@@ -3334,7 +3280,8 @@ stages:
           base_distribution_kwargs:
             distribution_name: lognormal
           num_parameters: 96
-          parameters_constraint_fn: hybrid_flows.activations.get_thetas_constrain_fn
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_thetas_constrain_fn
           parameters_constraint_fn_kwargs:
             allow_flexible_bounds: false
             bounds: none
@@ -3361,10 +3308,8 @@ stages:
       md5: 72b01e5c2211fc68580690c0c1d560ff
       size: 32
   train@dataset3-spline_nf_lognormal:
-    cmd: 'python scripts/train.py --model spline_nf_lognormal --stage-name train@dataset3-spline_nf_lognormal
-      --target-name pl2
-
-      '
+    cmd: "python scripts/train.py --model spline_nf_lognormal --stage-name train@dataset3-spline_nf_lognormal
+      --target-name pl2\n"
     deps:
     - path: data/processed/pl2/
       hash: md5
@@ -3406,7 +3351,8 @@ stages:
           base_distribution_kwargs:
             distribution_name: lognormal
           num_parameters: 95
-          parameters_constraint_fn: hybrid_flows.activations.get_spline_param_constrain_fn
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_spline_param_constrain_fn
           parameters_constraint_fn_kwargs:
             interval_width: 4
             min_slope: 0.001
@@ -3433,10 +3379,8 @@ stages:
       md5: a73518c024e514a35a02e3871ecaada0
       size: 32
   evaluate@dataset0-bernstein_nf:
-    cmd: 'python scripts/evaluate.py --model bernstein_nf --stage-name evaluate@dataset0-bernstein_nf
-      --target-name dla --prediction-horizon 48
-
-      '
+    cmd: "python scripts/evaluate.py --model bernstein_nf --stage-name evaluate@dataset0-bernstein_nf
+      --target-name dla --prediction-horizon 48\n"
     deps:
     - path: data/processed/dla/
       hash: md5
@@ -3494,7 +3438,8 @@ stages:
           base_distribution_kwargs:
             distribution_name: normal
           num_parameters: 8
-          parameters_constraint_fn: hybrid_flows.activations.get_thetas_constrain_fn
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_thetas_constrain_fn
           parameters_constraint_fn_kwargs:
             allow_flexible_bounds: false
             bounds: none
@@ -3524,10 +3469,8 @@ stages:
       md5: 4c959312eb21d5e16fd15db94ddd5cf1
       size: 51779
   evaluate@dataset0-spline_nf:
-    cmd: 'python scripts/evaluate.py --model spline_nf --stage-name evaluate@dataset0-spline_nf
-      --target-name dla --prediction-horizon 48
-
-      '
+    cmd: "python scripts/evaluate.py --model spline_nf --stage-name evaluate@dataset0-spline_nf
+      --target-name dla --prediction-horizon 48\n"
     deps:
     - path: data/processed/dla/
       hash: md5
@@ -3578,7 +3521,8 @@ stages:
           base_distribution_kwargs:
             distribution_name: normal
           num_parameters: 35
-          parameters_constraint_fn: hybrid_flows.activations.get_spline_param_constrain_fn
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_spline_param_constrain_fn
           parameters_constraint_fn_kwargs:
             interval_width: 8
             min_slope: 0.001
@@ -3608,10 +3552,8 @@ stages:
       md5: 1a0c6f177fdfdcc15a92dc6639e42942
       size: 52913
   evaluate@dataset0-bernstein_nf_lognormal:
-    cmd: 'python scripts/evaluate.py --model bernstein_nf_lognormal --stage-name evaluate@dataset0-bernstein_nf_lognormal
-      --target-name dla --prediction-horizon 48
-
-      '
+    cmd: "python scripts/evaluate.py --model bernstein_nf_lognormal --stage-name evaluate@dataset0-bernstein_nf_lognormal
+      --target-name dla --prediction-horizon 48\n"
     deps:
     - path: data/processed/dla/
       hash: md5
@@ -3669,7 +3611,8 @@ stages:
           base_distribution_kwargs:
             distribution_name: lognormal
           num_parameters: 8
-          parameters_constraint_fn: hybrid_flows.activations.get_thetas_constrain_fn
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_thetas_constrain_fn
           parameters_constraint_fn_kwargs:
             allow_flexible_bounds: false
             bounds: none
@@ -3699,10 +3642,8 @@ stages:
       md5: b635b34167874a332de9015151151cf0
       size: 52904
   evaluate@dataset0-spline_nf_lognormal:
-    cmd: 'python scripts/evaluate.py --model spline_nf_lognormal --stage-name evaluate@dataset0-spline_nf_lognormal
-      --target-name dla --prediction-horizon 48
-
-      '
+    cmd: "python scripts/evaluate.py --model spline_nf_lognormal --stage-name evaluate@dataset0-spline_nf_lognormal
+      --target-name dla --prediction-horizon 48\n"
     deps:
     - path: data/processed/dla/
       hash: md5
@@ -3753,7 +3694,8 @@ stages:
           base_distribution_kwargs:
             distribution_name: lognormal
           num_parameters: 23
-          parameters_constraint_fn: hybrid_flows.activations.get_spline_param_constrain_fn
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_spline_param_constrain_fn
           parameters_constraint_fn_kwargs:
             interval_width: 4
             min_slope: 0.001
@@ -3783,10 +3725,8 @@ stages:
       md5: ea9a0eeaeb58c52fe35da38db8c5cd80
       size: 52665
   evaluate@dataset1-bernstein_nf:
-    cmd: 'python scripts/evaluate.py --model bernstein_nf --stage-name evaluate@dataset1-bernstein_nf
-      --target-name ofen_g_koks --prediction-horizon 48
-
-      '
+    cmd: "python scripts/evaluate.py --model bernstein_nf --stage-name evaluate@dataset1-bernstein_nf
+      --target-name ofen_g_koks --prediction-horizon 48\n"
     deps:
     - path: data/processed/ofen_g_koks/
       hash: md5
@@ -3841,7 +3781,8 @@ stages:
           base_distribution_kwargs:
             distribution_name: normal
           num_parameters: 96
-          parameters_constraint_fn: hybrid_flows.activations.get_thetas_constrain_fn
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_thetas_constrain_fn
           parameters_constraint_fn_kwargs:
             allow_flexible_bounds: false
             bounds: none
@@ -3872,10 +3813,8 @@ stages:
       md5: 3c68ab0101de8aae6e1888bf4360416e
       size: 36141
   evaluate@dataset1-spline_nf:
-    cmd: 'python scripts/evaluate.py --model spline_nf --stage-name evaluate@dataset1-spline_nf
-      --target-name ofen_g_koks --prediction-horizon 48
-
-      '
+    cmd: "python scripts/evaluate.py --model spline_nf --stage-name evaluate@dataset1-spline_nf
+      --target-name ofen_g_koks --prediction-horizon 48\n"
     deps:
     - path: data/processed/ofen_g_koks/
       hash: md5
@@ -3926,7 +3865,8 @@ stages:
           base_distribution_kwargs:
             distribution_name: normal
           num_parameters: 95
-          parameters_constraint_fn: hybrid_flows.activations.get_spline_param_constrain_fn
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_spline_param_constrain_fn
           parameters_constraint_fn_kwargs:
             interval_width: 8
             min_slope: 0.001
@@ -3957,10 +3897,8 @@ stages:
       md5: d9dc0723db1e40963a7e3027efd5d749
       size: 38250
   train@dataset0-normal_baseline:
-    cmd: 'python scripts/train.py --model normal_baseline --stage-name train@dataset0-normal_baseline
-      --target-name dla
-
-      '
+    cmd: "python scripts/train.py --model normal_baseline --stage-name train@dataset0-normal_baseline
+      --target-name dla\n"
     deps:
     - path: data/processed/dla/
       hash: md5
@@ -4022,10 +3960,8 @@ stages:
       md5: a6b9f11adf8c5d73e1dc4da733b5a7ab
       size: 33
   evaluate@dataset1-bernstein_nf_lognormal:
-    cmd: 'python scripts/evaluate.py --model bernstein_nf_lognormal --stage-name evaluate@dataset1-bernstein_nf_lognormal
-      --target-name ofen_g_koks --prediction-horizon 48
-
-      '
+    cmd: "python scripts/evaluate.py --model bernstein_nf_lognormal --stage-name evaluate@dataset1-bernstein_nf_lognormal
+      --target-name ofen_g_koks --prediction-horizon 48\n"
     deps:
     - path: data/processed/ofen_g_koks/
       hash: md5
@@ -4080,7 +4016,8 @@ stages:
           base_distribution_kwargs:
             distribution_name: lognormal
           num_parameters: 96
-          parameters_constraint_fn: hybrid_flows.activations.get_thetas_constrain_fn
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_thetas_constrain_fn
           parameters_constraint_fn_kwargs:
             allow_flexible_bounds: false
             bounds: none
@@ -4094,7 +4031,8 @@ stages:
             - 256
             conditional: true
     outs:
-    - path: results/ofen_g_koks/bernstein_nf_lognormal/evaluation/calibration.pdf
+    - path:
+        results/ofen_g_koks/bernstein_nf_lognormal/evaluation/calibration.pdf
       hash: md5
       md5: 8314415d1f01c65d0030caa1a5d5419b
       size: 41638
@@ -4106,15 +4044,14 @@ stages:
       hash: md5
       md5: 98f2707bc50d807025e31cb25b77114e
       size: 89
-    - path: results/ofen_g_koks/bernstein_nf_lognormal/evaluation/pit_histogram.pdf
+    - path:
+        results/ofen_g_koks/bernstein_nf_lognormal/evaluation/pit_histogram.pdf
       hash: md5
       md5: 05a69915ccd43540673341137d2f559c
       size: 37911
   train@dataset0-lognormal_baseline:
-    cmd: 'python scripts/train.py --model lognormal_baseline --stage-name train@dataset0-lognormal_baseline
-      --target-name dla
-
-      '
+    cmd: "python scripts/train.py --model lognormal_baseline --stage-name train@dataset0-lognormal_baseline
+      --target-name dla\n"
     deps:
     - path: data/processed/dla/
       hash: md5
@@ -4176,10 +4113,8 @@ stages:
       md5: 0e234ad0d0db731ceff5dc230a93cc11
       size: 33
   evaluate@dataset1-spline_nf_lognormal:
-    cmd: 'python scripts/evaluate.py --model spline_nf_lognormal --stage-name evaluate@dataset1-spline_nf_lognormal
-      --target-name ofen_g_koks --prediction-horizon 48
-
-      '
+    cmd: "python scripts/evaluate.py --model spline_nf_lognormal --stage-name evaluate@dataset1-spline_nf_lognormal
+      --target-name ofen_g_koks --prediction-horizon 48\n"
     deps:
     - path: data/processed/ofen_g_koks/
       hash: md5
@@ -4230,7 +4165,8 @@ stages:
           base_distribution_kwargs:
             distribution_name: lognormal
           num_parameters: 95
-          parameters_constraint_fn: hybrid_flows.activations.get_spline_param_constrain_fn
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_spline_param_constrain_fn
           parameters_constraint_fn_kwargs:
             interval_width: 4
             min_slope: 0.001
@@ -4261,10 +4197,8 @@ stages:
       md5: 5c39601cd001681d34f409a13cab2828
       size: 38419
   evaluate@dataset2-bernstein_nf:
-    cmd: 'python scripts/evaluate.py --model bernstein_nf --stage-name evaluate@dataset2-bernstein_nf
-      --target-name ofen_f_koks --prediction-horizon 48
-
-      '
+    cmd: "python scripts/evaluate.py --model bernstein_nf --stage-name evaluate@dataset2-bernstein_nf
+      --target-name ofen_f_koks --prediction-horizon 48\n"
     deps:
     - path: data/processed/ofen_f_koks/
       hash: md5
@@ -4319,7 +4253,8 @@ stages:
           base_distribution_kwargs:
             distribution_name: normal
           num_parameters: 96
-          parameters_constraint_fn: hybrid_flows.activations.get_thetas_constrain_fn
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_thetas_constrain_fn
           parameters_constraint_fn_kwargs:
             allow_flexible_bounds: false
             bounds: none
@@ -4350,10 +4285,8 @@ stages:
       md5: 7de1e25f33fa7c019f5f6f6a19a8d0f9
       size: 36406
   train@dataset0-bernstein_nf_scale:
-    cmd: 'python scripts/train.py --model bernstein_nf_scale --stage-name train@dataset0-bernstein_nf_scale
-      --target-name dla
-
-      '
+    cmd: "python scripts/train.py --model bernstein_nf_scale --stage-name train@dataset0-bernstein_nf_scale
+      --target-name dla\n"
     deps:
     - path: data/processed/dla/
       hash: md5
@@ -4420,7 +4353,8 @@ stages:
               - 0.0
               - 1.0
             invert: true
-            parameters_constraint_fn: hybrid_flows.activations.get_thetas_constrain_fn
+            parameters_constraint_fn:
+              hybrid_flows.activations.get_thetas_constrain_fn
             parameters_constraint_fn_kwargs:
               allow_flexible_bounds: false
               bounds: none
@@ -4452,10 +4386,8 @@ stages:
       md5: 0d9665f1afad60ac303bd1447bd80520
       size: 33
   train@dataset0-bernstein_nf_scale_lognormal:
-    cmd: 'python scripts/train.py --model bernstein_nf_scale_lognormal --stage-name
-      train@dataset0-bernstein_nf_scale_lognormal --target-name dla
-
-      '
+    cmd: "python scripts/train.py --model bernstein_nf_scale_lognormal --stage-name
+      train@dataset0-bernstein_nf_scale_lognormal --target-name dla\n"
     deps:
     - path: data/processed/dla/
       hash: md5
@@ -4522,7 +4454,8 @@ stages:
               - 0.0
               - 1.0
             invert: true
-            parameters_constraint_fn: hybrid_flows.activations.get_thetas_constrain_fn
+            parameters_constraint_fn:
+              hybrid_flows.activations.get_thetas_constrain_fn
             parameters_constraint_fn_kwargs:
               allow_flexible_bounds: false
               bounds: none
@@ -4554,10 +4487,8 @@ stages:
       md5: b7c3ca62940f2a5680423238103f78d0
       size: 32
   train@dataset1-normal_baseline:
-    cmd: 'python scripts/train.py --model normal_baseline --stage-name train@dataset1-normal_baseline
-      --target-name ofen_g_koks
-
-      '
+    cmd: "python scripts/train.py --model normal_baseline --stage-name train@dataset1-normal_baseline
+      --target-name ofen_g_koks\n"
     deps:
     - path: data/processed/ofen_g_koks/
       hash: md5
@@ -4615,10 +4546,8 @@ stages:
       md5: 3751676b7b95ee4129784d1ce5c9dc16
       size: 32
   train@dataset1-lognormal_baseline:
-    cmd: 'python scripts/train.py --model lognormal_baseline --stage-name train@dataset1-lognormal_baseline
-      --target-name ofen_g_koks
-
-      '
+    cmd: "python scripts/train.py --model lognormal_baseline --stage-name train@dataset1-lognormal_baseline
+      --target-name ofen_g_koks\n"
     deps:
     - path: data/processed/ofen_g_koks/
       hash: md5
@@ -4676,10 +4605,8 @@ stages:
       md5: 36b432e9e1eaa04a39b61452eeb9a246
       size: 32
   train@dataset1-bernstein_nf_scale:
-    cmd: 'python scripts/train.py --model bernstein_nf_scale --stage-name train@dataset1-bernstein_nf_scale
-      --target-name ofen_g_koks
-
-      '
+    cmd: "python scripts/train.py --model bernstein_nf_scale --stage-name train@dataset1-bernstein_nf_scale
+      --target-name ofen_g_koks\n"
     deps:
     - path: data/processed/ofen_g_koks/
       hash: md5
@@ -4748,7 +4675,8 @@ stages:
               - 0.0
               - 1.0
             invert: true
-            parameters_constraint_fn: hybrid_flows.activations.get_thetas_constrain_fn
+            parameters_constraint_fn:
+              hybrid_flows.activations.get_thetas_constrain_fn
             parameters_constraint_fn_kwargs:
               allow_flexible_bounds: false
               bounds: none
@@ -4781,10 +4709,8 @@ stages:
       md5: 039fb504100c57c8024a5e0d767519d0
       size: 32
   train@dataset1-bernstein_nf_scale_lognormal:
-    cmd: 'python scripts/train.py --model bernstein_nf_scale_lognormal --stage-name
-      train@dataset1-bernstein_nf_scale_lognormal --target-name ofen_g_koks
-
-      '
+    cmd: "python scripts/train.py --model bernstein_nf_scale_lognormal --stage-name
+      train@dataset1-bernstein_nf_scale_lognormal --target-name ofen_g_koks\n"
     deps:
     - path: data/processed/ofen_g_koks/
       hash: md5
@@ -4853,7 +4779,8 @@ stages:
               - 0.0
               - 1.0
             invert: true
-            parameters_constraint_fn: hybrid_flows.activations.get_thetas_constrain_fn
+            parameters_constraint_fn:
+              hybrid_flows.activations.get_thetas_constrain_fn
             parameters_constraint_fn_kwargs:
               allow_flexible_bounds: false
               bounds: none
@@ -4886,10 +4813,8 @@ stages:
       md5: b06a6eb2330e0654bb69efe46c7245f0
       size: 32
   train@dataset2-normal_baseline:
-    cmd: 'python scripts/train.py --model normal_baseline --stage-name train@dataset2-normal_baseline
-      --target-name ofen_f_koks
-
-      '
+    cmd: "python scripts/train.py --model normal_baseline --stage-name train@dataset2-normal_baseline
+      --target-name ofen_f_koks\n"
     deps:
     - path: data/processed/ofen_f_koks/
       hash: md5
@@ -4947,10 +4872,8 @@ stages:
       md5: 73377680d8db7f894fc93797a84912bc
       size: 32
   train@dataset2-lognormal_baseline:
-    cmd: 'python scripts/train.py --model lognormal_baseline --stage-name train@dataset2-lognormal_baseline
-      --target-name ofen_f_koks
-
-      '
+    cmd: "python scripts/train.py --model lognormal_baseline --stage-name train@dataset2-lognormal_baseline
+      --target-name ofen_f_koks\n"
     deps:
     - path: data/processed/ofen_f_koks/
       hash: md5
@@ -5008,10 +4931,8 @@ stages:
       md5: 501fbb369c48b4b7553b16a06f7ee155
       size: 32
   train@dataset2-bernstein_nf_scale:
-    cmd: 'python scripts/train.py --model bernstein_nf_scale --stage-name train@dataset2-bernstein_nf_scale
-      --target-name ofen_f_koks
-
-      '
+    cmd: "python scripts/train.py --model bernstein_nf_scale --stage-name train@dataset2-bernstein_nf_scale
+      --target-name ofen_f_koks\n"
     deps:
     - path: data/processed/ofen_f_koks/
       hash: md5
@@ -5080,7 +5001,8 @@ stages:
               - 0.0
               - 1.0
             invert: true
-            parameters_constraint_fn: hybrid_flows.activations.get_thetas_constrain_fn
+            parameters_constraint_fn:
+              hybrid_flows.activations.get_thetas_constrain_fn
             parameters_constraint_fn_kwargs:
               allow_flexible_bounds: false
               bounds: none
@@ -5113,10 +5035,8 @@ stages:
       md5: 5961d783e17c6fafc66841e472d4ee08
       size: 32
   train@dataset2-bernstein_nf_scale_lognormal:
-    cmd: 'python scripts/train.py --model bernstein_nf_scale_lognormal --stage-name
-      train@dataset2-bernstein_nf_scale_lognormal --target-name ofen_f_koks
-
-      '
+    cmd: "python scripts/train.py --model bernstein_nf_scale_lognormal --stage-name
+      train@dataset2-bernstein_nf_scale_lognormal --target-name ofen_f_koks\n"
     deps:
     - path: data/processed/ofen_f_koks/
       hash: md5
@@ -5185,7 +5105,8 @@ stages:
               - 0.0
               - 1.0
             invert: true
-            parameters_constraint_fn: hybrid_flows.activations.get_thetas_constrain_fn
+            parameters_constraint_fn:
+              hybrid_flows.activations.get_thetas_constrain_fn
             parameters_constraint_fn_kwargs:
               allow_flexible_bounds: false
               bounds: none
@@ -5218,10 +5139,8 @@ stages:
       md5: 5af3051b4334541794c9bb0994fff270
       size: 32
   train@dataset3-normal_baseline:
-    cmd: 'python scripts/train.py --model normal_baseline --stage-name train@dataset3-normal_baseline
-      --target-name pl2
-
-      '
+    cmd: "python scripts/train.py --model normal_baseline --stage-name train@dataset3-normal_baseline
+      --target-name pl2\n"
     deps:
     - path: data/processed/pl2/
       hash: md5
@@ -5279,10 +5198,8 @@ stages:
       md5: 6dcd2fe664cd92a7b74f35337909e625
       size: 32
   train@dataset3-lognormal_baseline:
-    cmd: 'python scripts/train.py --model lognormal_baseline --stage-name train@dataset3-lognormal_baseline
-      --target-name pl2
-
-      '
+    cmd: "python scripts/train.py --model lognormal_baseline --stage-name train@dataset3-lognormal_baseline
+      --target-name pl2\n"
     deps:
     - path: data/processed/pl2/
       hash: md5
@@ -5340,10 +5257,8 @@ stages:
       md5: 946a9309c50e72f5270951b0e4eca88f
       size: 32
   train@dataset3-bernstein_nf_scale:
-    cmd: 'python scripts/train.py --model bernstein_nf_scale --stage-name train@dataset3-bernstein_nf_scale
-      --target-name pl2
-
-      '
+    cmd: "python scripts/train.py --model bernstein_nf_scale --stage-name train@dataset3-bernstein_nf_scale
+      --target-name pl2\n"
     deps:
     - path: data/processed/pl2/
       hash: md5
@@ -5412,7 +5327,8 @@ stages:
               - 0.0
               - 1.0
             invert: true
-            parameters_constraint_fn: hybrid_flows.activations.get_thetas_constrain_fn
+            parameters_constraint_fn:
+              hybrid_flows.activations.get_thetas_constrain_fn
             parameters_constraint_fn_kwargs:
               allow_flexible_bounds: false
               bounds: none
@@ -5445,10 +5361,8 @@ stages:
       md5: e410403f3ace20beb1f0b87529f74db8
       size: 32
   train@dataset3-bernstein_nf_scale_lognormal:
-    cmd: 'python scripts/train.py --model bernstein_nf_scale_lognormal --stage-name
-      train@dataset3-bernstein_nf_scale_lognormal --target-name pl2
-
-      '
+    cmd: "python scripts/train.py --model bernstein_nf_scale_lognormal --stage-name
+      train@dataset3-bernstein_nf_scale_lognormal --target-name pl2\n"
     deps:
     - path: data/processed/pl2/
       hash: md5
@@ -5517,7 +5431,8 @@ stages:
               - 0.0
               - 1.0
             invert: true
-            parameters_constraint_fn: hybrid_flows.activations.get_thetas_constrain_fn
+            parameters_constraint_fn:
+              hybrid_flows.activations.get_thetas_constrain_fn
             parameters_constraint_fn_kwargs:
               allow_flexible_bounds: false
               bounds: none
@@ -5550,10 +5465,8 @@ stages:
       md5: 9f786504122796068074c7e632f151c8
       size: 32
   evaluate@dataset0-normal_baseline:
-    cmd: 'python scripts/evaluate.py --model normal_baseline --stage-name evaluate@dataset0-normal_baseline
-      --target-name dla --prediction-horizon 48
-
-      '
+    cmd: "python scripts/evaluate.py --model normal_baseline --stage-name evaluate@dataset0-normal_baseline
+      --target-name dla --prediction-horizon 48\n"
     deps:
     - path: data/processed/dla/
       hash: md5
@@ -5628,10 +5541,8 @@ stages:
       md5: b8ffb831c5f61b5ebeb3980dbf7bee6a
       size: 52909
   evaluate@dataset0-lognormal_baseline:
-    cmd: 'python scripts/evaluate.py --model lognormal_baseline --stage-name evaluate@dataset0-lognormal_baseline
-      --target-name dla --prediction-horizon 48
-
-      '
+    cmd: "python scripts/evaluate.py --model lognormal_baseline --stage-name evaluate@dataset0-lognormal_baseline
+      --target-name dla --prediction-horizon 48\n"
     deps:
     - path: data/processed/dla/
       hash: md5
@@ -5706,10 +5617,8 @@ stages:
       md5: f5e0ab15915fcc0d6d909bd220f140e9
       size: 52927
   evaluate@dataset0-bernstein_nf_scale:
-    cmd: 'python scripts/evaluate.py --model bernstein_nf_scale --stage-name evaluate@dataset0-bernstein_nf_scale
-      --target-name dla --prediction-horizon 48
-
-      '
+    cmd: "python scripts/evaluate.py --model bernstein_nf_scale --stage-name evaluate@dataset0-bernstein_nf_scale
+      --target-name dla --prediction-horizon 48\n"
     deps:
     - path: data/processed/dla/
       hash: md5
@@ -5785,7 +5694,8 @@ stages:
               - 0.0
               - 1.0
             invert: true
-            parameters_constraint_fn: hybrid_flows.activations.get_thetas_constrain_fn
+            parameters_constraint_fn:
+              hybrid_flows.activations.get_thetas_constrain_fn
             parameters_constraint_fn_kwargs:
               allow_flexible_bounds: false
               bounds: none
@@ -5821,11 +5731,9 @@ stages:
       md5: e1bbc877cbc6812e060badf8e9353d70
       size: 52250
   evaluate@dataset0-bernstein_nf_scale_lognormal:
-    cmd: 'python scripts/evaluate.py --model bernstein_nf_scale_lognormal --stage-name
+    cmd: "python scripts/evaluate.py --model bernstein_nf_scale_lognormal --stage-name
       evaluate@dataset0-bernstein_nf_scale_lognormal --target-name dla --prediction-horizon
-      48
-
-      '
+      48\n"
     deps:
     - path: data/processed/dla/
       hash: md5
@@ -5901,7 +5809,8 @@ stages:
               - 0.0
               - 1.0
             invert: true
-            parameters_constraint_fn: hybrid_flows.activations.get_thetas_constrain_fn
+            parameters_constraint_fn:
+              hybrid_flows.activations.get_thetas_constrain_fn
             parameters_constraint_fn_kwargs:
               allow_flexible_bounds: false
               bounds: none
@@ -5928,7 +5837,8 @@ stages:
       hash: md5
       md5: 3433f41a33fc9e16493ef26fbe0813c1
       size: 115
-    - path: results/dla/bernstein_nf_scale_lognormal/evaluation/pit_histogram.pdf
+    - path:
+        results/dla/bernstein_nf_scale_lognormal/evaluation/pit_histogram.pdf
       hash: md5
       md5: 24f58f88d9c8f02c0637cf4d09ca6afd
       size: 47306
@@ -5937,10 +5847,8 @@ stages:
       md5: a60212dcfc5becffead5b3489e2fdfe5
       size: 54503
   evaluate@dataset1-normal_baseline:
-    cmd: 'python scripts/evaluate.py --model normal_baseline --stage-name evaluate@dataset1-normal_baseline
-      --target-name ofen_g_koks --prediction-horizon 48
-
-      '
+    cmd: "python scripts/evaluate.py --model normal_baseline --stage-name evaluate@dataset1-normal_baseline
+      --target-name ofen_g_koks --prediction-horizon 48\n"
     deps:
     - path: data/processed/ofen_g_koks/
       hash: md5
@@ -6011,10 +5919,8 @@ stages:
       md5: 822708879a1ebcef091ab2e4d9f92322
       size: 38458
   evaluate@dataset1-lognormal_baseline:
-    cmd: 'python scripts/evaluate.py --model lognormal_baseline --stage-name evaluate@dataset1-lognormal_baseline
-      --target-name ofen_g_koks --prediction-horizon 48
-
-      '
+    cmd: "python scripts/evaluate.py --model lognormal_baseline --stage-name evaluate@dataset1-lognormal_baseline
+      --target-name ofen_g_koks --prediction-horizon 48\n"
     deps:
     - path: data/processed/ofen_g_koks/
       hash: md5
@@ -6085,10 +5991,8 @@ stages:
       md5: a45a19086f44d82450c00d9032314e52
       size: 33241
   evaluate@dataset1-bernstein_nf_scale:
-    cmd: 'python scripts/evaluate.py --model bernstein_nf_scale --stage-name evaluate@dataset1-bernstein_nf_scale
-      --target-name ofen_g_koks --prediction-horizon 48
-
-      '
+    cmd: "python scripts/evaluate.py --model bernstein_nf_scale --stage-name evaluate@dataset1-bernstein_nf_scale
+      --target-name ofen_g_koks --prediction-horizon 48\n"
     deps:
     - path: data/processed/ofen_g_koks/
       hash: md5
@@ -6166,7 +6070,8 @@ stages:
               - 0.0
               - 1.0
             invert: true
-            parameters_constraint_fn: hybrid_flows.activations.get_thetas_constrain_fn
+            parameters_constraint_fn:
+              hybrid_flows.activations.get_thetas_constrain_fn
             parameters_constraint_fn_kwargs:
               allow_flexible_bounds: false
               bounds: none
@@ -6203,11 +6108,9 @@ stages:
       md5: 5881a31994acfdaf80c9887c11facf6d
       size: 38310
   evaluate@dataset1-bernstein_nf_scale_lognormal:
-    cmd: 'python scripts/evaluate.py --model bernstein_nf_scale_lognormal --stage-name
+    cmd: "python scripts/evaluate.py --model bernstein_nf_scale_lognormal --stage-name
       evaluate@dataset1-bernstein_nf_scale_lognormal --target-name ofen_g_koks --prediction-horizon
-      48
-
-      '
+      48\n"
     deps:
     - path: data/processed/ofen_g_koks/
       hash: md5
@@ -6285,7 +6188,8 @@ stages:
               - 0.0
               - 1.0
             invert: true
-            parameters_constraint_fn: hybrid_flows.activations.get_thetas_constrain_fn
+            parameters_constraint_fn:
+              hybrid_flows.activations.get_thetas_constrain_fn
             parameters_constraint_fn_kwargs:
               allow_flexible_bounds: false
               bounds: none
@@ -6305,27 +6209,29 @@ stages:
               - 48
               - 50
     outs:
-    - path: results/ofen_g_koks/bernstein_nf_scale_lognormal/evaluation/calibration.pdf
+    - path:
+        results/ofen_g_koks/bernstein_nf_scale_lognormal/evaluation/calibration.pdf
       hash: md5
       md5: 459b753221934a20d9920ff160e6d924
       size: 42077
-    - path: results/ofen_g_koks/bernstein_nf_scale_lognormal/evaluation/forecast.pdf
+    - path:
+        results/ofen_g_koks/bernstein_nf_scale_lognormal/evaluation/forecast.pdf
       hash: md5
       md5: ab0c9157443eb597203423abf5e66310
       size: 52071
-    - path: results/ofen_g_koks/bernstein_nf_scale_lognormal/evaluation/metrics.yaml
+    - path:
+        results/ofen_g_koks/bernstein_nf_scale_lognormal/evaluation/metrics.yaml
       hash: md5
       md5: 15cf9b016dc627b36b54402dc240ed9f
       size: 88
-    - path: results/ofen_g_koks/bernstein_nf_scale_lognormal/evaluation/pit_histogram.pdf
+    - path:
+        results/ofen_g_koks/bernstein_nf_scale_lognormal/evaluation/pit_histogram.pdf
       hash: md5
       md5: 6c11c3da9363f87e49ec1c4440c56664
       size: 38879
   evaluate@dataset2-normal_baseline:
-    cmd: 'python scripts/evaluate.py --model normal_baseline --stage-name evaluate@dataset2-normal_baseline
-      --target-name ofen_f_koks --prediction-horizon 48
-
-      '
+    cmd: "python scripts/evaluate.py --model normal_baseline --stage-name evaluate@dataset2-normal_baseline
+      --target-name ofen_f_koks --prediction-horizon 48\n"
     deps:
     - path: data/processed/ofen_f_koks/
       hash: md5
@@ -6396,10 +6302,8 @@ stages:
       md5: 77322afeaf0baaac2a79b4c1c68f053a
       size: 38379
   evaluate@dataset2-lognormal_baseline:
-    cmd: 'python scripts/evaluate.py --model lognormal_baseline --stage-name evaluate@dataset2-lognormal_baseline
-      --target-name ofen_f_koks --prediction-horizon 48
-
-      '
+    cmd: "python scripts/evaluate.py --model lognormal_baseline --stage-name evaluate@dataset2-lognormal_baseline
+      --target-name ofen_f_koks --prediction-horizon 48\n"
     deps:
     - path: data/processed/ofen_f_koks/
       hash: md5
@@ -6470,10 +6374,8 @@ stages:
       md5: 3abaafcdfeb961f6ad6167b1fa279de8
       size: 33239
   evaluate@dataset2-spline_nf:
-    cmd: 'python scripts/evaluate.py --model spline_nf --stage-name evaluate@dataset2-spline_nf
-      --target-name ofen_f_koks --prediction-horizon 48
-
-      '
+    cmd: "python scripts/evaluate.py --model spline_nf --stage-name evaluate@dataset2-spline_nf
+      --target-name ofen_f_koks --prediction-horizon 48\n"
     deps:
     - path: data/processed/ofen_f_koks/
       hash: md5
@@ -6524,7 +6426,8 @@ stages:
           base_distribution_kwargs:
             distribution_name: normal
           num_parameters: 95
-          parameters_constraint_fn: hybrid_flows.activations.get_spline_param_constrain_fn
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_spline_param_constrain_fn
           parameters_constraint_fn_kwargs:
             interval_width: 8
             min_slope: 0.001
@@ -6555,10 +6458,8 @@ stages:
       md5: 6193539486d7036d938c817c57ea7420
       size: 38042
   evaluate@dataset2-bernstein_nf_lognormal:
-    cmd: 'python scripts/evaluate.py --model bernstein_nf_lognormal --stage-name evaluate@dataset2-bernstein_nf_lognormal
-      --target-name ofen_f_koks --prediction-horizon 48
-
-      '
+    cmd: "python scripts/evaluate.py --model bernstein_nf_lognormal --stage-name evaluate@dataset2-bernstein_nf_lognormal
+      --target-name ofen_f_koks --prediction-horizon 48\n"
     deps:
     - path: data/processed/ofen_f_koks/
       hash: md5
@@ -6613,7 +6514,8 @@ stages:
           base_distribution_kwargs:
             distribution_name: lognormal
           num_parameters: 96
-          parameters_constraint_fn: hybrid_flows.activations.get_thetas_constrain_fn
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_thetas_constrain_fn
           parameters_constraint_fn_kwargs:
             allow_flexible_bounds: false
             bounds: none
@@ -6627,7 +6529,8 @@ stages:
             - 256
             conditional: true
     outs:
-    - path: results/ofen_f_koks/bernstein_nf_lognormal/evaluation/calibration.pdf
+    - path:
+        results/ofen_f_koks/bernstein_nf_lognormal/evaluation/calibration.pdf
       hash: md5
       md5: 139c5e96597909703642b1a5affcc53a
       size: 41903
@@ -6639,15 +6542,14 @@ stages:
       hash: md5
       md5: 839592a62c58102793c57c690378e97f
       size: 90
-    - path: results/ofen_f_koks/bernstein_nf_lognormal/evaluation/pit_histogram.pdf
+    - path:
+        results/ofen_f_koks/bernstein_nf_lognormal/evaluation/pit_histogram.pdf
       hash: md5
       md5: 6d653f2fcbdfac34552c6f83253ce5b2
       size: 38362
   evaluate@dataset2-spline_nf_lognormal:
-    cmd: 'python scripts/evaluate.py --model spline_nf_lognormal --stage-name evaluate@dataset2-spline_nf_lognormal
-      --target-name ofen_f_koks --prediction-horizon 48
-
-      '
+    cmd: "python scripts/evaluate.py --model spline_nf_lognormal --stage-name evaluate@dataset2-spline_nf_lognormal
+      --target-name ofen_f_koks --prediction-horizon 48\n"
     deps:
     - path: data/processed/ofen_f_koks/
       hash: md5
@@ -6698,7 +6600,8 @@ stages:
           base_distribution_kwargs:
             distribution_name: lognormal
           num_parameters: 95
-          parameters_constraint_fn: hybrid_flows.activations.get_spline_param_constrain_fn
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_spline_param_constrain_fn
           parameters_constraint_fn_kwargs:
             interval_width: 4
             min_slope: 0.001
@@ -6729,10 +6632,8 @@ stages:
       md5: f5c95e44cbdb8b2cf67b84c86a2d2292
       size: 37962
   evaluate@dataset2-bernstein_nf_scale:
-    cmd: 'python scripts/evaluate.py --model bernstein_nf_scale --stage-name evaluate@dataset2-bernstein_nf_scale
-      --target-name ofen_f_koks --prediction-horizon 48
-
-      '
+    cmd: "python scripts/evaluate.py --model bernstein_nf_scale --stage-name evaluate@dataset2-bernstein_nf_scale
+      --target-name ofen_f_koks --prediction-horizon 48\n"
     deps:
     - path: data/processed/ofen_f_koks/
       hash: md5
@@ -6810,7 +6711,8 @@ stages:
               - 0.0
               - 1.0
             invert: true
-            parameters_constraint_fn: hybrid_flows.activations.get_thetas_constrain_fn
+            parameters_constraint_fn:
+              hybrid_flows.activations.get_thetas_constrain_fn
             parameters_constraint_fn_kwargs:
               allow_flexible_bounds: false
               bounds: none
@@ -6847,11 +6749,9 @@ stages:
       md5: fa4adb61c1f2252beafb5262771dd3c1
       size: 38519
   evaluate@dataset2-bernstein_nf_scale_lognormal:
-    cmd: 'python scripts/evaluate.py --model bernstein_nf_scale_lognormal --stage-name
+    cmd: "python scripts/evaluate.py --model bernstein_nf_scale_lognormal --stage-name
       evaluate@dataset2-bernstein_nf_scale_lognormal --target-name ofen_f_koks --prediction-horizon
-      48
-
-      '
+      48\n"
     deps:
     - path: data/processed/ofen_f_koks/
       hash: md5
@@ -6929,7 +6829,8 @@ stages:
               - 0.0
               - 1.0
             invert: true
-            parameters_constraint_fn: hybrid_flows.activations.get_thetas_constrain_fn
+            parameters_constraint_fn:
+              hybrid_flows.activations.get_thetas_constrain_fn
             parameters_constraint_fn_kwargs:
               allow_flexible_bounds: false
               bounds: none
@@ -6949,27 +6850,29 @@ stages:
               - 48
               - 50
     outs:
-    - path: results/ofen_f_koks/bernstein_nf_scale_lognormal/evaluation/calibration.pdf
+    - path:
+        results/ofen_f_koks/bernstein_nf_scale_lognormal/evaluation/calibration.pdf
       hash: md5
       md5: 687fdcf3fcc0abb3b6d3d1567ed92dc1
       size: 42014
-    - path: results/ofen_f_koks/bernstein_nf_scale_lognormal/evaluation/forecast.pdf
+    - path:
+        results/ofen_f_koks/bernstein_nf_scale_lognormal/evaluation/forecast.pdf
       hash: md5
       md5: e9a27e48d88b81edaaf07364db0796ba
       size: 52399
-    - path: results/ofen_f_koks/bernstein_nf_scale_lognormal/evaluation/metrics.yaml
+    - path:
+        results/ofen_f_koks/bernstein_nf_scale_lognormal/evaluation/metrics.yaml
       hash: md5
       md5: e5f079b563e65d4d03aebfc22170a594
       size: 91
-    - path: results/ofen_f_koks/bernstein_nf_scale_lognormal/evaluation/pit_histogram.pdf
+    - path:
+        results/ofen_f_koks/bernstein_nf_scale_lognormal/evaluation/pit_histogram.pdf
       hash: md5
       md5: c6dae114847e127d89c49c01f41ea544
       size: 38928
   evaluate@dataset3-normal_baseline:
-    cmd: 'python scripts/evaluate.py --model normal_baseline --stage-name evaluate@dataset3-normal_baseline
-      --target-name pl2 --prediction-horizon 48
-
-      '
+    cmd: "python scripts/evaluate.py --model normal_baseline --stage-name evaluate@dataset3-normal_baseline
+      --target-name pl2 --prediction-horizon 48\n"
     deps:
     - path: data/processed/pl2/
       hash: md5
@@ -7040,10 +6943,8 @@ stages:
       md5: 012073278a9196ce7cdee47ac29e56a3
       size: 38292
   evaluate@dataset3-lognormal_baseline:
-    cmd: 'python scripts/evaluate.py --model lognormal_baseline --stage-name evaluate@dataset3-lognormal_baseline
-      --target-name pl2 --prediction-horizon 48
-
-      '
+    cmd: "python scripts/evaluate.py --model lognormal_baseline --stage-name evaluate@dataset3-lognormal_baseline
+      --target-name pl2 --prediction-horizon 48\n"
     deps:
     - path: data/processed/pl2/
       hash: md5
@@ -7114,10 +7015,8 @@ stages:
       md5: 4c4884e166d066bc561454b3319f4f85
       size: 33131
   evaluate@dataset3-bernstein_nf:
-    cmd: 'python scripts/evaluate.py --model bernstein_nf --stage-name evaluate@dataset3-bernstein_nf
-      --target-name pl2 --prediction-horizon 48
-
-      '
+    cmd: "python scripts/evaluate.py --model bernstein_nf --stage-name evaluate@dataset3-bernstein_nf
+      --target-name pl2 --prediction-horizon 48\n"
     deps:
     - path: data/processed/pl2/
       hash: md5
@@ -7172,7 +7071,8 @@ stages:
           base_distribution_kwargs:
             distribution_name: normal
           num_parameters: 96
-          parameters_constraint_fn: hybrid_flows.activations.get_thetas_constrain_fn
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_thetas_constrain_fn
           parameters_constraint_fn_kwargs:
             allow_flexible_bounds: false
             bounds: none
@@ -7203,10 +7103,8 @@ stages:
       md5: caa38ee7fe38f24172b55a661620a120
       size: 37634
   evaluate@dataset3-spline_nf:
-    cmd: 'python scripts/evaluate.py --model spline_nf --stage-name evaluate@dataset3-spline_nf
-      --target-name pl2 --prediction-horizon 48
-
-      '
+    cmd: "python scripts/evaluate.py --model spline_nf --stage-name evaluate@dataset3-spline_nf
+      --target-name pl2 --prediction-horizon 48\n"
     deps:
     - path: data/processed/pl2/
       hash: md5
@@ -7257,7 +7155,8 @@ stages:
           base_distribution_kwargs:
             distribution_name: normal
           num_parameters: 95
-          parameters_constraint_fn: hybrid_flows.activations.get_spline_param_constrain_fn
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_spline_param_constrain_fn
           parameters_constraint_fn_kwargs:
             interval_width: 8
             min_slope: 0.001
@@ -7288,10 +7187,8 @@ stages:
       md5: c50af3faf64fe479501617aec498e9c9
       size: 37879
   evaluate@dataset3-bernstein_nf_lognormal:
-    cmd: 'python scripts/evaluate.py --model bernstein_nf_lognormal --stage-name evaluate@dataset3-bernstein_nf_lognormal
-      --target-name pl2 --prediction-horizon 48
-
-      '
+    cmd: "python scripts/evaluate.py --model bernstein_nf_lognormal --stage-name evaluate@dataset3-bernstein_nf_lognormal
+      --target-name pl2 --prediction-horizon 48\n"
     deps:
     - path: data/processed/pl2/
       hash: md5
@@ -7346,7 +7243,8 @@ stages:
           base_distribution_kwargs:
             distribution_name: lognormal
           num_parameters: 96
-          parameters_constraint_fn: hybrid_flows.activations.get_thetas_constrain_fn
+          parameters_constraint_fn:
+            hybrid_flows.activations.get_thetas_constrain_fn
           parameters_constraint_fn_kwargs:
             allow_flexible_bounds: false
             bounds: none
@@ -7377,10 +7275,8 @@ stages:
       md5: 4127b9ea2c4554e6c3548d14e9954270
       size: 38321
   train@dataset0-spline_nf_scale:
-    cmd: 'python scripts/train.py --model spline_nf_scale --stage-name train@dataset0-spline_nf_scale
-      --target-name dla
-
-      '
+    cmd: "python scripts/train.py --model spline_nf_scale --stage-name train@dataset0-spline_nf_scale
+      --target-name dla\n"
     deps:
     - path: data/processed/dla/
       hash: md5
@@ -7444,7 +7340,8 @@ stages:
             bijector_kwargs:
               range_min: -4
             invert: true
-            parameters_constraint_fn: hybrid_flows.activations.get_spline_param_constrain_fn
+            parameters_constraint_fn:
+              hybrid_flows.activations.get_spline_param_constrain_fn
             parameters_constraint_fn_kwargs:
               interval_width: 8
               min_slope: 0.001
@@ -7476,10 +7373,8 @@ stages:
       md5: b3305faa4e1ab0afaeabb7837e75e39e
       size: 32
   train@dataset0-spline_nf_scale_lognormal:
-    cmd: 'python scripts/train.py --model spline_nf_scale_lognormal --stage-name train@dataset0-spline_nf_scale_lognormal
-      --target-name dla
-
-      '
+    cmd: "python scripts/train.py --model spline_nf_scale_lognormal --stage-name train@dataset0-spline_nf_scale_lognormal
+      --target-name dla\n"
     deps:
     - path: data/processed/dla/
       hash: md5
@@ -7547,7 +7442,8 @@ stages:
             bijector_kwargs:
               range_min: 0
             invert: true
-            parameters_constraint_fn: hybrid_flows.activations.get_spline_param_constrain_fn
+            parameters_constraint_fn:
+              hybrid_flows.activations.get_spline_param_constrain_fn
             parameters_constraint_fn_kwargs:
               interval_width: 4
               min_slope: 0.001
@@ -7579,11 +7475,9 @@ stages:
       md5: cc03dba2d2e4d86d47a6634d6f175ee0
       size: 33
   evaluate@dataset0-spline_nf_scale_lognormal:
-    cmd: 'python scripts/evaluate.py --model spline_nf_scale_lognormal --stage-name
+    cmd: "python scripts/evaluate.py --model spline_nf_scale_lognormal --stage-name
       evaluate@dataset0-spline_nf_scale_lognormal --target-name dla --prediction-horizon
-      48
-
-      '
+      48\n"
     deps:
     - path: data/processed/dla/
       hash: md5
@@ -7660,7 +7554,8 @@ stages:
             bijector_kwargs:
               range_min: 0
             invert: true
-            parameters_constraint_fn: hybrid_flows.activations.get_spline_param_constrain_fn
+            parameters_constraint_fn:
+              hybrid_flows.activations.get_spline_param_constrain_fn
             parameters_constraint_fn_kwargs:
               interval_width: 4
               min_slope: 0.001
@@ -7696,10 +7591,8 @@ stages:
       md5: 68427be43a1029025e7363f34dd9bc56
       size: 51105
   evaluate@dataset0-spline_nf_scale:
-    cmd: 'python scripts/evaluate.py --model spline_nf_scale --stage-name evaluate@dataset0-spline_nf_scale
-      --target-name dla --prediction-horizon 48
-
-      '
+    cmd: "python scripts/evaluate.py --model spline_nf_scale --stage-name evaluate@dataset0-spline_nf_scale
+      --target-name dla --prediction-horizon 48\n"
     deps:
     - path: data/processed/dla/
       hash: md5
@@ -7772,7 +7665,8 @@ stages:
             bijector_kwargs:
               range_min: -4
             invert: true
-            parameters_constraint_fn: hybrid_flows.activations.get_spline_param_constrain_fn
+            parameters_constraint_fn:
+              hybrid_flows.activations.get_spline_param_constrain_fn
             parameters_constraint_fn_kwargs:
               interval_width: 8
               min_slope: 0.001
