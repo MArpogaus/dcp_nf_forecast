@@ -42,6 +42,7 @@ def _parse_kv_csv(s: str) -> dict[str, int]:
     -------
     dict[str, int]
         Parsed key / integer-value mapping.
+
     """
     result: dict[str, int] = {}
     for item in _parse_csv(s):

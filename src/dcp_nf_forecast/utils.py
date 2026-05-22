@@ -1,3 +1,5 @@
+"""I/O helpers, logging setup, and plotting configuration utilities."""
+
 import logging
 from pathlib import Path
 
@@ -25,6 +27,7 @@ def load_data(
     -------
     tuple[np.ndarray, np.ndarray]
         ``(X, y)`` as ``float32`` arrays.
+
     """
     x = read_dataframe(processed_dir / f"X_{split}", data_format)
     y = read_dataframe(processed_dir / f"y_{split}", data_format)
@@ -45,6 +48,7 @@ def setup_logging(log_level: str, log_file: str) -> logging.Logger:
     -------
     logging.Logger
         Configured logger instance.
+
     """
     level = getattr(logging, log_level.upper(), logging.INFO)
     handlers: list[logging.Handler] = [logging.StreamHandler()]
@@ -71,6 +75,7 @@ def _ext(data_format: str) -> str:
     -------
     str
         ``".feather"`` or ``".csv"`` (default).
+
     """
     return ".feather" if data_format == "feather" else ".csv"
 
@@ -87,6 +92,7 @@ def save_dataframe(df: pd.DataFrame, path: Path, data_format: str) -> None:
         *data_format*).
     data_format : str
         ``"feather"`` (faster) or ``"csv"``.
+
     """
     full_path = path.with_suffix(_ext(data_format))
     if data_format == "feather":
@@ -118,6 +124,7 @@ def read_dataframe(
     -------
     pd.DataFrame
         Loaded data.
+
     """
     full_path = path.with_suffix(_ext(data_format))
     if data_format == "feather":

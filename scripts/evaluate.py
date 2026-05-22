@@ -68,6 +68,7 @@ def sample_predictions(
     -------
     np.ndarray
         Samples, shape ``(n_samples, n, prediction_horizon)``.
+
     """
     n = len(x)
     all_samples: list[np.ndarray] = []
@@ -112,6 +113,7 @@ def compute_nll(
     float
         Mean negative log-likelihood across all test samples and
         forecast steps.
+
     """
     n = len(x)
     nlls: list[np.ndarray] = []
@@ -151,6 +153,7 @@ def plot_forecast_with_intervals(
     -------
     Figure
         The figure object.
+
     """
     n_steps = y_true.shape[1]
     n_cols = min(4, n_steps)
@@ -232,6 +235,7 @@ def plot_pit_histogram_grid(
     -------
     Figure
         The figure object.
+
     """
     n_steps = y_true.shape[1]
     n_cols = min(4, n_steps)
@@ -284,6 +288,7 @@ def plot_qq_grid(
     -------
     Figure
         The figure object.
+
     """
     n_steps = y_true.shape[1]
     n_cols = min(4, n_steps)
@@ -330,6 +335,7 @@ def compute_metrics(
     -------
     dict
         Dictionary with ``rmse``, ``mae``, and ``mean_90_ci_width``.
+
     """
     median = np.percentile(samples, 50, axis=0)
     rmse = float(np.sqrt(np.mean((y_true - median) ** 2)))

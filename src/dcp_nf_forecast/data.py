@@ -1,3 +1,5 @@
+"""Data loading, feature engineering, and preprocessing utilities."""
+
 import logging
 
 import holidays as _holidays
@@ -34,6 +36,7 @@ def load_raw_data(
     -------
     pd.DataFrame
         Data indexed by the parsed datetime column.
+
     """
     df = pd.read_csv(raw_data_path, parse_dates=[datetime_column])
     df = df.set_index(datetime_column)
@@ -57,6 +60,7 @@ def cyclical_encode(
     -------
     np.ndarray
         Shape ``(len(values), 2)`` with sin and cos of the base frequency.
+
     """
     angular = 2 * np.pi * values
     return np.column_stack([np.sin(angular), np.cos(angular)])
@@ -84,6 +88,7 @@ def _normalize_time_component(
     ------
     ValueError
         If *component* is not recognised.
+
     """
     if component == "time":
         values = (df.index.hour * 60 + df.index.minute) / (24 * 60)  # type: ignore[attr-defined]
@@ -114,6 +119,7 @@ def encode_time_features(
     pd.DataFrame
         Columns named ``{component}_sin`` and ``{component}_cos``,
         same index as *df*.
+
     """
     if not components:
         return pd.DataFrame(index=df.index)
@@ -144,6 +150,7 @@ def create_lag_features(
     pd.DataFrame
         Columns named ``{column}_lag_{step}``, same index as *df*.
         Leading rows will be ``NaN`` for each lag step.
+
     """
     if not column_lags:
         return pd.DataFrame(index=df.index)
@@ -176,6 +183,7 @@ def build_target(
     pd.DataFrame
         Columns named ``target_1`` … ``target_{horizon}``.  Trailing rows
         will be ``NaN`` for each step.
+
     """
     frames: list[pd.DataFrame] = []
     for step in range(1, prediction_horizon + 1):
@@ -239,6 +247,7 @@ def fillna_with_noise(
     -------
     pd.DataFrame
         Copy of *df* with NaNs filled in the specified columns.
+
     """
     if not columns:
         return df
@@ -271,6 +280,21 @@ def add_holiday_indicator(
     df: pd.DataFrame,
     country: str,
 ) -> pd.DataFrame:
+    """Add a binary holiday indicator column for the given country.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Source DataFrame indexed by datetime.
+    country : str
+        ISO country code (e.g. ``"DE"`` or ``"DE-BW"``).
+
+    Returns
+    -------
+    pd.DataFrame
+        Copy of *df* containing an additional ``is_holiday`` column.
+
+    """
     years = set(df.index.year)  # type: ignore[attr-defined]
     parts = country.upper().split("-")
     country_code = parts[0]
@@ -323,6 +347,7 @@ def _create_lead_features(
     pd.DataFrame
         Columns named ``{column}_lead_{step}``, same index as *df*.
         Trailing rows will be ``NaN`` for each step.
+
     """
     if not column_leads:
         return pd.DataFrame(index=df.index)
@@ -380,6 +405,7 @@ def build_features_and_target(
         ``(X, Y)`` with no ``NaN`` values.  Rows are a contiguous subset
         of the original index after dropping leading and trailing ``NaN``
         rows from lag and shift operations.
+
     """
     if holiday_country is not None:
         df = add_holiday_indicator(df, holiday_country)
@@ -430,6 +456,7 @@ def validate_data(
     ------
     ValueError
         If any ``NaN`` is found in *df_x* or *df_y*.
+
     """
     if df_x.isnull().sum().sum() > 0 or df_y.isnull().sum().sum() > 0:
         raise ValueError("Found NaNs in data")
@@ -461,6 +488,7 @@ def split_temporal(
     -------
     dict[str, tuple[pd.DataFrame, pd.DataFrame]]
         Keys ``"train"``, ``"val"``, ``"test"`` mapping to ``(X, Y)`` pairs.
+
     """
     n = len(df_x)
     train_end = int(n * train_ratio)
