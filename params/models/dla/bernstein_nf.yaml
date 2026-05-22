@@ -18,6 +18,7 @@ model_kwargs:
     domain:
     - 0.0
     - 1.0
+  invert: true
   base_distribution_kwargs:
     distribution_name: normal
   num_parameters: 8

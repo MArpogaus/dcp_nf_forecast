@@ -6,7 +6,7 @@ fit_kwargs:
   learning_rate:
     scheduler_name: CosineDecay
     scheduler_kwargs:
-      initial_learning_rate: 0.001
+      initial_learning_rate: 0.0005
       decay_steps: 22000
   verbose: true
 model_kwargs:
@@ -18,6 +18,7 @@ model_kwargs:
     domain:
     - 0.0
     - 1.0
+  invert: true
   base_distribution_kwargs:
     distribution_name: lognormal
   num_parameters: 8
@@ -33,3 +34,5 @@ model_kwargs:
     - 128
     - 128
     conditional: true
+    dropout: 0.1
+    batch_norm: true
