@@ -505,17 +505,17 @@ stages:
     deps:
     - path: data/processed/ofen_g_koks/
       hash: md5
-      md5: a6003f8ea854ffd9d8f12dde1f55a623.dir
-      size: 6688388
+      md5: e82e98897375c61f6a5433b173101295.dir
+      size: 44835012
       nfiles: 6
     - path: scripts/describe_data.py
       hash: md5
-      md5: 9ab2ccc40420bef48c3fff0a4d0a8882
-      size: 9715
+      md5: a9be6a3b994faab43f71bc4a75a487fe
+      size: 11783
     - path: src/dcp_nf_forecast/
       hash: md5
-      md5: 0872261314d904cedb77b28094fe6e07.dir
-      size: 66311
+      md5: 5b69810d019b95ab79012813b0eee9d4.dir
+      size: 66220
       nfiles: 16
     params:
       params.yaml:
@@ -529,7 +529,7 @@ stages:
           prediction_horizon: 48
           lag_columns: dla_stromverbrauch_kwh:96
           tabular_covariate_columns: none
-          future_columns: none
+          future_columns: is_holiday:48
           fillna_columns: none
           fillna_value: 0.0
           fillna_noise_type: lognormal
@@ -539,8 +539,8 @@ stages:
           prediction_horizon: 48
           lag_columns: ofen_g_koks_kg:96
           tabular_covariate_columns: none
-          future_columns: ofen_metall_kg:48
-          fillna_columns: ofen_g_koks_kg,ofen_f_koks_kg
+          future_columns: is_holiday:48,ofen_metall_kg:48
+          fillna_columns: ofen_g_koks_kg,ofen_f_koks_kg,ofen_metall_kg
           fillna_value: 0.0
           fillna_noise_type: lognormal
           fillna_noise_scale: 0.005
@@ -549,8 +549,8 @@ stages:
           prediction_horizon: 48
           lag_columns: ofen_f_koks_kg:96
           tabular_covariate_columns: none
-          future_columns: ofen_metall_kg:48
-          fillna_columns: ofen_g_koks_kg,ofen_f_koks_kg
+          future_columns: is_holiday:48,ofen_metall_kg:48
+          fillna_columns: ofen_g_koks_kg,ofen_f_koks_kg,ofen_metall_kg
           fillna_value: 0.0
           fillna_noise_type: lognormal
           fillna_noise_scale: 0.005
@@ -559,44 +559,68 @@ stages:
           prediction_horizon: 48
           lag_columns: pl2_stromverbrauch_kwh:96
           tabular_covariate_columns: none
-          future_columns: none
+          future_columns: is_holiday:48
           fillna_columns: none
           fillna_value: 0.0
           fillna_noise_type: lognormal
           fillna_noise_scale: 0.0
     outs:
-    - path: results/ofen_g_koks/data_description/correlation_train.pdf
+    - path: results/ofen_g_koks/data_description/correlation_features_train.pdf
       hash: md5
-      md5: 72e9bd79718ae0f336de178144eba5f1
-      size: 71969
-    - path: results/ofen_g_koks/data_description/correlation_val.pdf
+      md5: 8bdca421cd5bc0ebeb5faaf98383670f
+      size: 288651
+    - path: results/ofen_g_koks/data_description/correlation_features_val.pdf
       hash: md5
-      md5: 8dd0c8159bbc3ac59bbd3ff1b1e0f2e5
-      size: 80664
-    - path: results/ofen_g_koks/data_description/histograms_train.pdf
+      md5: a2acc0e5c74d125fbbc35ba6d8908150
+      size: 298343
+    - path: results/ofen_g_koks/data_description/correlation_targets_train.pdf
       hash: md5
-      md5: aa92c63a410839bc95c5d311a5898fd8
-      size: 41949
-    - path: results/ofen_g_koks/data_description/histograms_val.pdf
+      md5: 9b0afbf6192fd0d00ad6918417ba10ca
+      size: 32569
+    - path: results/ofen_g_koks/data_description/correlation_targets_val.pdf
       hash: md5
-      md5: cb7353d2e8385568e2b3254f17823f49
-      size: 40202
+      md5: 6f3d9b4a128a6347ab9ee6722266b8d9
+      size: 31847
+    - path: results/ofen_g_koks/data_description/histograms_features_train.pdf
+      hash: md5
+      md5: acb2eb953af36622b92c2628f540fe86
+      size: 226413
+    - path: results/ofen_g_koks/data_description/histograms_features_val.pdf
+      hash: md5
+      md5: ea45e61cd821c1b4c71e71b580250cdf
+      size: 252854
+    - path: results/ofen_g_koks/data_description/histograms_targets_train.pdf
+      hash: md5
+      md5: 5ca45ca0a2bfee9bf4fc90c69e7db69a
+      size: 64359
+    - path: results/ofen_g_koks/data_description/histograms_targets_val.pdf
+      hash: md5
+      md5: 34995eb98969f097736c7ec0c5c21195
+      size: 63214
     - path: results/ofen_g_koks/data_description/statistics_train.yaml
       hash: md5
-      md5: 6e95cdaadca0d2455fc2e2679eee61e7
-      size: 34335
+      md5: 138badf5a54c387ba3feb6847404008e
+      size: 35879
     - path: results/ofen_g_koks/data_description/statistics_val.yaml
       hash: md5
-      md5: 511c2d88b45b822bdc6b2e1d73f0e97a
-      size: 34052
-    - path: results/ofen_g_koks/data_description/timeseries_train.pdf
+      md5: f8ef1ad90ee3eb25f5d0d94f0a7382ef
+      size: 36028
+    - path: results/ofen_g_koks/data_description/timeseries_features_train.pdf
       hash: md5
-      md5: a8a9e5438f621500a5b0656dfb488ec0
-      size: 104546
-    - path: results/ofen_g_koks/data_description/timeseries_val.pdf
+      md5: 908a70de4fafa8c53b03ec552e227e16
+      size: 3975591
+    - path: results/ofen_g_koks/data_description/timeseries_features_val.pdf
       hash: md5
-      md5: a877827615607631438ec7184d0e50fa
-      size: 32370
+      md5: e1648fe1162953899f8b3934ea18078a
+      size: 2302703
+    - path: results/ofen_g_koks/data_description/timeseries_targets_train.pdf
+      hash: md5
+      md5: b3e46b1e85d8dc213d58dc55d1bb7f94
+      size: 1342882
+    - path: results/ofen_g_koks/data_description/timeseries_targets_val.pdf
+      hash: md5
+      md5: cc5f64a0fc3cdae2fe772dcf038d282c
+      size: 757717
   prepare@2:
     cmd: "python scripts/prepare_features.py --raw-data-path data/raw/norm_fondium_15_min_data_2023.csv
       --datetime-column new_time --tabular-covariate-columns 'none' --time-components

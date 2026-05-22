@@ -21,8 +21,6 @@ from dcp_nf_forecast.utils import read_dataframe, setup_logging, setup_plotting_
 
 logger = logging.getLogger(__name__)
 
-setup_plotting_style()
-
 
 def compute_statistics(
     x: np.ndarray,
@@ -275,6 +273,7 @@ def main() -> None:
     args = parser.parse_args()
 
     setup_logging(args.log_level, args.log_file)
+    setup_plotting_style()
     run_name = f"describe_{args.target_name}"
 
     processed_dir = Path(args.processed_dir)
