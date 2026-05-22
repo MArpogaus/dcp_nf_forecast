@@ -145,3 +145,13 @@ Results from MLflow after full pipeline re-run on updated data:
 | # | Date | Param change | min_val_loss | Δ | Commit | Status |
 |---|------|-------------|-------------|---|--------|--------|
 | 0 | 2026-05-22 | baseline (lr=0.001, nbins=12, h=[128,128]) | -156.61 | — | — | committed |
+| 1 | 2026-05-22 | learning_rate: 0.001→0.0005 | -156.61 | — | — | — | launched |
+| 1 | 2026-05-22 | learning_rate: 0.001→0.0005 | -156.61 | -155.53 | -1.08 | — | reverted |
+| 2 | 2026-05-22 | learning_rate: 0.001→0.003 | -156.61 | — | — | — | launched |
+| 2 | 2026-05-22 | learning_rate: 0.001→0.003 | -156.61 | -152.62 | -3.99 | — | reverted |
+| 3 | 2026-05-22 | schedule: constant→CosineDecay(lr=0.001) | -156.61 | — | — | — | launched |
+| 3 | 2026-05-22 | schedule: constant→CosineDecay(lr=0.001) | -156.61 | -153.74 | -2.87 | — | reverted |
+| 4 | 2026-05-22 | nbins: 12→8 (params: 36→24) | -156.61 | — | — | — | launched |
+| 4 | 2026-05-22 | nbins: 12→8 (params: 36→24) | -156.61 | -154.27 | -2.34 | — | reverted |
+| 5 | 2026-05-22 | nbins: 12→16 (params: 36→48) | -156.61 | — | — | — | launched |
+| 5 | 2026-05-22 | nbins: 12→16 (params: 36→48) | -156.61 | -154.75 | -1.86 | — | reverted |

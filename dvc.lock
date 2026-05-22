@@ -460,7 +460,7 @@ stages:
           num_layers: 1
           base_distribution_kwargs:
             distribution_name: normal
-          num_parameters: 36
+          num_parameters: 48
           parameters_fn_kwargs:
             activation: relu
             hidden_units:
@@ -482,7 +482,7 @@ stages:
               parameter_shape:
               - 48
           - bijector: RationalQuadraticSpline
-            parameters_slice_size: 35
+            parameters_slice_size: 47
             bijector_kwargs:
               range_min: -4
             invert: true
@@ -492,7 +492,7 @@ stages:
               interval_width: 8
               min_slope: 0.001
               min_bin_width: 0.001
-              nbins: 12
+              nbins: 16
             parameters_fn: parameter_vector_or_simple_network
             parameters_fn_kwargs:
               activation: relu
@@ -504,19 +504,19 @@ stages:
               - 128
               parameter_shape:
               - 48
-              - 35
+              - 47
     outs:
     - path: results/dla/spline_nf_scale/metrics.yaml
       hash: md5
-      md5: ab02087716809d7c9806fa90f053e0a5
-      size: 148
+      md5: bc32235e9cb53ed67d6527f4d33fe824
+      size: 150
     - path: results/dla/spline_nf_scale/model_weights.h5
       hash: md5
-      md5: ed45855c88e53d7d1f5a1f6aa6eea683
-      size: 2192560
+      md5: 61eeb8a1bac18d9f4cf1d136def7748e
+      size: 2786992
     - path: results/dla/spline_nf_scale/parent_run_id.txt
       hash: md5
-      md5: 5d10f7f5449ed2b87d22b95a03c5abd1
+      md5: efa06928f812af49d1c5da81affc8c6a
       size: 32
   train@dataset0-lognormal_baseline:
     cmd: "python scripts/train.py --model lognormal_baseline --stage-name train@dataset0-lognormal_baseline
