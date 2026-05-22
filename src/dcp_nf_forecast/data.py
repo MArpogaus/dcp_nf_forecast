@@ -385,16 +385,19 @@ def build_features_and_target(
         df = add_holiday_indicator(df, holiday_country)
         __LOGGER__.info("Holiday indicator added for '%s'", holiday_country)
     parts: list[pd.DataFrame] = [encode_time_features(df, time_components)]
+    if holiday_country is not None:
+        parts.append(df[["is_holiday"]])
     lag_df = create_lag_features(df, column_lags)
     if not lag_df.empty:
         parts.append(lag_df)
-    lead_df = _create_lead_features(df, column_leads or {})
+    all_leads = dict(column_leads or {})
+    if holiday_country is not None:
+        all_leads.setdefault("is_holiday", prediction_horizon)
+    lead_df = _create_lead_features(df, all_leads)
     if not lead_df.empty:
         parts.append(lead_df)
     if tabular_covariate_columns:
         parts.append(_parse_tabular_with_offset(tabular_covariate_columns, df))
-    if holiday_country is not None:
-        parts.append(df[["is_holiday"]])
     df_x = pd.concat(parts, axis=1)
     df_y = build_target(df, target_column, prediction_horizon)
     n_before = len(df_x)
