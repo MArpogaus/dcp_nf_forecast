@@ -27,6 +27,8 @@ setup_plotting_style()
 def compute_statistics(
     x: np.ndarray,
     y: np.ndarray,
+    x_colnames: list[str] | None = None,
+    y_colnames: list[str] | None = None,
 ) -> dict:
     """Compute descriptive statistics for feature and target arrays.
 
@@ -36,6 +38,10 @@ def compute_statistics(
         Feature matrix.
     y : np.ndarray
         Target matrix.
+    x_colnames : list[str] | None, optional
+        Column names for features, by default ``None``.
+    y_colnames : list[str] | None, optional
+        Column names for targets, by default ``None``.
 
     Returns
     -------
@@ -49,9 +55,10 @@ def compute_statistics(
 
     columns: list[dict] = []
     for i, col in enumerate(x.T):
+        name = x_colnames[i] if x_colnames else f"x_{i}"
         columns.append(
             {
-                "name": f"x_{i}",
+                "name": name,
                 "role": "feature",
                 "mean": round(float(np.mean(col)), 6),
                 "std": round(float(np.std(col)), 6),
@@ -63,9 +70,10 @@ def compute_statistics(
             }
         )
     for i, col in enumerate(y.T):
+        name = y_colnames[i] if y_colnames else f"y_{i}"
         columns.append(
             {
-                "name": f"y_{i}",
+                "name": name,
                 "role": "target",
                 "mean": round(float(np.mean(col)), 6),
                 "std": round(float(np.std(col)), 6),
@@ -85,24 +93,90 @@ def compute_statistics(
     }
 
 
-def plot_histograms(
-    x: np.ndarray,
-    y: np.ndarray,
+def _plot_column_grid(
+    data: np.ndarray,
+    plot_fn: callable,
+    colnames: list[str] | None = None,
     title: str = "",
-    max_cols: int = 20,
+    n_cols: int = 6,
+    figsize_scale: tuple[float, float] = (2, 1.8),
+    sharex: bool = False,
 ) -> plt.Figure:
-    """Plot histograms for each column in the combined feature-target array.
+    """Plot a grid of per-column plots.
 
     Parameters
     ----------
-    x : np.ndarray
-        Feature matrix.
-    y : np.ndarray
-        Target matrix.
+    data : np.ndarray
+        2D array (samples × columns).
+    plot_fn : callable
+        Function ``plot_fn(ax, values)`` to draw on each subplot.
+    colnames : list[str] | None, optional
+        Column names, by default ``None``.
     title : str, optional
         Plot title suffix, by default ``""``.
-    max_cols : int, optional
-        Maximum number of columns to plot, by default ``20``.
+    n_cols : int, optional
+        Number of columns per row, by default ``6``.
+    figsize_scale : tuple[float, float], optional
+        (width, height) per subplot cell, by default ``(2, 1.8)``.
+    sharex : bool, optional
+        Whether subplots share the x-axis, by default ``False``.
+
+    Returns
+    -------
+    plt.Figure
+        The grid figure.
+
+    """
+    n_plot = data.shape[1]
+    plot_cols = min(n_cols, n_plot)
+    plot_rows = max(1, int(np.ceil(n_plot / plot_cols)))
+    fig, axes = plt.subplots(
+        plot_rows,
+        plot_cols,
+        figsize=(plot_cols * figsize_scale[0], plot_rows * figsize_scale[1]),
+        sharex=sharex,
+    )
+    axes = axes.flatten() if n_plot > 1 else [axes]
+
+    for i in range(n_plot):
+        plot_fn(axes[i], data[:, i])
+        name = colnames[i] if colnames else f"Col {i}"
+        axes[i].set_title(name, fontsize=7)
+        axes[i].tick_params(labelsize=6)
+
+    for j in range(n_plot, len(axes)):
+        axes[j].set_visible(False)
+
+    fig.suptitle(title, fontsize=10)
+    fig.tight_layout()
+    return fig
+
+
+def _plot_histogram(ax: plt.Axes, values: np.ndarray) -> None:
+    """Draw a histogram on *ax*."""
+    ax.hist(values, bins=50, color="steelblue", alpha=0.7, edgecolor="white")
+
+
+def _plot_timeseries(ax: plt.Axes, values: np.ndarray) -> None:
+    """Draw a line plot on *ax*."""
+    ax.plot(values, linewidth=0.3, color="steelblue")
+
+
+def plot_histograms(
+    data: np.ndarray,
+    colnames: list[str] | None = None,
+    title: str = "",
+) -> plt.Figure:
+    """Plot histograms for each column.
+
+    Parameters
+    ----------
+    data : np.ndarray
+        2D array (samples × columns).
+    colnames : list[str] | None, optional
+        Column names, by default ``None``.
+    title : str, optional
+        Plot title suffix, by default ``""``.
 
     Returns
     -------
@@ -110,48 +184,26 @@ def plot_histograms(
         The histogram grid figure.
 
     """
-    combined = np.concatenate([x, y], axis=1)
-    n_cols_plot = min(combined.shape[1], max_cols)
-    plot_cols = min(4, n_cols_plot)
-    plot_rows = int(np.ceil(n_cols_plot / plot_cols))
-    fig, axes = plt.subplots(
-        plot_rows, plot_cols, figsize=(plot_cols * 3, plot_rows * 2.5)
+    return _plot_column_grid(
+        data, _plot_histogram, colnames, title=f"Histograms – {title}"
     )
-    axes = axes.flatten() if n_cols_plot > 1 else [axes]
-
-    for i in range(n_cols_plot):
-        axes[i].hist(
-            combined[:, i], bins=50, color="steelblue", alpha=0.7, edgecolor="white"
-        )
-        axes[i].set_title(f"Col {i}", fontsize=8)
-        axes[i].tick_params(labelsize=7)
-
-    for j in range(n_cols_plot, len(axes)):
-        axes[j].set_visible(False)
-
-    fig.suptitle(f"Histograms – {title}", fontsize=12)
-    fig.tight_layout()
-    return fig
 
 
 def plot_timeseries(
-    x: np.ndarray,
-    y: np.ndarray,
+    data: np.ndarray,
+    colnames: list[str] | None = None,
     title: str = "",
-    max_cols: int = 10,
 ) -> plt.Figure:
     """Plot time series line plots for each column.
 
     Parameters
     ----------
-    x : np.ndarray
-        Feature matrix.
-    y : np.ndarray
-        Target matrix.
+    data : np.ndarray
+        2D array (samples × columns).
+    colnames : list[str] | None, optional
+        Column names, by default ``None``.
     title : str, optional
         Plot title suffix, by default ``""``.
-    max_cols : int, optional
-        Maximum number of columns to plot, by default ``10``.
 
     Returns
     -------
@@ -159,42 +211,30 @@ def plot_timeseries(
         The time series grid figure.
 
     """
-    combined = np.concatenate([x, y], axis=1)
-    n_plot = combined.shape[1] if max_cols <= 0 else min(combined.shape[1], max_cols)
-    plot_cols = min(3, n_plot)
-    plot_rows = int(np.ceil(n_plot / plot_cols))
-    fig, axes = plt.subplots(
-        plot_rows, plot_cols, figsize=(plot_cols * 4, plot_rows * 2.5), sharex=True
+    fig = _plot_column_grid(
+        data,
+        _plot_timeseries,
+        colnames,
+        title=f"Time Series – {title}",
+        sharex=True,
     )
-    axes = axes.flatten() if n_plot > 1 else [axes]
-
-    for i in range(n_plot):
-        axes[i].plot(combined[:, i], linewidth=0.5, color="steelblue")
-        axes[i].set_title(f"Col {i}", fontsize=8)
-        axes[i].tick_params(labelsize=7)
-
-    for j in range(n_plot, len(axes)):
-        axes[j].set_visible(False)
-
-    fig.suptitle(f"Time Series – {title}", fontsize=12)
-    fig.supxlabel("Row index")
-    fig.tight_layout()
+    fig.supxlabel("Row index", fontsize=8)
     return fig
 
 
 def plot_correlation_matrix(
-    x: np.ndarray,
-    y: np.ndarray,
+    data: np.ndarray,
+    colnames: list[str] | None = None,
     title: str = "",
 ) -> plt.Figure:
-    """Plot a correlation matrix heatmap for the combined feature-target array.
+    """Plot a correlation matrix heatmap.
 
     Parameters
     ----------
-    x : np.ndarray
-        Feature matrix.
-    y : np.ndarray
-        Target matrix.
+    data : np.ndarray
+        2D array (samples × columns).
+    colnames : list[str] | None, optional
+        Column names for tick labels, by default ``None``.
     title : str, optional
         Plot title suffix, by default ``""``.
 
@@ -204,13 +244,20 @@ def plot_correlation_matrix(
         The correlation matrix figure.
 
     """
-    combined = np.concatenate([x, y], axis=1)
-    corr = np.corrcoef(combined.T)
-    fig, ax = plt.subplots(figsize=(6, 5))
+    corr = np.corrcoef(data.T)
+    n = data.shape[1]
+    figsize = (max(6, n * 0.12), max(5, n * 0.12))
+    fig, ax = plt.subplots(figsize=figsize)
     im = ax.imshow(corr, cmap="RdBu_r", vmin=-1, vmax=1, aspect="equal")
-    ax.set_title(f"Correlation Matrix – {title}", fontsize=12)
+    ax.set_title(f"Correlation Matrix – {title}", fontsize=10)
     fig.colorbar(im, ax=ax, shrink=0.8)
-    ax.tick_params(labelsize=6)
+    if colnames:
+        ax.set_xticks(range(n))
+        ax.set_yticks(range(n))
+        ax.set_xticklabels(colnames, fontsize=4, rotation=90)
+        ax.set_yticklabels(colnames, fontsize=4)
+    else:
+        ax.tick_params(labelsize=6)
     fig.tight_layout()
     return fig
 
@@ -243,9 +290,11 @@ def main() -> None:
             y = read_dataframe(processed_dir / f"y_{split_name}", args.data_format)
             x_arr = np.array(x)
             y_arr = np.array(y)
+            x_colnames = list(x.columns)
+            y_colnames = list(y.columns)
             logger.info("  X=%s y=%s", x_arr.shape, y_arr.shape)
 
-            stats = compute_statistics(x_arr, y_arr)
+            stats = compute_statistics(x_arr, y_arr, x_colnames, y_colnames)
             stats["split"] = split_name
             stats_path = out_dir / f"statistics_{split_name}.yaml"
             with open(stats_path, "w") as f:
@@ -260,63 +309,77 @@ def main() -> None:
             )
             logger.info("  Statistics saved to %s", stats_path)
 
-            logger.info("  Generating histograms ...")
-            fig = plot_histograms(
-                x_arr,
-                y_arr,
-                title=f"{args.target_name} – {split_name}",
-            )
-            log_and_save_figure(
-                fig, str(out_dir), f"histograms_{split_name}", "pdf", dpi=300
-            )
-            log_and_save_figure(
-                fig, str(out_dir), f"histograms_{split_name}", "png", dpi=150
-            )
-            plt.close(fig)
+            for prefix, arr, cnames in (
+                ("features", x_arr, x_colnames),
+                ("targets", y_arr, y_colnames),
+            ):
+                tag = f"{prefix}_{split_name}"
 
-            logger.info("  Generating time series plot ...")
-            fig = plot_timeseries(
-                x_arr,
-                y_arr,
-                title=f"{args.target_name} – {split_name}",
-            )
-            log_and_save_figure(
-                fig,
-                str(out_dir),
-                f"timeseries_{split_name}",
-                "pdf",
-                dpi=300,
-            )
-            log_and_save_figure(
-                fig,
-                str(out_dir),
-                f"timeseries_{split_name}",
-                "png",
-                dpi=150,
-            )
-            plt.close(fig)
+                logger.info("  Generating %s histograms ...", prefix)
+                fig = plot_histograms(
+                    arr,
+                    colnames=cnames,
+                    title=f"{args.target_name} – {tag}",
+                )
+                log_and_save_figure(
+                    fig,
+                    str(out_dir),
+                    f"histograms_{tag}",
+                    "pdf",
+                    dpi=300,
+                )
+                log_and_save_figure(
+                    fig,
+                    str(out_dir),
+                    f"histograms_{tag}",
+                    "png",
+                    dpi=150,
+                )
+                plt.close(fig)
 
-            logger.info("  Generating correlation matrix ...")
-            fig = plot_correlation_matrix(
-                x_arr,
-                y_arr,
-                title=f"{args.target_name} – {split_name}",
-            )
-            log_and_save_figure(
-                fig,
-                str(out_dir),
-                f"correlation_{split_name}",
-                "pdf",
-                dpi=300,
-            )
-            log_and_save_figure(
-                fig,
-                str(out_dir),
-                f"correlation_{split_name}",
-                "png",
-                dpi=150,
-            )
-            plt.close(fig)
+                logger.info("  Generating %s time series plot ...", prefix)
+                fig = plot_timeseries(
+                    arr,
+                    colnames=cnames,
+                    title=f"{args.target_name} – {tag}",
+                )
+                log_and_save_figure(
+                    fig,
+                    str(out_dir),
+                    f"timeseries_{tag}",
+                    "pdf",
+                    dpi=300,
+                )
+                log_and_save_figure(
+                    fig,
+                    str(out_dir),
+                    f"timeseries_{tag}",
+                    "png",
+                    dpi=150,
+                )
+                plt.close(fig)
+
+                logger.info("  Generating %s correlation matrix ...", prefix)
+                fig = plot_correlation_matrix(
+                    arr,
+                    colnames=cnames,
+                    title=f"{args.target_name} – {tag}",
+                )
+                log_and_save_figure(
+                    fig,
+                    str(out_dir),
+                    f"correlation_{tag}",
+                    "pdf",
+                    dpi=300,
+                )
+                log_and_save_figure(
+                    fig,
+                    str(out_dir),
+                    f"correlation_{tag}",
+                    "png",
+                    dpi=150,
+                )
+                plt.close(fig)
 
         mlflow.log_artifacts(str(out_dir))
 
