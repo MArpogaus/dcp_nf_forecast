@@ -3,11 +3,7 @@
 import argparse
 from pathlib import Path
 
-from dcp_nf_forecast.data import (
-    build_features_and_target,
-    load_raw_data,
-    validate_data,
-)
+from dcp_nf_forecast.data import build_features_and_target, load_raw_data
 from dcp_nf_forecast.utils import save_dataframe, setup_logging
 
 
@@ -42,7 +38,6 @@ def main() -> None:
     )
     parser.add_argument("--raw-data-path", required=True, type=str)
     parser.add_argument("--datetime-column", required=True, type=str)
-    parser.add_argument("--fillna-method", required=True, type=str)
     parser.add_argument("--tabular-covariate-columns", required=True, type=str)
     parser.add_argument("--time-components", required=True, type=str)
     parser.add_argument("--target-name", required=True, type=str)
@@ -53,14 +48,25 @@ def main() -> None:
     parser.add_argument("--data-format", required=True, type=str)
     parser.add_argument("--log-level", required=True, type=str)
     parser.add_argument("--log-file", required=True, type=str)
+    parser.add_argument("--holiday-country", type=str, default=None)
+    parser.add_argument("--end-date", type=str, default=None)
     args = parser.parse_args()
 
     logger = setup_logging(args.log_level, args.log_file)
 
+    end_date = (
+        args.end_date if args.end_date and args.end_date.lower() != "none" else None
+    )
+    holiday_country = (
+        args.holiday_country
+        if args.holiday_country and args.holiday_country.lower() != "none"
+        else None
+    )
+
     df = load_raw_data(
         raw_data_path=args.raw_data_path,
         datetime_column=args.datetime_column,
-        fillna_method=args.fillna_method,
+        end_date=end_date,
     )
     logger.info("Loaded %d rows with columns %s", len(df), list(df.columns))
 
@@ -82,10 +88,9 @@ def main() -> None:
         column_lags=lag_cols,
         target_column=args.y_column,
         prediction_horizon=args.prediction_horizon,
+        holiday_country=holiday_country,
     )
     logger.info("X shape: %s, Y shape: %s", df_x.shape, df_y.shape)
-
-    validate_data(df_x, df_y)
 
     out = Path(args.output_dir)
     out.mkdir(parents=True, exist_ok=True)

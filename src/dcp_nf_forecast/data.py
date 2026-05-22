@@ -1,11 +1,22 @@
+import logging
+
+import holidays as _holidays
 import numpy as np
 import pandas as pd
+
+__LOGGER__ = logging.getLogger(__name__)
+
+
+def _parse_date(s: str) -> pd.Timestamp | None:
+    if not s or s.strip().lower() in ("none", ""):
+        return None
+    return pd.Timestamp(s)
 
 
 def load_raw_data(
     raw_data_path: str,
     datetime_column: str,
-    fillna_method: str,
+    end_date: str | None = None,
 ) -> pd.DataFrame:
     """Load raw CSV data into a DataFrame with a datetime index.
 
@@ -15,27 +26,20 @@ def load_raw_data(
         Path to the CSV file.
     datetime_column : str
         Name of the column containing datetime strings.
-    fillna_method : str
-        Method for filling NaN values (e.g. ``"ffill"``).
+    end_date : str | None, optional
+        Optional end date filter (inclusive).  Rows after this date are
+        dropped.  Pass ``None`` or ``"none"`` to keep all data.
 
     Returns
     -------
     pd.DataFrame
-        Data indexed by the parsed datetime column, with NaNs filled.
-
-    Raises
-    ------
-    ValueError
-        If any NaN values remain after filling.
+        Data indexed by the parsed datetime column.
     """
     df = pd.read_csv(raw_data_path, parse_dates=[datetime_column])
     df = df.set_index(datetime_column)
-    if fillna_method == "ffill":
-        df = df.ffill()
-    df = df.bfill()
-    nan_count = int(df.isnull().sum().sum())
-    if nan_count > 0:
-        raise ValueError(f"Found {nan_count} NaNs after filling - data has gaps")
+    end = _parse_date(end_date)
+    if end is not None:
+        df = df[df.index <= end]  # type: ignore[index]
     return df
 
 
@@ -184,6 +188,25 @@ def build_target(
     return pd.concat(frames, axis=1)
 
 
+def add_holiday_indicator(
+    df: pd.DataFrame,
+    country: str,
+) -> pd.DataFrame:
+    years = set(df.index.year)  # type: ignore[attr-defined]
+    parts = country.upper().split("-")
+    country_code = parts[0]
+    state_code = parts[1] if len(parts) > 1 else None
+    cls = getattr(_holidays, country_code)
+    kwargs: dict = {"years": years}
+    if state_code:
+        kwargs["state"] = state_code
+    cal = cls(**kwargs)
+    is_holiday = pd.Series(df.index.isin(cal), index=df.index, dtype=int)  # type: ignore[arg-type]
+    df_out = df.copy()
+    df_out["is_holiday"] = is_holiday
+    return df_out
+
+
 def build_features_and_target(
     df: pd.DataFrame,
     tabular_covariate_columns: list[str],
@@ -191,12 +214,14 @@ def build_features_and_target(
     column_lags: dict[str, int],
     target_column: str,
     prediction_horizon: int,
+    holiday_country: str | None = None,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Assemble the feature matrix X and target matrix Y.
 
-    X is formed by concatenating time features, lag features, and tabular
-    covariates.  Y contains the future values of the target column.  Rows
-    that contain ``NaN`` from lag or shift operations are dropped.
+    X is formed by concatenating time features, lag features, tabular
+    covariates, and optionally a holiday indicator.  Y contains the future
+    values of the target column.  Rows that contain ``NaN`` from lag or
+    shift operations are dropped (counted and logged).
 
     Parameters
     ----------
@@ -212,6 +237,8 @@ def build_features_and_target(
         Column to predict.
     prediction_horizon : int
         Number of future steps to predict.
+    holiday_country : str | None, optional
+        ISO country code for holiday indicator (e.g. ``"DE-BW"``).
 
     Returns
     -------
@@ -220,15 +247,29 @@ def build_features_and_target(
         of the original index after dropping leading and trailing ``NaN``
         rows from lag and shift operations.
     """
+    if holiday_country is not None:
+        df = add_holiday_indicator(df, holiday_country)
+        __LOGGER__.info("Holiday indicator added for '%s'", holiday_country)
     parts: list[pd.DataFrame] = [encode_time_features(df, time_components)]
     lag_df = create_lag_features(df, column_lags)
     if not lag_df.empty:
         parts.append(lag_df)
     if tabular_covariate_columns:
         parts.append(df[tabular_covariate_columns])
+    if holiday_country is not None:
+        parts.append(df[["is_holiday"]])
     df_x = pd.concat(parts, axis=1)
     df_y = build_target(df, target_column, prediction_horizon)
+    n_before = len(df_x)
     mask = df_x.notna().all(axis=1) & df_y.notna().all(axis=1)
+    n_nan = int((~mask).sum())
+    if n_nan > 0:
+        __LOGGER__.info(
+            "Dropped %d / %d rows with NaNs (%.1f%%)",
+            n_nan,
+            n_before,
+            100.0 * n_nan / n_before,
+        )
     return df_x[mask], df_y[mask]
 
 

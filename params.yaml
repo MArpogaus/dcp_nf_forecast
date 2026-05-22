@@ -5,16 +5,17 @@ seed: 42
 test_mode: false
 
 paths:
-  raw_data: ../dcp/norm_data/norm_fondium_15_min_data_2023.csv
+  raw_data: data/raw/norm_fondium_15_min_data_2023.csv
   data_interim: data/interim
   data_processed: data/processed
 
 data:
   datetime_column: new_time
   data_format: feather
-  fillna_method: ffill
   tabular_covariate_columns: none
   time_components: time,day_of_week,day_of_year
+  holiday_country: none
+  end_date: '2023-10-31'
 
 eval:
   n_samples: 200

@@ -20,13 +20,10 @@ from hybrid_flows.utils.mlflow import (
     start_run_with_exception_logging,
 )
 from matplotlib.figure import Figure
-from probabilistic_forecast_validation import (
-    plot_pit_histogram,
-    plot_qq,
-)
 
 from dcp_nf_forecast.models import build_model
 from dcp_nf_forecast.utils import load_data, setup_logging
+from dcp_nf_forecast.validation import plot_pit_histogram, plot_qq
 
 logger = logging.getLogger(__name__)
 

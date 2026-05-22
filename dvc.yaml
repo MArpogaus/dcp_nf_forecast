@@ -36,7 +36,6 @@ stages:
         python scripts/prepare_features.py
         --raw-data-path ${paths.raw_data}
         --datetime-column ${data.datetime_column}
-        --fillna-method ${data.fillna_method}
         --tabular-covariate-columns ${data.tabular_covariate_columns}
         --time-components ${data.time_components}
         --target-name ${item.name}
@@ -47,6 +46,8 @@ stages:
         --data-format ${data.data_format}
         --log-level ${log_level}
         --log-file ${log_file}
+        --holiday-country ${data.holiday_country}
+        --end-date ${data.end_date}
       deps:
       - scripts/prepare_features.py
       - src/dcp_nf_forecast/
@@ -55,10 +56,11 @@ stages:
       - paths.raw_data
       - paths.data_interim
       - data.datetime_column
-      - data.fillna_method
       - data.tabular_covariate_columns
       - data.data_format
       - data.time_components
+      - data.holiday_country
+      - data.end_date
       - targets
       - log_level
       - log_file
