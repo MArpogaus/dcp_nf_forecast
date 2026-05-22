@@ -14,9 +14,7 @@ model_kwargs:
   distribution: multivariate_normal
   parameters_fn_kwargs:
     activation: relu
-    batch_norm: false
     conditional: true
-    dropout: 0
     hidden_units:
     - 128
     - 128

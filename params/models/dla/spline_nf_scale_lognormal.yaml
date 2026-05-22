@@ -28,8 +28,6 @@ model_kwargs:
     parameters_fn_kwargs:
       activation: relu
       conditional: true
-      dropout: false
-      batch_norm: false
       hidden_units:
       - 128
       - 128
@@ -50,8 +48,6 @@ model_kwargs:
     parameters_fn_kwargs:
       activation: relu
       conditional: true
-      dropout: false
-      batch_norm: false
       hidden_units:
       - 128
       - 128

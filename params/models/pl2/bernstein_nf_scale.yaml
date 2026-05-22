@@ -16,8 +16,6 @@ model_kwargs:
     hidden_units:
     - 128
     - 128
-    dropout: 0.1
-    batch_norm: true
   nested_bijectors:
   - bijector: Scale
     parameters_slice_size: 1
@@ -26,8 +24,6 @@ model_kwargs:
     parameters_fn_kwargs:
       activation: relu
       conditional: true
-      dropout: 0.1
-      batch_norm: true
       hidden_units:
       - 128
       - 128
@@ -51,8 +47,6 @@ model_kwargs:
     parameters_fn_kwargs:
       activation: relu
       conditional: true
-      dropout: 0.1
-      batch_norm: true
       hidden_units:
       - 128
       - 128
