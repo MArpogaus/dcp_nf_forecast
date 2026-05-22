@@ -1,34 +1,4 @@
 stages:
-  describe:
-    foreach: ${targets}
-    do:
-      cmd: >
-        python scripts/describe_data.py
-        --processed-dir ${paths.data_processed}/${item.name}
-        --target-name ${item.name}
-        --data-format ${data.data_format}
-        --log-level ${log_level}
-        --log-file ${log_file}
-      deps:
-      - scripts/describe_data.py
-      - src/dcp_nf_forecast/
-      - data/processed/${item.name}/
-      params:
-      - paths.data_processed
-      - data.data_format
-      - targets
-      - log_level
-      - log_file
-      outs:
-      - results/${item.name}/data_description/statistics_train.yaml
-      - results/${item.name}/data_description/statistics_val.yaml
-      - results/${item.name}/data_description/histograms_train.pdf
-      - results/${item.name}/data_description/histograms_val.pdf
-      - results/${item.name}/data_description/timeseries_train.pdf
-      - results/${item.name}/data_description/timeseries_val.pdf
-      - results/${item.name}/data_description/correlation_train.pdf
-      - results/${item.name}/data_description/correlation_val.pdf
-
   prepare:
     foreach: ${targets}
     do:
@@ -103,6 +73,36 @@ stages:
       - data/processed/${item.name}/y_val.feather
       - data/processed/${item.name}/X_test.feather
       - data/processed/${item.name}/y_test.feather
+
+  describe:
+    foreach: ${targets}
+    do:
+      cmd: >
+        python scripts/describe_data.py
+        --processed-dir ${paths.data_processed}/${item.name}
+        --target-name ${item.name}
+        --data-format ${data.data_format}
+        --log-level ${log_level}
+        --log-file ${log_file}
+      deps:
+      - scripts/describe_data.py
+      - src/dcp_nf_forecast/
+      - data/processed/${item.name}/
+      params:
+      - paths.data_processed
+      - data.data_format
+      - targets
+      - log_level
+      - log_file
+      outs:
+      - results/${item.name}/data_description/statistics_train.yaml
+      - results/${item.name}/data_description/statistics_val.yaml
+      - results/${item.name}/data_description/histograms_train.pdf
+      - results/${item.name}/data_description/histograms_val.pdf
+      - results/${item.name}/data_description/timeseries_train.pdf
+      - results/${item.name}/data_description/timeseries_val.pdf
+      - results/${item.name}/data_description/correlation_train.pdf
+      - results/${item.name}/data_description/correlation_val.pdf
 
   train:
     matrix:
