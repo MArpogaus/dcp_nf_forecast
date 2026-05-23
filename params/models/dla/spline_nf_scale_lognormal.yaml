@@ -23,8 +23,8 @@ model_kwargs:
       conditional: true
       dropout: 0
       hidden_units:
-      - 128
-      - 128
+      - 256
+      - 256
       parameter_shape:
       - 48
     parameters_slice_size: 1
@@ -45,8 +45,8 @@ model_kwargs:
       conditional: true
       dropout: 0
       hidden_units:
-      - 128
-      - 128
+      - 256
+      - 256
       parameter_shape:
       - 48
       - 23
