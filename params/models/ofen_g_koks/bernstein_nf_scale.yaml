@@ -1,59 +1,59 @@
 compile_kwargs: {}
 fit_kwargs:
-  epochs: 200
-  learning_rate: 0.0005
   batch_size: 256
-  early_stopping_patience: 10
+  early_stopping_patience: 20
+  epochs: 400
+  learning_rate: 0.0005
   verbose: true
 model_kwargs:
-  distribution: masked_autoregressive_flow
-  num_layers: 1
   base_distribution_kwargs:
     distribution_name: normal
-  num_parameters: 9
-  parameters_fn_kwargs:
-    activation: relu
-    hidden_units:
-    - 128
-    - 128
+  distribution: masked_autoregressive_flow
   nested_bijectors:
   - bijector: Scale
-    parameters_slice_size: 1
     parameters_constraint_fn: tensorflow.math.softplus
     parameters_fn: parameter_vector_or_simple_network
     parameters_fn_kwargs:
       activation: relu
+      batch_norm: false
       conditional: true
+      dropout: 0
       hidden_units:
-      - 128
-      - 128
+      - 256
+      - 256
       parameter_shape:
       - 48
-      dropout: 0
-      batch_norm: false
+    parameters_slice_size: 1
   - bijector: BernsteinPolynomial
-    parameters_slice_size: 8
     bijector_kwargs:
-      extrapolation: false
       domain:
       - 0.0
       - 1.0
+      extrapolation: false
     invert: true
     parameters_constraint_fn: hybrid_flows.activations.get_thetas_constrain_fn
     parameters_constraint_fn_kwargs:
       allow_flexible_bounds: false
       bounds: none
-      low: -5.0
       high: 5.0
+      low: -5.0
     parameters_fn: parameter_vector_or_simple_network
     parameters_fn_kwargs:
       activation: relu
+      batch_norm: false
       conditional: true
+      dropout: 0
       hidden_units:
-      - 128
-      - 128
+      - 256
+      - 256
       parameter_shape:
       - 48
       - 8
-      dropout: 0
-      batch_norm: false
+    parameters_slice_size: 8
+  num_layers: 1
+  num_parameters: 9
+  parameters_fn_kwargs:
+    activation: relu
+    hidden_units:
+    - 256
+    - 256
