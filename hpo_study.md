@@ -328,7 +328,7 @@ Key findings:
 | # | Date | Param change | Old val | New val | Δ | Commit | Status |
 | 1 | 2026-05-23 | epochs: 200→400, patience: 10→20 | -157.51 | **-159.39** | **+1.88** | f6333ca | ✅ completed, best_epoch=395 |
 | 2 | 2026-05-23 | lr: 0.0005→0.0003, rest gleich | -159.39 | -157.02 | -2.37 | ef014ca | ❌ regression, LR zu niedrig |
-| 3 | 2026-05-23 | h=[128,128]→[256,256], lr=0.0005 | -159.39 | — | — | — | launched |
+| 3 | 2026-05-23 | h=[128,128]→[256,256], lr=0.0005 | -159.39 | **-165.83** | **-6.44** | caaae42 | ✅ BEATS BASELINE! best_epoch=336 |
 
 ---
 
