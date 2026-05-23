@@ -20,9 +20,9 @@ stages:
       size: 5077
     - path: src/dcp_nf_forecast/
       hash: md5
-      md5: 015901d01c9cd40522ed25b7b1b81e03.dir
-      size: 57822
-      nfiles: 13
+      md5: 0967d27ef39b8f2aee8d7ea3a63fef58.dir
+      size: 66047
+      nfiles: 16
     params:
       params.yaml:
         data.data_format: feather
@@ -100,9 +100,9 @@ stages:
       size: 1858
     - path: src/dcp_nf_forecast/
       hash: md5
-      md5: 015901d01c9cd40522ed25b7b1b81e03.dir
-      size: 57822
-      nfiles: 13
+      md5: 0967d27ef39b8f2aee8d7ea3a63fef58.dir
+      size: 66047
+      nfiles: 16
     params:
       params.yaml:
         data.data_format: feather
@@ -154,9 +154,9 @@ stages:
       size: 5121
     - path: src/dcp_nf_forecast/
       hash: md5
-      md5: 015901d01c9cd40522ed25b7b1b81e03.dir
-      size: 57822
-      nfiles: 13
+      md5: 0967d27ef39b8f2aee8d7ea3a63fef58.dir
+      size: 66047
+      nfiles: 16
     params:
       params.yaml:
         data.data_format: feather
@@ -170,44 +170,45 @@ stages:
         compile_kwargs: {}
         fit_kwargs:
           batch_size: 256
-          early_stopping_patience: 10
-          epochs: 200
-          learning_rate: 0.0005
+          early_stopping_patience: 20
+          epochs: 400
+          learning_rate: 0.0003
+          max_epochs: 400
           verbose: true
         model_kwargs:
-          distribution: masked_autoregressive_flow
-          num_layers: 1
+          base_distribution_kwargs:
+            distribution_name: lognormal
           bijector: RationalQuadraticSpline
           bijector_kwargs:
             range_min: 0
-          base_distribution_kwargs:
-            distribution_name: lognormal
+          distribution: masked_autoregressive_flow
+          num_layers: 1
           num_parameters: 35
           parameters_constraint_fn: 
             hybrid_flows.activations.get_spline_param_constrain_fn
           parameters_constraint_fn_kwargs:
             interval_width: 8
-            min_slope: 0.001
             min_bin_width: 0.001
+            min_slope: 0.001
             nbins: 12
           parameters_fn_kwargs:
             activation: relu
+            conditional: true
             hidden_units:
             - 128
             - 128
-            conditional: true
     outs:
     - path: results/dla/spline_nf_lognormal/metrics.yaml
       hash: md5
-      md5: 392219bdd9a98e4f674178be5ca645b7
-      size: 153
+      md5: bda3976eeef7bb65154a840ae7707729
+      size: 154
     - path: results/dla/spline_nf_lognormal/model_weights.h5
       hash: md5
-      md5: 7d0cae0878405873a8baf993422d5383
+      md5: 023851d4da8361f2df462be5b276e863
       size: 974240
     - path: results/dla/spline_nf_lognormal/parent_run_id.txt
       hash: md5
-      md5: 78337e8f54ebf0542078fa7d4e40a0ed
+      md5: 6e5149ade518a18d49018fa17b8e48c7
       size: 32
   train@dataset0-normal_baseline:
     cmd: "python scripts/train.py --model normal_baseline --stage-name train@dataset0-normal_baseline

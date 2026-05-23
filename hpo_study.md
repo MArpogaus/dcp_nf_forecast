@@ -326,4 +326,45 @@ Key findings:
 
 **HPO log:**
 | # | Date | Param change | Old val | New val | Δ | Commit | Status |
-| 1 | 2026-05-23 | epochs: 200→400, patience: 10→20 | -157.51 | — | — | — | launched |
+| 1 | 2026-05-23 | epochs: 200→400, patience: 10→20 | -157.51 | **-159.39** | **+1.88** | f6333ca | ✅ completed, best_epoch=395 |
+| 2 | 2026-05-23 | lr: 0.0005 → 0.0003 | -159.39 | — | — | — | running (epoch 306/400) |
+
+---
+
+## Autonomous Monitoring & Handover Protocol
+
+### Strategy
+- **Monitoring:** `sleep 30–120s` loops checking `ps aux | grep "dvc repro"` and reading latest `val_loss` from training log.
+- **Completion detection:** When DVC process exits, wait 15s for final writes, then read `metrics.yaml`.
+- **Decision logic per model:**
+  1. If `min_val_loss` improved → log result, update `hpo_study.md`, commit, continue to next config in HPO plan.
+  2. If no improvement → revert config, try next hyperparameter.
+  3. If model's HPO plan exhausted → move to next DLA model.
+- **Plan progression:**
+  1. DLA: spline_nf_lognormal (LR sweep → capacity sweep → nbins sweep)
+  2. DLA: remaining 7 NF models (epochs 400 → LR sweep → capacity)
+  3. Export best configs to ofen_g_koks, ofen_f_koks, pl2
+  4. Full pipeline reproduce
+  5. Evaluate and possibly iterate on non-DLA targets if gaps exist
+
+### Commit after every completed run
+- `git add -A && git commit -m "hpo(dla): <model> iter<N> <param_change>: <old>→<new>"`
+- Push when convenient (not blocking)
+
+### Files
+| File | Purpose |
+|------|---------|
+| `/app/hpo_study.md` | Full HPO log, plans, decisions (THIS FILE) |
+| `/app/logs/hpo_iter*.log` | Training stdout per iteration |
+| `/app/logs/hpo_phase4_controller.log` | Controller monitoring output |
+| `/app/scripts/hpo_master_loop.py` | Python master loop (fallback) |
+| `/app/scripts/run_autonomous_hpo.sh` | Bash launcher template |
+| `/app/results/<target>/<model>/metrics.yaml` | Final metrics per run |
+
+### To resume after compact/handover:
+1. Read this file to see last completed iteration.
+2. Check `/app/results/dla/spline_nf_lognormal/metrics.yaml` for current best.
+3. Check if a training is running: `ps aux | grep "dvc repro"` or `ps aux | grep "train.py"`.
+4. If running: monitor with `sleep 30` loop reading val_loss from the iteration's log.
+5. If idle: check `hpo_study.md` HPO log for last completed line, continue from there.
+6. Decision rules: improvement → continue plan; plateau 5 iters → new strategy; beat baseline → export to other targets.
