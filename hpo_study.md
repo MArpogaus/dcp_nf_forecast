@@ -300,3 +300,30 @@ Key findings:
 1. First on best NF candidates: spline_nf_lognormal, spline_nf_scale
 2. Then on remaining models: bernstein_nf_scale, bernstein_nf_scale_lognormal
 3. Low priority (poor performers): bernstein_nf, bernstein_nf_lognormal, spline_nf, spline_nf_scale_lognormal
+
+---
+
+## HPO Phase 4a — DLA spline_nf_lognormal (best NF candidate)
+
+**Target:** Optimise spline_nf_lognormal on DLA. Gap to beat: -157.51 → -163.31 (lognormal_baseline).
+
+**Starting config:** `params/models/dla/spline_nf_lognormal.yaml`
+
+**Baseline:** lr=0.0005 const, nbins=12, h=[128,128], epochs=200, patience=10 → val_loss=-157.51
+
+**Search space (one param change per iteration):**
+| Order | Param | Current | Test values | Strategy |
+|-------|-------|---------|-------------|----------|
+| 1 | epochs/patience | 200/10 | 400/20 | More training budget |
+| 2 | hidden_units | [128,128] | [256,256] | More capacity |
+| 3 | learning_rate | 0.0005 | [3e-4, 1e-4, 1e-3] | Fine-tune |
+| 4 | nbins | 12 | [16, 24] | More spline flexibility |
+
+**Stopping criteria:**
+1. Target min_val_loss ≤ -163.31
+2. Plateau: 5 consecutive iterations without improvement
+3. Max iterations: 12
+
+**HPO log:**
+| # | Date | Param change | Old val | New val | Δ | Commit | Status |
+| 1 | 2026-05-23 | epochs: 200→400, patience: 10→20 | -157.51 | — | — | — | launched |

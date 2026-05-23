@@ -1,8 +1,8 @@
 compile_kwargs: {}
 fit_kwargs:
   batch_size: 256
-  early_stopping_patience: 10
-  epochs: 200
+  early_stopping_patience: 20
+  epochs: 400
   learning_rate: 0.0005
   verbose: true
 model_kwargs:
