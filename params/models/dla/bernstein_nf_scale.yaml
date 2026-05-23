@@ -48,10 +48,10 @@ model_kwargs:
       - 256
       parameter_shape:
       - 48
-      - 8
-    parameters_slice_size: 8
+      - 12
+    parameters_slice_size: 12
   num_layers: 1
-  num_parameters: 9
+  num_parameters: 13
   parameters_fn_kwargs:
     activation: relu
     hidden_units:

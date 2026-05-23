@@ -21,7 +21,7 @@ model_kwargs:
   distribution: masked_autoregressive_flow
   invert: true
   num_layers: 1
-  num_parameters: 8
+  num_parameters: 12
   parameters_constraint_fn: hybrid_flows.activations.get_thetas_constrain_fn
   parameters_constraint_fn_kwargs:
     allow_flexible_bounds: false

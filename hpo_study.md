@@ -369,3 +369,39 @@ Key findings:
 4. If running: monitor with `sleep 30` loop reading val_loss from the iteration's log.
 5. If idle: check `hpo_study.md` HPO log for last completed line, continue from there.
 6. Decision rules: improvement → continue plan; plateau 5 iters → new strategy; beat baseline → export to other targets.
+
+---
+
+## Phase 5: Unified Config — Full Pipeline Results
+
+**Config:** h=[256,256], epochs=400, patience=20 for ALL 40 models (4 targets × 10 models)
+
+| Target | Best Model | NLL | 2nd Best | NLL | Previous Best |
+|--------|-----------|-----|----------|-----|--------------|
+| dla | spline_nf_lognormal | **-189.34** | spline_nf | -178.20 | -163.31 (lognormal_baseline) |
+| ofen_g_koks | bernstein_nf_scale_lognormal | **-179.62** | spline_nf_scale | -169.23 | -145.9 (spline_nf_scale) |
+| ofen_f_koks | spline_nf | **-191.67** | spline_nf_scale | -186.60 | -176.8 (spline_nf_scale) |
+| pl2 | spline_nf_scale | **-204.79** | bernstein_nf_scale_lognormal | -203.94 | -156.8 (spline_nf) |
+
+**Key findings:**
+1. h=[256,256] universally improved all models across all targets
+2. Each target has a different optimal architecture
+3. Lognormal base → NaN/INF on non-DLA targets (needs shift fix)
+4. Pure Bernstein (no scale) is terrible everywhere — needs higher order
+5. Scale bijector helps on ofen_g_koks and pl2, hurts on ofen_f_koks
+
+## Phase 5b — Bernstein Order Exploration
+
+**Goal:** Find optimal Bernstein order for models that still underperform.
+
+### Current Bernstein models needing order increase:
+| Target | Model | Current order | NLL | Target NLL |
+|--------|-------|-------------|-----|-----------|
+| dla | bernstein_nf | 8 | 42.34 ❌ | beat -178 |
+| dla | bernstein_nf_scale | 8 | -128.19 | beat -189 |
+| ofen_g_koks | bernstein_nf | 8 | 258.07 ❌ | beat -179 |
+| ofen_f_koks | bernstein_nf | 8 | 287.98 ❌ | beat -191 |
+| pl2 | bernstein_nf | 8 | 184.26 ❌ | beat -204 |
+
+**Plan:** Incrementally increase num_parameters (order) for Bernstein models to 12, 16, 24.
+
