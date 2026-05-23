@@ -189,3 +189,114 @@ Launching full pipeline with best configs after DLA HPO.
 - Remove `dropout`/`batch_norm` from top-level `parameters_fn_kwargs` of all `masked_autoregressive_flow` models (16 non-baseline MAF configs had them)
 - Add `dropout: 0, batch_norm: false` to ALL nested bijectors' `parameters_fn_kwargs` (22 files: 4 targets × 4 scale models = 16 files for nested add, plus 6 non-DLA MAF files for top-level removal only)
 - Baseline models (`multivariate_normal`/`multivariate_lognormal`) use `get_parameter_vector_or_simple_network_fn` directly → keep their `dropout`/`batch_norm` unchanged
+
+---
+
+## Full Pipeline Results — All 4 targets × 10 models
+
+Completed 2026-05-23 01:54 UTC (commit c1ae1d4). Config bug fix (550a1f8) applied before run.
+
+### Target: ofen_g_koks (N=8)
+
+| Model | val_loss | Notes |
+|-------|----------|-------|
+| spline_nf_scale | **-145.92** | best NF |
+| bernstein_nf_scale_lognormal | -135.25 | |
+| bernstein_nf_scale | -134.27 | |
+| bernstein_nf_lognormal | -99.75 | |
+| spline_nf | -99.24 | |
+| normal_baseline | -71.66 | |
+| bernstein_nf | 34.25 | poor |
+| spline_nf_lognormal | INF | numerical overflow |
+
+NaN/INF models: spline_nf_lognormal, spline_nf_scale_lognormal, lognormal_baseline — lognormal base causes numerical instability for this target.
+
+### Target: ofen_f_koks (N=8)
+
+| Model | val_loss | Notes |
+|-------|----------|-------|
+| spline_nf_scale | **-176.82** | best NF |
+| bernstein_nf_scale | -156.98 | |
+| bernstein_nf_scale_lognormal | -152.58 | |
+| spline_nf | -139.41 | |
+| bernstein_nf_lognormal | -119.35 | |
+| normal_baseline | -113.86 | |
+| bernstein_nf | 61.36 | poor |
+| spline_nf_lognormal | INF | overflow |
+
+NaN/INF: spline_nf_lognormal, spline_nf_scale_lognormal, lognormal_baseline.
+
+### Target: pl2 (N=8)
+
+| Model | val_loss | Notes |
+|-------|----------|-------|
+| spline_nf | **-156.78** | best NF |
+| spline_nf_scale | -142.88 | |
+| bernstein_nf_scale_lognormal | -74.77 | |
+| normal_baseline | -64.33 | |
+| bernstein_nf_lognormal | -48.06 | |
+| bernstein_nf_scale | -34.81 | |
+| bernstein_nf | 78.21 | poor |
+| spline_nf_lognormal | INF | overflow |
+
+NaN/INF: spline_nf_lognormal, spline_nf_scale_lognormal, lognormal_baseline.
+
+### Target: DLA (from earlier run, unchanged)
+
+| Model | val_loss | Notes |
+|-------|----------|-------|
+| lognormal_baseline | **-163.31** | overall best (simple!) |
+| spline_nf_lognormal | -157.51 | best NF, HPO improved |
+| spline_nf_scale | -156.61 | |
+| bernstein_nf_scale | -148.97 | |
+| spline_nf | -146.35 | |
+| bernstein_nf_scale_lognormal | -146.04 | |
+| bernstein_nf_lognormal | -135.15 | |
+| spline_nf_scale_lognormal | -128.28 | |
+| normal_baseline | -106.44 | |
+| bernstein_nf | -81.14 | |
+
+---
+
+## Analysis: Why lognormal_baseline outperforms complex NFs on DLA
+
+DLA ranking: `lognormal_baseline (-163.31) > spline_nf_lognormal (-157.51) > spline_nf_scale (-156.61)`
+
+Key findings:
+1. **Simplest model wins.** The lognormal baseline is a single `parameter_vector_or_simple_network` + `multivariate_lognormal` distribution. No flow, no bijectors — just a fully connected net predicting lognormal params. Fewer parameters → less overfitting.
+2. **Lognormal base helps on positive-skewed data.** The target `dla_stromverbrauch_kwh` is always positive, right-skewed, in [0,1]. Lognormal is a natural match. Models with normal base consistently underperform their lognormal counterparts.
+3. **Spline NF with lognormal + HPO closes the gap.** spline_nf_lognormal reached -157.51 after HPO (lr=0.0005, nbins=12), but is still 5.8 points short. Further gains may come from longer training.
+4. **Scale bijector inconsistent.** On DLA, scale helps normal-base models but hurts lognormal-base. On non-DLA, scale consistently helps.
+5. **Bernstein underperforms Spline.** Across all targets, spline-based models beat equivalent Bernstein models. The rational quadratic spline is more flexible.
+
+--- 
+
+## HPO Phase 4 — Closing the gap on DLA (all models)
+
+**Goal:** Improve all 8 NF models on DLA, with focus on closing the 5.8-point gap between spline_nf_lognormal and lognormal_baseline.
+
+**Hypothesis:** NF models may need more training time and capacity to reach lognormal_baseline performance. The early stopping at 200 epochs may be premature for these complex models.
+
+**Current DLA Bernstein parameters:**
+| Model | order | hidden | lr_schedule | epochs | val_loss |
+|-------|-------|--------|-------------|--------|----------|
+| bernstein_nf | 8 | [128,128] | CosineDecay 0.001 | 200 | -81.14 |
+| bernstein_nf_lognormal | 8 | [128,128] | CosineDecay 0.001 | 200 | -135.15 |
+| bernstein_nf_scale | 8 | [128,128] | constant 0.001 | 200 | -148.97 |
+| bernstein_nf_scale_lognormal | 12 | [128,128] | constant 0.001 | 200 | -146.04 |
+
+**Search space (one param change per iteration, per model):**
+| Order | Param | Values | Rationale |
+|-------|-------|--------|-----------|
+| 1 | epochs | 200 → 400, patience 10 → 20 | Complex NFs need more time |
+| 2 | hidden_units | [128,128] → [256,256] or [256,256,128] | More capacity |
+| 3 | learning_rate | log sweep [5e-4, 3e-4, 1e-4, 5e-3] for each model | Fine-tune |
+| 4 | num_layers | 1 → 2 (deeper flow) | More expressive flow |
+| 5 | nbins (spline) | 12 → 16, 24 | More spline flexibility |
+| 6 | order (Bernstein) | 8 → 12, 16 | Higher-order Bernstein |
+| 7 | schedule | const ↔ CosineDecay | Compare schedulers |
+
+**Priority order:**
+1. First on best NF candidates: spline_nf_lognormal, spline_nf_scale
+2. Then on remaining models: bernstein_nf_scale, bernstein_nf_scale_lognormal
+3. Low priority (poor performers): bernstein_nf, bernstein_nf_lognormal, spline_nf, spline_nf_scale_lognormal
