@@ -11,12 +11,14 @@ fit_kwargs:
   verbose: true
 model_kwargs:
   base_distribution_kwargs:
-    distribution_name: lognormal
+    distribution_name: truncated_normal
+    low: 0.0
+    high: 5.0
   bijector: BernsteinPolynomial
   bijector_kwargs:
     domain:
-    - 0.0
-    - 1.0
+      - 0.0
+      - 5.0
     extrapolation: false
   distribution: masked_autoregressive_flow
   invert: true
@@ -26,8 +28,8 @@ model_kwargs:
   parameters_constraint_fn_kwargs:
     allow_flexible_bounds: false
     bounds: none
-    high: 148
-    low: 0.007
+    high: 5.0
+    low: 0.0
   parameters_fn_kwargs:
     activation: relu
     conditional: true

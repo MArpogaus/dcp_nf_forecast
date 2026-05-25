@@ -177,7 +177,9 @@ stages:
           verbose: true
         model_kwargs:
           base_distribution_kwargs:
-            distribution_name: lognormal
+            distribution_name: truncated_normal
+            low: 0.0
+            high: 5.0
           bijector: RationalQuadraticSpline
           bijector_kwargs:
             range_min: 0
@@ -187,7 +189,7 @@ stages:
           parameters_constraint_fn: 
             hybrid_flows.activations.get_spline_param_constrain_fn
           parameters_constraint_fn_kwargs:
-            interval_width: 8
+            interval_width: 5
             min_bin_width: 0.001
             min_slope: 0.001
             nbins: 12
@@ -200,15 +202,15 @@ stages:
     outs:
     - path: results/dla/spline_nf_lognormal/metrics.yaml
       hash: md5
-      md5: 0274387e8e955c518292b14f46123e30
+      md5: 093146be9e8dfe379b6cc1024acc0fe9
       size: 152
     - path: results/dla/spline_nf_lognormal/model_weights.h5
       hash: md5
-      md5: 451997b0124561113d60b6ea9b9507aa
+      md5: 79eb0841920c71694d3aa8cec52e1156
       size: 2055584
     - path: results/dla/spline_nf_lognormal/parent_run_id.txt
       hash: md5
-      md5: 5a616cc871fc098d3e446baae1e8b59b
+      md5: 0a2dd235230835ae005bef4e4d5b8b5a
       size: 32
   train@dataset0-normal_baseline:
     cmd: "python scripts/train.py --model normal_baseline --stage-name train@dataset0-normal_baseline
@@ -314,24 +316,26 @@ stages:
           verbose: true
         model_kwargs:
           base_distribution_kwargs:
-            distribution_name: lognormal
+            distribution_name: truncated_normal
+            low: 0.0
+            high: 5.0
           bijector: BernsteinPolynomial
           bijector_kwargs:
             domain:
             - 0.0
-            - 1.0
+            - 5.0
             extrapolation: false
           distribution: masked_autoregressive_flow
           invert: true
           num_layers: 1
-          num_parameters: 8
+          num_parameters: 12
           parameters_constraint_fn: 
             hybrid_flows.activations.get_thetas_constrain_fn
           parameters_constraint_fn_kwargs:
             allow_flexible_bounds: false
             bounds: none
-            high: 148
-            low: 0.007
+            high: 5.0
+            low: 0.0
           parameters_fn_kwargs:
             activation: relu
             conditional: true
@@ -341,15 +345,15 @@ stages:
     outs:
     - path: results/dla/bernstein_nf_lognormal/metrics.yaml
       hash: md5
-      md5: b51050bdd4ccfc91a010e56765951a97
+      md5: bb21f33974c417d1224ef55f88e1a4da
       size: 150
     - path: results/dla/bernstein_nf_lognormal/model_weights.h5
       hash: md5
-      md5: 52754b1be0d9280daa8e545338da058d
-      size: 723296
+      md5: bf2d6613e8be701736aa883bcf37d62e
+      size: 920672
     - path: results/dla/bernstein_nf_lognormal/parent_run_id.txt
       hash: md5
-      md5: 9e6adcb66c8fd2cc1818d0771e9af582
+      md5: 0b6e29339f12f1936ad9c0f894bf2cad
       size: 32
   train@dataset0-spline_nf:
     cmd: "python scripts/train.py --model spline_nf --stage-name train@dataset0-spline_nf
@@ -701,7 +705,9 @@ stages:
           verbose: true
         model_kwargs:
           base_distribution_kwargs:
-            distribution_name: lognormal
+            distribution_name: truncated_normal
+            low: 0.0
+            high: 5.0
           distribution: masked_autoregressive_flow
           nested_bijectors:
           - bijector: Scale
@@ -725,7 +731,7 @@ stages:
             parameters_constraint_fn: 
               hybrid_flows.activations.get_spline_param_constrain_fn
             parameters_constraint_fn_kwargs:
-              interval_width: 4
+              interval_width: 5
               min_bin_width: 0.001
               min_slope: 0.001
               nbins: 8
@@ -752,15 +758,15 @@ stages:
     outs:
     - path: results/dla/spline_nf_scale_lognormal/metrics.yaml
       hash: md5
-      md5: edc34b1cca800cdd0dcf94d65ebc0b94
-      size: 152
+      md5: 1407a81d7ef3be08137a82a185be08d5
+      size: 149
     - path: results/dla/spline_nf_scale_lognormal/model_weights.h5
       hash: md5
-      md5: 0460d8d6cc71a63b6d8e76d78f0a8970
+      md5: f0f727fc3b56a510f39273e23dd29986
       size: 3549360
     - path: results/dla/spline_nf_scale_lognormal/parent_run_id.txt
       hash: md5
-      md5: ac4da62212a73b3303dea82026591986
+      md5: de933bbfb547c45b24e3705fa008c9d3
       size: 32
   train@dataset0-bernstein_nf_scale:
     cmd: "python scripts/train.py --model bernstein_nf_scale --stage-name train@dataset0-bernstein_nf_scale
@@ -900,7 +906,9 @@ stages:
           verbose: true
         model_kwargs:
           base_distribution_kwargs:
-            distribution_name: lognormal
+            distribution_name: truncated_normal
+            low: 0.0
+            high: 5.0
           distribution: masked_autoregressive_flow
           nested_bijectors:
           - bijector: Scale
@@ -921,7 +929,7 @@ stages:
             bijector_kwargs:
               domain:
               - 0.0
-              - 1.0
+              - 5.0
               extrapolation: false
             invert: true
             parameters_constraint_fn: 
@@ -929,8 +937,8 @@ stages:
             parameters_constraint_fn_kwargs:
               allow_flexible_bounds: false
               bounds: none
-              high: 148
-              low: 0.007
+              high: 5.0
+              low: 0.0
             parameters_fn: parameter_vector_or_simple_network
             parameters_fn_kwargs:
               activation: relu
@@ -942,10 +950,10 @@ stages:
               - 256
               parameter_shape:
               - 48
-              - 12
-            parameters_slice_size: 12
+              - 16
+            parameters_slice_size: 16
           num_layers: 1
-          num_parameters: 13
+          num_parameters: 17
           parameters_fn_kwargs:
             activation: relu
             hidden_units:
@@ -954,15 +962,15 @@ stages:
     outs:
     - path: results/dla/bernstein_nf_scale_lognormal/metrics.yaml
       hash: md5
-      md5: ef7447a44291c9f6af409c09e45539e6
-      size: 151
+      md5: 714608e5d9672198f86d6a30d6f49606
+      size: 153
     - path: results/dla/bernstein_nf_scale_lognormal/model_weights.h5
       hash: md5
-      md5: ffa786446759a09a2fb5ceac09f21deb
-      size: 2463792
+      md5: 9efa43742b35de714a40b4fa371d960a
+      size: 2858544
     - path: results/dla/bernstein_nf_scale_lognormal/parent_run_id.txt
       hash: md5
-      md5: 875a6f78ff9c42b413e139469221fd9e
+      md5: 0b16752cecd8d13d184ca60f8d8089fa
       size: 32
   prepare@1:
     cmd: "python scripts/prepare_features.py --raw-data-path data/raw/norm_fondium_15_min_data_2023.csv
@@ -4680,11 +4688,11 @@ stages:
       nfiles: 6
     - path: results/dla/bernstein_nf_lognormal/model_weights.h5
       hash: md5
-      md5: 52754b1be0d9280daa8e545338da058d
-      size: 723296
+      md5: bf2d6613e8be701736aa883bcf37d62e
+      size: 920672
     - path: results/dla/bernstein_nf_lognormal/parent_run_id.txt
       hash: md5
-      md5: 9e6adcb66c8fd2cc1818d0771e9af582
+      md5: 0b6e29339f12f1936ad9c0f894bf2cad
       size: 32
     - path: scripts/evaluate.py
       hash: md5
@@ -4719,24 +4727,26 @@ stages:
           verbose: true
         model_kwargs:
           base_distribution_kwargs:
-            distribution_name: lognormal
+            distribution_name: truncated_normal
+            low: 0.0
+            high: 5.0
           bijector: BernsteinPolynomial
           bijector_kwargs:
             domain:
             - 0.0
-            - 1.0
+            - 5.0
             extrapolation: false
           distribution: masked_autoregressive_flow
           invert: true
           num_layers: 1
-          num_parameters: 8
+          num_parameters: 12
           parameters_constraint_fn: 
             hybrid_flows.activations.get_thetas_constrain_fn
           parameters_constraint_fn_kwargs:
             allow_flexible_bounds: false
             bounds: none
-            high: 148
-            low: 0.007
+            high: 5.0
+            low: 0.0
           parameters_fn_kwargs:
             activation: relu
             conditional: true
@@ -4746,20 +4756,20 @@ stages:
     outs:
     - path: results/dla/bernstein_nf_lognormal/evaluation/forecast.pdf
       hash: md5
-      md5: 80efaf503cca1cb3103ca4fc7b280c63
-      size: 168483
+      md5: 630d231ba5735555cda5498356e4fe71
+      size: 172195
     - path: results/dla/bernstein_nf_lognormal/evaluation/metrics.yaml
       hash: md5
-      md5: 8d215e7ec484185c0db059b38a622c15
-      size: 115
+      md5: 69726b19b8c7dca6c43a04267692e914
+      size: 114
     - path: results/dla/bernstein_nf_lognormal/evaluation/pit_histogram.pdf
       hash: md5
-      md5: a1ac5bc39aed12fb2039680abb5e8bac
-      size: 53312
+      md5: b565b0573bff060a8cd474ba8832f93f
+      size: 52013
     - path: results/dla/bernstein_nf_lognormal/evaluation/qq_plot.pdf
       hash: md5
-      md5: eb29af219ad485ed8ef1ebbda5d6b5f5
-      size: 57392
+      md5: 8351adbb528cb89346a61dc8e855b37d
+      size: 56497
   evaluate@dataset0-spline_nf_lognormal:
     cmd: "python scripts/evaluate.py --model spline_nf_lognormal --stage-name evaluate@dataset0-spline_nf_lognormal
       --target-name dla --prediction-horizon 48\n"
@@ -4771,11 +4781,11 @@ stages:
       nfiles: 6
     - path: results/dla/spline_nf_lognormal/model_weights.h5
       hash: md5
-      md5: 451997b0124561113d60b6ea9b9507aa
+      md5: 79eb0841920c71694d3aa8cec52e1156
       size: 2055584
     - path: results/dla/spline_nf_lognormal/parent_run_id.txt
       hash: md5
-      md5: 5a616cc871fc098d3e446baae1e8b59b
+      md5: 0a2dd235230835ae005bef4e4d5b8b5a
       size: 32
     - path: scripts/evaluate.py
       hash: md5
@@ -4807,7 +4817,9 @@ stages:
           verbose: true
         model_kwargs:
           base_distribution_kwargs:
-            distribution_name: lognormal
+            distribution_name: truncated_normal
+            low: 0.0
+            high: 5.0
           bijector: RationalQuadraticSpline
           bijector_kwargs:
             range_min: 0
@@ -4817,7 +4829,7 @@ stages:
           parameters_constraint_fn: 
             hybrid_flows.activations.get_spline_param_constrain_fn
           parameters_constraint_fn_kwargs:
-            interval_width: 8
+            interval_width: 5
             min_bin_width: 0.001
             min_slope: 0.001
             nbins: 12
@@ -4830,20 +4842,20 @@ stages:
     outs:
     - path: results/dla/spline_nf_lognormal/evaluation/forecast.pdf
       hash: md5
-      md5: 5e35d178e2b6cda3a46decb18b9b2e83
-      size: 155069
+      md5: 79bd7618ff1fa1dbb63800643ce9ffa5
+      size: 155151
     - path: results/dla/spline_nf_lognormal/evaluation/metrics.yaml
       hash: md5
-      md5: f921a0ca4bf55499f9fd98375906c02a
-      size: 110
+      md5: 0e9fe29368dee0c162584c078d7185fb
+      size: 114
     - path: results/dla/spline_nf_lognormal/evaluation/pit_histogram.pdf
       hash: md5
-      md5: 1ce85a5784ef9582a166d065f7e2c152
-      size: 51730
+      md5: 3ae3d23da221cc3182af9d9a00d9d7a3
+      size: 52897
     - path: results/dla/spline_nf_lognormal/evaluation/qq_plot.pdf
       hash: md5
-      md5: c3c4101c4f8a7fccc8b4af7b9fa414f5
-      size: 56347
+      md5: fbbe031c091dbbfb8284b6cbd6d93dc4
+      size: 57627
   evaluate@dataset0-bernstein_nf_scale:
     cmd: "python scripts/evaluate.py --model bernstein_nf_scale --stage-name evaluate@dataset0-bernstein_nf_scale
       --target-name dla --prediction-horizon 48\n"
@@ -4970,11 +4982,11 @@ stages:
       nfiles: 6
     - path: results/dla/bernstein_nf_scale_lognormal/model_weights.h5
       hash: md5
-      md5: ffa786446759a09a2fb5ceac09f21deb
-      size: 2463792
+      md5: 9efa43742b35de714a40b4fa371d960a
+      size: 2858544
     - path: results/dla/bernstein_nf_scale_lognormal/parent_run_id.txt
       hash: md5
-      md5: 875a6f78ff9c42b413e139469221fd9e
+      md5: 0b16752cecd8d13d184ca60f8d8089fa
       size: 32
     - path: scripts/evaluate.py
       hash: md5
@@ -5005,7 +5017,9 @@ stages:
           verbose: true
         model_kwargs:
           base_distribution_kwargs:
-            distribution_name: lognormal
+            distribution_name: truncated_normal
+            low: 0.0
+            high: 5.0
           distribution: masked_autoregressive_flow
           nested_bijectors:
           - bijector: Scale
@@ -5026,7 +5040,7 @@ stages:
             bijector_kwargs:
               domain:
               - 0.0
-              - 1.0
+              - 5.0
               extrapolation: false
             invert: true
             parameters_constraint_fn: 
@@ -5034,8 +5048,8 @@ stages:
             parameters_constraint_fn_kwargs:
               allow_flexible_bounds: false
               bounds: none
-              high: 148
-              low: 0.007
+              high: 5.0
+              low: 0.0
             parameters_fn: parameter_vector_or_simple_network
             parameters_fn_kwargs:
               activation: relu
@@ -5047,10 +5061,10 @@ stages:
               - 256
               parameter_shape:
               - 48
-              - 12
-            parameters_slice_size: 12
+              - 16
+            parameters_slice_size: 16
           num_layers: 1
-          num_parameters: 13
+          num_parameters: 17
           parameters_fn_kwargs:
             activation: relu
             hidden_units:
@@ -5059,21 +5073,21 @@ stages:
     outs:
     - path: results/dla/bernstein_nf_scale_lognormal/evaluation/forecast.pdf
       hash: md5
-      md5: b704ee598c10b5cdc20bc8b7d3150a5d
-      size: 169313
+      md5: a27ef0281958ca64830fd86f9908ba7b
+      size: 170702
     - path: results/dla/bernstein_nf_scale_lognormal/evaluation/metrics.yaml
       hash: md5
-      md5: e40a9a1d00e30df042e0e92528e6fe88
-      size: 115
+      md5: 42a8bc1b9b70ef05efa5d9850dc0500c
+      size: 116
     - path: 
         results/dla/bernstein_nf_scale_lognormal/evaluation/pit_histogram.pdf
       hash: md5
-      md5: bb8657741fb3ce885c1ad5dae1ee0b67
-      size: 50775
+      md5: b01dbdf1a15ca09b8aa5292b2cbe8629
+      size: 51073
     - path: results/dla/bernstein_nf_scale_lognormal/evaluation/qq_plot.pdf
       hash: md5
-      md5: fe691f787c2cfeae7da3615492d6e314
-      size: 57332
+      md5: 09ba787eb4ef525bde466235438f8325
+      size: 58099
   evaluate@dataset0-spline_nf_scale:
     cmd: "python scripts/evaluate.py --model spline_nf_scale --stage-name evaluate@dataset0-spline_nf_scale
       --target-name dla --prediction-horizon 48\n"
@@ -5197,11 +5211,11 @@ stages:
       nfiles: 6
     - path: results/dla/spline_nf_scale_lognormal/model_weights.h5
       hash: md5
-      md5: 0460d8d6cc71a63b6d8e76d78f0a8970
+      md5: f0f727fc3b56a510f39273e23dd29986
       size: 3549360
     - path: results/dla/spline_nf_scale_lognormal/parent_run_id.txt
       hash: md5
-      md5: ac4da62212a73b3303dea82026591986
+      md5: de933bbfb547c45b24e3705fa008c9d3
       size: 32
     - path: scripts/evaluate.py
       hash: md5
@@ -5236,7 +5250,9 @@ stages:
           verbose: true
         model_kwargs:
           base_distribution_kwargs:
-            distribution_name: lognormal
+            distribution_name: truncated_normal
+            low: 0.0
+            high: 5.0
           distribution: masked_autoregressive_flow
           nested_bijectors:
           - bijector: Scale
@@ -5260,7 +5276,7 @@ stages:
             parameters_constraint_fn: 
               hybrid_flows.activations.get_spline_param_constrain_fn
             parameters_constraint_fn_kwargs:
-              interval_width: 4
+              interval_width: 5
               min_bin_width: 0.001
               min_slope: 0.001
               nbins: 8
@@ -5287,20 +5303,20 @@ stages:
     outs:
     - path: results/dla/spline_nf_scale_lognormal/evaluation/forecast.pdf
       hash: md5
-      md5: 0b3ceb58d96ff1d450dd262ba583bfd0
-      size: 86124
+      md5: 04453060cdee287519aeffefb342e39f
+      size: 168454
     - path: results/dla/spline_nf_scale_lognormal/evaluation/metrics.yaml
       hash: md5
-      md5: a89867e703183d1123315b39211ef4a1
-      size: 68
+      md5: 75d5db09154c2c5651c0077033b1e6c0
+      size: 115
     - path: results/dla/spline_nf_scale_lognormal/evaluation/pit_histogram.pdf
       hash: md5
-      md5: e8cde619be85fd38ba76da3964fe2ba6
-      size: 50527
+      md5: ace45bf43db923af8cfeea4b2769f5e0
+      size: 52173
     - path: results/dla/spline_nf_scale_lognormal/evaluation/qq_plot.pdf
       hash: md5
-      md5: 6d81b47776cadb623ba4e4c9537ec555
-      size: 43304
+      md5: 73899b880567a03306d9e80ccd9ffd6f
+      size: 57349
   evaluate@dataset1-normal_baseline:
     cmd: "python scripts/evaluate.py --model normal_baseline --stage-name evaluate@dataset1-normal_baseline
       --target-name ofen_g_koks --prediction-horizon 48\n"

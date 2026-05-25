@@ -15,16 +15,33 @@
 - `parameters_constraint_fn_kwargs.low`/`.high` must match base distribution support:
   - Normal base: `low: -5.0, high: 5.0`
   - LogNormal base: `low: 0.007, high: 148`
+- Spline domain = `[range_min, range_min + interval_width]`. Must match base distribution support.
+  - Normal base: `range_min: -4, interval_width: 8` → domain [-4, 4]
+  - LogNormal base: `range_min: 0` → domain [0, interval_width]
+  - TruncatedNormal base: `range_min` should match `low`, `interval_width = high - low`
+- **LogNormal base problem**: unbounded upper tail → linear spline extrapolation → extreme samples (CI90 >> 1). Fix: use `truncated_normal` with bounded support instead.
+
+## Environment
+
+- TensorFlow, DVC and all project deps installed in `/app/.venv` (Python 3.11).
+- **Always activate the venv first:** `source /app/.venv/bin/activate`
+- After activation, `dvc repro` and `python scripts/...` both use the correct env.
+- Available GPU: NVIDIA TITAN RTX (2 × 22GB)
 
 ## Pipeline
 
 ```bash
-# Test mode (fast, 1 epoch) — edit params.yaml first, then revert
-# Stage names: train@dataset<N>-<model> where N is the target index (0=dla, 1=ofen_g_koks, 2=ofen_f_koks, 3=pl2)
-dvc repro train@dataset0-bernstein_nf
+# Activate venv first
+source /app/.venv/bin/activate
 
-# Full run
-dvc repro train@dataset0-bernstein_nf
+# Run via DVC (now works correctly):
+dvc repro train@dataset<N>-<model>
+
+# Or run directly:
+python scripts/train.py --model <model> --stage-name train@dataset<N>-<model> --target-name <target>
+python scripts/evaluate.py --model <model> --stage-name evaluate@dataset<N>-<model> --target-name <target> --prediction-horizon 48
+
+# Stage names: train@dataset<N>-<model> where N is the target index (0=dla, 1=ofen_g_koks, 2=ofen_f_koks, 3=pl2)
 ```
 
 ## Data prep

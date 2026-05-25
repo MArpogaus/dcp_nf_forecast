@@ -11,7 +11,9 @@ fit_kwargs:
   verbose: true
 model_kwargs:
   base_distribution_kwargs:
-    distribution_name: lognormal
+    distribution_name: truncated_normal
+    low: 0.0
+    high: 5.0
   distribution: masked_autoregressive_flow
   nested_bijectors:
   - bijector: Scale
@@ -34,7 +36,7 @@ model_kwargs:
     invert: true
     parameters_constraint_fn: hybrid_flows.activations.get_spline_param_constrain_fn
     parameters_constraint_fn_kwargs:
-      interval_width: 4
+      interval_width: 5
       min_bin_width: 0.001
       min_slope: 0.001
       nbins: 8

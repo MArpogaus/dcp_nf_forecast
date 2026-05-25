@@ -405,3 +405,68 @@ Key findings:
 
 **Plan:** Incrementally increase num_parameters (order) for Bernstein models to 12, 16, 24.
 
+---
+
+## Phase 6 — Domain Expansion for Lognormal-base models
+
+**Problem:** Models with lognormal base distribution produce extreme sample values
+when the bijector domain is too narrow. Base distribution samples fall outside the
+bijector's domain → linear extrapolation → extreme output values → CI90 >> 1.
+
+**Root cause (spline):** `interval_width: 8` with `range_min: 0` → domain [0, 8].
+Lognormal heavy tail produces samples >> 8 → linear extrapolation.
+
+**Root cause (Bernstein):** `domain: [0.0, 1.0]` with `extrapolation: false` →
+base samples outside [0,1] are clamped at boundaries, producing degenerate PIT.
+
+**Targets:**
+1. DLA: spline_nf_lognormal (NLL=-189.34, CI90=5.14 — best NLL, worst CI)
+2. DLA: bernstein_nf_lognormal (NLL=-158.55, CI90=0.14 — good CI but can improve)
+3. DLA: spline_nf_scale_lognormal (NLL=-155.78, CI90=nan — unstable)
+4. DLA: bernstein_nf_scale_lognormal (NLL=-160.79, CI90=0.07)
+5. Scale best domain fix to other targets
+
+**Search space:**
+| Order | Model | Param | Current | Test values |
+|-------|-------|-------|---------|-------------|
+| 1 | spline_nf_lognormal | interval_width | 8 | [16, 32, 64] |
+| 2 | spline_nf_lognormal | range_max | (auto) | [16, 32, auto] |
+| 3 | bernstein_nf_lognormal | domain | [0.0, 1.0] | [0.0, 5.0], [0.0, 10.0], [-1.0, 5.0] |
+| 4 | bernstein_nf_scale_lognormal | domain | [0.0, 1.0] | same as best from iter 3 |
+| 5 | spline_nf_scale_lognormal | interval_width | 4 | [8, 16] |
+
+**Primary metric:** NLL (lower=better). **Secondary metric:** CI90 (target < 0.5).
+
+**Stopping criteria:**
+1. CI90 ≤ 0.5 AND NLL ≤ -180 (both metrics good)
+2. Plateau: 3 consecutive iterations without NLL improvement
+3. Max total iterations: 12
+
+**HPO log:**
+| # | Target | Model | Param change | Old NLL | New NLL | Old CI90 | New CI90 | Status |
+|---|--------|-------|-------------|---------|---------|----------|----------|--------|
+| 1 | dla | spline_nf_lognormal | interval_width: 8→16 | -189.34 | -187.61 | 5.14 | 6.50 | reverted |
+| 2 | dla | spline_nf_lognormal | range_min: 0→-5, interval_width: 10 | -189.34 | 1.25 | 5.14 | 5.53 | reverted |
+| 3 | dla | spline_nf_lognormal | interval_width: 8→3 | -189.34 | -182.51 | 5.14 | 5.12 | reverted |
+| 4 | dla | spline_nf_lognormal | base: lognormal→truncated_normal(0,5), interval_width: 5 | -189.34 | **-196.23** | 5.14 | **0.13** | **committed** 🏆 |
+| 5 | dla | bernstein_nf_lognormal | base: lognormal→truncated_normal(0,5), domain: [0,1]→[0,5], thetas: [0.007,148]→[0,5] | -158.55 | -98.01 | 0.14 | 0.19 | reverted |
+| 6 | dla | spline_nf_scale_lognormal | base: lognormal→truncated_normal(0,5), interval_width: 4→5 | -155.78 | -146.64 | nan | 0.028 | committed (CI fixed ✅) |
+| 7 | dla | bernstein_nf_scale_lognormal | base: lognormal→truncated_normal(0,5), domain: [0,1]→[0,5], thetas: [0.007,148]→[0,5] | -160.79 | -149.11 | 0.07 | **0.037** | committed (CI halved ✅) |
+
+---
+
+## Phase 6 Summary — Domain Fix via Bounded Base Distribution
+
+**Problem:** LogNormal base distribution has unbounded upper tail → spline linear extrapolation → extreme samples (CI90 >> 1).
+
+**Solution:** Replace LogNormal base with `truncated_normal(0, 5)` for all NF models. Spline domain matches base support: `[0, interval_width]` where `interval_width = high - low = 5`.
+
+**Results on DLA:**
+| Model | Base | NLL (eval) | CI90 | RMSE | Δ |
+|-------|------|-----------|------|------|---|
+| spline_nf_lognormal | ~~lognormal~~ → **truncated_normal** | -189 → **-196** | 5.14 → **0.13** | 0.76 → **0.03** | 🏆 **BEST** |
+| spline_nf_scale_lognormal | ~~lognormal~~ → **truncated_normal** | NaN → -147 | NaN → **0.028** | NaN → **0.023** | CI fixed ✅ |
+| bernstein_nf_scale_lognormal | ~~lognormal~~ → **truncated_normal** | -161 → -149 | 0.07 → **0.037** | 0.024 → 0.028 | CI halved ✅ |
+| bernstein_nf_lognormal | ~~lognormal~~ → **truncated_normal** | -159 → -98 | — | — | ❌ reverted (capacity too low) |
+
+**Next steps:** Apply `truncated_normal(0, 5)` to all `*_lognormal` models across ALL 4 targets. Also update `params.yaml` descriptions and AGENTS.md.

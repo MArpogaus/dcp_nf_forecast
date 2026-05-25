@@ -15,8 +15,8 @@ model_kwargs:
   bijector: BernsteinPolynomial
   bijector_kwargs:
     domain:
-    - 0.0
-    - 1.0
+      - 0.0
+      - 1.0
     extrapolation: false
   distribution: masked_autoregressive_flow
   invert: true
