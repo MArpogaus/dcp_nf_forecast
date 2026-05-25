@@ -2268,7 +2268,9 @@ stages:
           verbose: true
         model_kwargs:
           base_distribution_kwargs:
-            distribution_name: lognormal
+            distribution_name: truncated_normal
+            low: 0.0
+            high: 5.0
           bijector: RationalQuadraticSpline
           bijector_kwargs:
             range_min: 0
@@ -2278,7 +2280,7 @@ stages:
           parameters_constraint_fn: 
             hybrid_flows.activations.get_spline_param_constrain_fn
           parameters_constraint_fn_kwargs:
-            interval_width: 8
+            interval_width: 5
             min_bin_width: 0.001
             min_slope: 0.001
             nbins: 12
@@ -2291,15 +2293,15 @@ stages:
     outs:
     - path: results/ofen_g_koks/spline_nf_lognormal/metrics.yaml
       hash: md5
-      md5: f0c1807a1dccdb586b0589c95c8e0151
-      size: 92
+      md5: 56e3bf747cc5b817328fc0642c4b549b
+      size: 150
     - path: results/ofen_g_koks/spline_nf_lognormal/model_weights.h5
       hash: md5
-      md5: dc3ad5c26530a073610380777f39f37e
+      md5: 064b8d42433a56dbfe415a981793e318
       size: 2055584
     - path: results/ofen_g_koks/spline_nf_lognormal/parent_run_id.txt
       hash: md5
-      md5: 3685d06e3602c308e3b49a48216a8f41
+      md5: 719a2e2525f8a25186c4b2b91b59aeb9
       size: 32
   train@dataset1-bernstein_nf_scale:
     cmd: "python scripts/train.py --model bernstein_nf_scale --stage-name train@dataset1-bernstein_nf_scale
@@ -3092,7 +3094,9 @@ stages:
           verbose: true
         model_kwargs:
           base_distribution_kwargs:
-            distribution_name: lognormal
+            distribution_name: truncated_normal
+            low: 0.0
+            high: 5.0
           bijector: RationalQuadraticSpline
           bijector_kwargs:
             range_min: 0
@@ -3102,7 +3106,7 @@ stages:
           parameters_constraint_fn: 
             hybrid_flows.activations.get_spline_param_constrain_fn
           parameters_constraint_fn_kwargs:
-            interval_width: 8
+            interval_width: 5
             min_bin_width: 0.001
             min_slope: 0.001
             nbins: 12
@@ -3115,15 +3119,15 @@ stages:
     outs:
     - path: results/ofen_f_koks/spline_nf_lognormal/metrics.yaml
       hash: md5
-      md5: f0c1807a1dccdb586b0589c95c8e0151
-      size: 92
+      md5: 984ba7a1096f268c3b59ecddca2b1bac
+      size: 152
     - path: results/ofen_f_koks/spline_nf_lognormal/model_weights.h5
       hash: md5
-      md5: 442a33984f6d63c760095188b725422a
+      md5: 3afee86264e5dbdeb7e3891900d57fa2
       size: 2055584
     - path: results/ofen_f_koks/spline_nf_lognormal/parent_run_id.txt
       hash: md5
-      md5: 38f281e46615ebeb2a0de356ce920771
+      md5: 3e7e784a967889dc130710a1f0cf36e4
       size: 32
   train@dataset2-bernstein_nf_scale:
     cmd: "python scripts/train.py --model bernstein_nf_scale --stage-name train@dataset2-bernstein_nf_scale
@@ -3916,7 +3920,9 @@ stages:
           verbose: true
         model_kwargs:
           base_distribution_kwargs:
-            distribution_name: lognormal
+            distribution_name: truncated_normal
+            low: 0.0
+            high: 5.0
           bijector: RationalQuadraticSpline
           bijector_kwargs:
             range_min: 0
@@ -3926,7 +3932,7 @@ stages:
           parameters_constraint_fn: 
             hybrid_flows.activations.get_spline_param_constrain_fn
           parameters_constraint_fn_kwargs:
-            interval_width: 8
+            interval_width: 5
             min_bin_width: 0.001
             min_slope: 0.001
             nbins: 12
@@ -3939,15 +3945,15 @@ stages:
     outs:
     - path: results/pl2/spline_nf_lognormal/metrics.yaml
       hash: md5
-      md5: f0c1807a1dccdb586b0589c95c8e0151
-      size: 92
+      md5: 366689a35c9ca37fb6d07d2468b9b2a9
+      size: 152
     - path: results/pl2/spline_nf_lognormal/model_weights.h5
       hash: md5
-      md5: 28711cde540b658544e13b8cf0faaa93
+      md5: 2eeb48f8be87b3cc66f0d0e56a9f5600
       size: 2055584
     - path: results/pl2/spline_nf_lognormal/parent_run_id.txt
       hash: md5
-      md5: d6fed9dc20ff253e06f6c42dd5359a28
+      md5: dec77e5ff399cfe087c7e4cdf2feb8ab
       size: 32
   train@dataset3-bernstein_nf_scale:
     cmd: "python scripts/train.py --model bernstein_nf_scale --stage-name train@dataset3-bernstein_nf_scale
@@ -5746,11 +5752,11 @@ stages:
       nfiles: 6
     - path: results/ofen_g_koks/spline_nf_lognormal/model_weights.h5
       hash: md5
-      md5: dc3ad5c26530a073610380777f39f37e
+      md5: 064b8d42433a56dbfe415a981793e318
       size: 2055584
     - path: results/ofen_g_koks/spline_nf_lognormal/parent_run_id.txt
       hash: md5
-      md5: 3685d06e3602c308e3b49a48216a8f41
+      md5: 719a2e2525f8a25186c4b2b91b59aeb9
       size: 32
     - path: scripts/evaluate.py
       hash: md5
@@ -5781,7 +5787,9 @@ stages:
           verbose: true
         model_kwargs:
           base_distribution_kwargs:
-            distribution_name: lognormal
+            distribution_name: truncated_normal
+            low: 0.0
+            high: 5.0
           bijector: RationalQuadraticSpline
           bijector_kwargs:
             range_min: 0
@@ -5791,7 +5799,7 @@ stages:
           parameters_constraint_fn: 
             hybrid_flows.activations.get_spline_param_constrain_fn
           parameters_constraint_fn_kwargs:
-            interval_width: 8
+            interval_width: 5
             min_bin_width: 0.001
             min_slope: 0.001
             nbins: 12
@@ -5804,20 +5812,20 @@ stages:
     outs:
     - path: results/ofen_g_koks/spline_nf_lognormal/evaluation/forecast.pdf
       hash: md5
-      md5: 3212751e4fd9910b8f3c8c6c0ae81c5d
-      size: 155591
+      md5: 35237b9b19e49a424b8730e57cac453e
+      size: 169352
     - path: results/ofen_g_koks/spline_nf_lognormal/evaluation/metrics.yaml
       hash: md5
-      md5: d5daeaff7b6945b80f5a9532f279d73a
-      size: 109
+      md5: 191ad557523474e89371067d50cdcdf2
+      size: 112
     - path: results/ofen_g_koks/spline_nf_lognormal/evaluation/pit_histogram.pdf
       hash: md5
-      md5: 08152fe895aac4f01e729d9ca7f095cd
-      size: 50614
+      md5: d875c781531cadbcffe66741e431232e
+      size: 44205
     - path: results/ofen_g_koks/spline_nf_lognormal/evaluation/qq_plot.pdf
       hash: md5
-      md5: b5e3e00ea359721956eeb37a64664b43
-      size: 55528
+      md5: 84662d07c026d34c4b35eff625b04e34
+      size: 56713
   evaluate@dataset1-bernstein_nf_scale:
     cmd: "python scripts/evaluate.py --model bernstein_nf_scale --stage-name evaluate@dataset1-bernstein_nf_scale
       --target-name ofen_g_koks --prediction-horizon 48\n"
@@ -6710,11 +6718,11 @@ stages:
       nfiles: 6
     - path: results/ofen_f_koks/spline_nf_lognormal/model_weights.h5
       hash: md5
-      md5: 442a33984f6d63c760095188b725422a
+      md5: 3afee86264e5dbdeb7e3891900d57fa2
       size: 2055584
     - path: results/ofen_f_koks/spline_nf_lognormal/parent_run_id.txt
       hash: md5
-      md5: 38f281e46615ebeb2a0de356ce920771
+      md5: 3e7e784a967889dc130710a1f0cf36e4
       size: 32
     - path: scripts/evaluate.py
       hash: md5
@@ -6745,7 +6753,9 @@ stages:
           verbose: true
         model_kwargs:
           base_distribution_kwargs:
-            distribution_name: lognormal
+            distribution_name: truncated_normal
+            low: 0.0
+            high: 5.0
           bijector: RationalQuadraticSpline
           bijector_kwargs:
             range_min: 0
@@ -6755,7 +6765,7 @@ stages:
           parameters_constraint_fn: 
             hybrid_flows.activations.get_spline_param_constrain_fn
           parameters_constraint_fn_kwargs:
-            interval_width: 8
+            interval_width: 5
             min_bin_width: 0.001
             min_slope: 0.001
             nbins: 12
@@ -6768,20 +6778,20 @@ stages:
     outs:
     - path: results/ofen_f_koks/spline_nf_lognormal/evaluation/forecast.pdf
       hash: md5
-      md5: 8e3ab000238c848c8c67303e704321a4
-      size: 141655
+      md5: 8ec15f8b98bdeb89a97dbd061a1a2f96
+      size: 159805
     - path: results/ofen_f_koks/spline_nf_lognormal/evaluation/metrics.yaml
       hash: md5
-      md5: d813e5841f80ceb9ff2aa44c776415e3
-      size: 98
+      md5: d55a0f56d9d7ad6dd63cd8698d4a3e65
+      size: 112
     - path: results/ofen_f_koks/spline_nf_lognormal/evaluation/pit_histogram.pdf
       hash: md5
-      md5: 76a71f2c27ee473c60ed252864303413
-      size: 46247
+      md5: 44a4dc7cbf859063ccf1a9f32d2fdd77
+      size: 50741
     - path: results/ofen_f_koks/spline_nf_lognormal/evaluation/qq_plot.pdf
       hash: md5
-      md5: 4e74cd4bdf882d7bfa959cc0019a2d9b
-      size: 55396
+      md5: 091697abf706e84737ae4b85fad4fb9b
+      size: 57912
   evaluate@dataset2-bernstein_nf_scale:
     cmd: "python scripts/evaluate.py --model bernstein_nf_scale --stage-name evaluate@dataset2-bernstein_nf_scale
       --target-name ofen_f_koks --prediction-horizon 48\n"
@@ -7673,11 +7683,11 @@ stages:
       nfiles: 6
     - path: results/pl2/spline_nf_lognormal/model_weights.h5
       hash: md5
-      md5: 553828715eb7dab1d54483327cd292de
-      size: 974240
+      md5: 2eeb48f8be87b3cc66f0d0e56a9f5600
+      size: 2055584
     - path: results/pl2/spline_nf_lognormal/parent_run_id.txt
       hash: md5
-      md5: 4a2ea2f1628af402ca4503048babbd5e
+      md5: dec77e5ff399cfe087c7e4cdf2feb8ab
       size: 32
     - path: scripts/evaluate.py
       hash: md5
@@ -7702,49 +7712,51 @@ stages:
         compile_kwargs: {}
         fit_kwargs:
           batch_size: 256
-          early_stopping_patience: 10
-          epochs: 200
+          early_stopping_patience: 20
+          epochs: 400
           learning_rate: 0.0005
           verbose: true
         model_kwargs:
-          distribution: masked_autoregressive_flow
-          num_layers: 1
+          base_distribution_kwargs:
+            distribution_name: truncated_normal
+            low: 0.0
+            high: 5.0
           bijector: RationalQuadraticSpline
           bijector_kwargs:
             range_min: 0
-          base_distribution_kwargs:
-            distribution_name: lognormal
+          distribution: masked_autoregressive_flow
+          num_layers: 1
           num_parameters: 35
           parameters_constraint_fn: 
             hybrid_flows.activations.get_spline_param_constrain_fn
           parameters_constraint_fn_kwargs:
-            interval_width: 8
-            min_slope: 0.001
+            interval_width: 5
             min_bin_width: 0.001
+            min_slope: 0.001
             nbins: 12
           parameters_fn_kwargs:
             activation: relu
-            hidden_units:
-            - 128
-            - 128
             conditional: true
+            hidden_units:
+            - 256
+            - 256
     outs:
     - path: results/pl2/spline_nf_lognormal/evaluation/forecast.pdf
       hash: md5
-      md5: 58883327140118e176b375dd91406e72
-      size: 144275
+      md5: c6e68d82b4f0300136583ca6ef9e6362
+      size: 168934
     - path: results/pl2/spline_nf_lognormal/evaluation/metrics.yaml
       hash: md5
-      md5: bd64d2ec2cc57aa44629fdf9f22b9a13
-      size: 107
+      md5: 11864ae56e8bf558554bf8fa2f761de3
+      size: 115
     - path: results/pl2/spline_nf_lognormal/evaluation/pit_histogram.pdf
       hash: md5
-      md5: 97e09f64b8ebf21dedc8eb8cc44a9463
-      size: 48043
+      md5: e39d2ea64f76283785ac42216c42f89f
+      size: 49641
     - path: results/pl2/spline_nf_lognormal/evaluation/qq_plot.pdf
       hash: md5
-      md5: 998db55e70f7bb169e450389731c21a8
-      size: 53894
+      md5: 7d3c5cde1ed5dba7b45319e5a9070d0d
+      size: 55242
   evaluate@dataset3-bernstein_nf_scale:
     cmd: "python scripts/evaluate.py --model bernstein_nf_scale --stage-name evaluate@dataset3-bernstein_nf_scale
       --target-name pl2 --prediction-horizon 48\n"
