@@ -34,6 +34,8 @@ get_multivariate_lognormal = partial(
 
 def _get_multivariate_truncated_normal_fn(
     dims: int,
+    low: float = 0.0,
+    high: float = 5.0,
 ) -> tuple[Callable[[tf.Tensor], tfp.distributions.Distribution], tuple[int, ...]]:
 
     mv_normal_dist, parameters_shape = hf_distributions._get_multivariate_normal_fn(
@@ -45,7 +47,7 @@ def _get_multivariate_truncated_normal_fn(
         loc = mv_normal.mean()
         scale = mv_normal.stddev()
         return tfd.Independent(
-            tfd.TruncatedNormal(loc=loc, scale=scale, low=0.0, high=5.0),
+            tfd.TruncatedNormal(loc=loc, scale=scale, low=low, high=high),
             reinterpreted_batch_ndims=1,
         )
 

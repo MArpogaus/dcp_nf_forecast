@@ -71,11 +71,7 @@ targets:
 models:
 - normal_baseline
 - truncated_baseline
-- bernstein_nf
 - spline_nf
-- bernstein_nf_truncated
 - spline_nf_truncated
-- bernstein_nf_scale
-- bernstein_nf_scale_truncated
 - spline_nf_scale
 - spline_nf_scale_truncated

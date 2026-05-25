@@ -16,17 +16,28 @@ Models use suffix indicating base distribution:
 - `*` (no suffix) = `normal(0, 1)` base
 - `*_baseline` = simple diagonal distributions (not NF)
 
+## Active models (6)
+
+- `normal_baseline` — diagonal multivariate normal
+- `truncated_baseline` — diagonal truncated_normal(0,5) (best CI, competitive NLL)
+- `spline_nf` — normal(0,1) base, RationalQuadraticSpline
+- `spline_nf_truncated` — truncated_normal(0,5) base, RationalQuadraticSpline (best NLL on DLA/pl2)
+- `spline_nf_scale` — normal(0,1) base, Scale + RationalQuadraticSpline
+- `spline_nf_scale_truncated` — truncated_normal(0,5) base, Scale + Spline (DLA only, NaN on other targets)
+
+**Dropped:** Bernstein variants (consistently underperformed vs spline), `truncated_baseline` replaced `lognormal_baseline`.
+
 ## Config rules
 
 - `truncated_normal(0, 5)` is the standard truncated base for all NF models
-- Bernstein `domain: [0.0, 5.0]` always for truncated models
 - `parameters_constraint_fn_kwargs.low`/`.high` must match base distribution support:
   - Normal base: `low: -5.0, high: 5.0`
   - TruncatedNormal base: `low: 0.0, high: 5.0`
 - Spline domain = `[range_min, range_min + interval_width]`. Must match base distribution support:
   - Normal base: `range_min: -4, interval_width: 8` → domain [-4, 4]
   - TruncatedNormal base: `range_min: 0, interval_width: 5` → domain [0, 5]
-- **TruncatedNormal(0,5) fix**: replaces `lognormal` to eliminate unbounded upper tail that caused CI90 >> 1 via linear spline extrapolation.
+- **Scale + TruncatedNormal(0,5) fails** on non-DLA targets (NaN at init). Use non-scale `spline_nf_truncated` or `truncated_baseline` for ofen_g/ofen_f/pl2.
+- `truncated_baseline` uses custom `multivariate_truncated_normal` distribution (hard-codes low/high).
 
 ## Environment
 
