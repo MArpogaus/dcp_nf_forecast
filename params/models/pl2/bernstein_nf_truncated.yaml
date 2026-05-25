@@ -3,25 +3,33 @@ fit_kwargs:
   batch_size: 256
   early_stopping_patience: 20
   epochs: 400
-  learning_rate: 0.0005
+  learning_rate:
+    scheduler_kwargs:
+      decay_steps: 22000
+      initial_learning_rate: 0.0005
+    scheduler_name: CosineDecay
   verbose: true
 model_kwargs:
   base_distribution_kwargs:
     distribution_name: truncated_normal
-    low: 0.0
     high: 5.0
-  bijector: RationalQuadraticSpline
+    low: 0.0
+  bijector: BernsteinPolynomial
   bijector_kwargs:
-    range_min: 0
+    domain:
+    - 0.0
+    - 5.0
+    extrapolation: false
   distribution: masked_autoregressive_flow
+  invert: true
   num_layers: 1
-  num_parameters: 35
-  parameters_constraint_fn: hybrid_flows.activations.get_spline_param_constrain_fn
+  num_parameters: 8
+  parameters_constraint_fn: hybrid_flows.activations.get_thetas_constrain_fn
   parameters_constraint_fn_kwargs:
-    interval_width: 5
-    min_bin_width: 0.001
-    min_slope: 0.001
-    nbins: 12
+    allow_flexible_bounds: false
+    bounds: none
+    high: 5.0
+    low: 0.0
   parameters_fn_kwargs:
     activation: relu
     conditional: true

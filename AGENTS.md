@@ -9,17 +9,24 @@
 - `dvc.yaml` — DVC pipeline definition (foreach over targets × models)
 - `hpo_study.md` — HPO phase log
 
+## Model naming
+
+Models use suffix indicating base distribution:
+- `*_truncated` = `truncated_normal(0, 5)` base (replaces old `*_lognormal`)
+- `*` (no suffix) = `normal(0, 1)` base
+- `*_baseline` = simple diagonal distributions (not NF)
+
 ## Config rules
 
-- Bernstein `domain: [0.0, 1.0]` always (matches data in [0,1])
+- `truncated_normal(0, 5)` is the standard truncated base for all NF models
+- Bernstein `domain: [0.0, 5.0]` always for truncated models
 - `parameters_constraint_fn_kwargs.low`/`.high` must match base distribution support:
   - Normal base: `low: -5.0, high: 5.0`
-  - LogNormal base: `low: 0.007, high: 148`
-- Spline domain = `[range_min, range_min + interval_width]`. Must match base distribution support.
+  - TruncatedNormal base: `low: 0.0, high: 5.0`
+- Spline domain = `[range_min, range_min + interval_width]`. Must match base distribution support:
   - Normal base: `range_min: -4, interval_width: 8` → domain [-4, 4]
-  - LogNormal base: `range_min: 0` → domain [0, interval_width]
-  - TruncatedNormal base: `range_min` should match `low`, `interval_width = high - low`
-- **LogNormal base problem**: unbounded upper tail → linear spline extrapolation → extreme samples (CI90 >> 1). Fix: use `truncated_normal` with bounded support instead.
+  - TruncatedNormal base: `range_min: 0, interval_width: 5` → domain [0, 5]
+- **TruncatedNormal(0,5) fix**: replaces `lognormal` to eliminate unbounded upper tail that caused CI90 >> 1 via linear spline extrapolation.
 
 ## Environment
 
@@ -34,7 +41,7 @@
 # Activate venv first
 source /app/.venv/bin/activate
 
-# Run via DVC (now works correctly):
+# Run via DVC:
 dvc repro train@dataset<N>-<model>
 
 # Or run directly:

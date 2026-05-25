@@ -3,7 +3,11 @@ fit_kwargs:
   batch_size: 256
   early_stopping_patience: 20
   epochs: 400
-  learning_rate: 0.0005
+  learning_rate:
+    scheduler_kwargs:
+      decay_steps: 22000
+      initial_learning_rate: 0.0005
+    scheduler_name: CosineDecay
   verbose: true
 model_kwargs:
   base_distribution_kwargs:

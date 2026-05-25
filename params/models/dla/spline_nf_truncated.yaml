@@ -3,13 +3,18 @@ fit_kwargs:
   batch_size: 256
   early_stopping_patience: 20
   epochs: 400
-  learning_rate: 0.0005
+  learning_rate:
+    scheduler_kwargs:
+      decay_steps: 22000
+      initial_learning_rate: 0.0005
+    scheduler_name: CosineDecay
+  max_epochs: 400
   verbose: true
 model_kwargs:
   base_distribution_kwargs:
     distribution_name: truncated_normal
-    low: 0.0
     high: 5.0
+    low: 0.0
   bijector: RationalQuadraticSpline
   bijector_kwargs:
     range_min: 0

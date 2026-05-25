@@ -11,7 +11,7 @@ fit_kwargs:
     scheduler_name: CosineDecay
   verbose: true
 model_kwargs:
-  distribution: multivariate_lognormal
+  distribution: multivariate_truncated_normal
   parameters_fn_kwargs:
     activation: relu
     batch_norm: false
@@ -20,3 +20,6 @@ model_kwargs:
     hidden_units:
     - 256
     - 256
+  truncated:
+    high: 5.0
+    low: 0.0
