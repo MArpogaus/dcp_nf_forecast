@@ -1,8 +1,8 @@
 compile_kwargs: {}
 fit_kwargs:
   batch_size: 256
-  early_stopping_patience: 20
-  epochs: 400
+  early_stopping_patience: 10
+  epochs: 200
   learning_rate: 0.0005
   verbose: true
 model_kwargs:
@@ -19,8 +19,8 @@ model_kwargs:
       conditional: true
       dropout: 0
       hidden_units:
-      - 256
-      - 256
+      - 128
+      - 128
       parameter_shape:
       - 48
     parameters_slice_size: 1
@@ -44,8 +44,8 @@ model_kwargs:
       conditional: true
       dropout: 0
       hidden_units:
-      - 256
-      - 256
+      - 128
+      - 128
       parameter_shape:
       - 48
       - 12
@@ -55,5 +55,5 @@ model_kwargs:
   parameters_fn_kwargs:
     activation: relu
     hidden_units:
-    - 256
-    - 256
+    - 128
+    - 128
