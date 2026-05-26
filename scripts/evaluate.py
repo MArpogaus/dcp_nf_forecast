@@ -28,6 +28,7 @@ from matplotlib.figure import Figure
 
 from dcp_nf_forecast.models import build_model
 from dcp_nf_forecast.utils import read_dataframe, setup_logging, setup_plotting_style
+from dcp_nf_forecast.validation import plot_pit_histogram
 logger = logging.getLogger(__name__)
 
 
@@ -162,6 +163,39 @@ def plot_forecast_with_intervals(
     fig.suptitle(title, fontsize=11)
     fig.supxlabel(r"Test sample index", fontsize=9)
     fig.supylabel(r"Value", fontsize=9)
+    fig.tight_layout()
+    return fig
+
+
+def plot_pit_histogram_grid(
+    y_true: np.ndarray,
+    samples: np.ndarray,
+    n_bins: int = 20,
+    title: str = "",
+) -> Figure:
+    n_steps = y_true.shape[1]
+    n_cols = min(4, n_steps)
+    n_rows = int(np.ceil(n_steps / n_cols))
+    width, height = n_cols * 2.8, n_rows * 2.2
+    fig, axes = plt.subplots(
+        n_rows, n_cols, figsize=(width, height), sharex=True, sharey=True
+    )
+    axes = axes.flatten() if n_steps > 1 else [axes]
+
+    for step in range(n_steps):
+        ax = axes[step]
+        plot_pit_histogram(
+            observations=y_true[:, step],
+            samples=samples[:, :, step],
+            n_bins=n_bins,
+            ax=ax,
+        )
+        ax.set_title(rf"$t + {step + 1}$", fontsize=9)
+
+    for j in range(n_steps, len(axes)):
+        axes[j].set_visible(False)
+
+    fig.suptitle(rf"PIT Histogram -- {title}", fontsize=11)
     fig.tight_layout()
     return fig
 
@@ -319,6 +353,15 @@ def main() -> None:
             )
             log_and_save_figure(fig, str(out_dir), "forecast", "pdf", dpi=300)
             log_and_save_figure(fig, str(out_dir), "forecast", "png", dpi=150)
+            plt.close(fig)
+
+            logger.info("Generating PIT histogram ...")
+            fig = plot_pit_histogram_grid(
+                y_test, samples, n_bins=20,
+                title=f"{args.model} -- {args.target_name}",
+            )
+            log_and_save_figure(fig, str(out_dir), "pit_histogram", "pdf", dpi=300)
+            log_and_save_figure(fig, str(out_dir), "pit_histogram", "png", dpi=150)
             plt.close(fig)
 
             mlflow.log_metrics(metrics)
