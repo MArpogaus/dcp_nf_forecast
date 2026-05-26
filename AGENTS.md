@@ -96,3 +96,49 @@ python scripts/evaluate.py --model <model> --stage-name evaluate@dataset<N>-<mod
 - Run name: `<model>_<target>`
 - Log dir: `mlruns/` (gitignored)
 - Tags: `stage: training`, `stage: evaluation`
+
+## Summary docs
+
+- `docs/hpo_summary.md` — publication-oriented results summary: dataset, model set, experiment setup, per-target results tables, cross-target winners, discussion
+- `docs/model_architecture.md` — detailed architecture description of all model variants (two-layer MAF MADE + nested FC parameterization, parameter routing, bijector composition, per-variant breakdown with flow diagrams)
+- `scripts/report_hpo_results.py` — queries MLflow, prints terminal tables, generates LaTeX (`--latex --output tables.tex`)
+
+### Updating summaries after new evaluations
+
+After running new model evaluations (e.g., the Scale+Shift models from Phase 8), update both summary docs:
+
+1. **Query MLflow and regenerate LaTeX tables:**
+   ```bash
+   source /app/.venv/bin/activate && python scripts/report_hpo_results.py --latex --output tables.tex
+   ```
+   Review the terminal output for new entries.
+
+2. **Update `docs/hpo_summary.md`:**
+   - Add new rows to the per-target results tables (Section 4.1–4.4) for any newly evaluated models. Keep ranking by NLL.
+   - If a new model becomes the best for any target, update the winner row in that target's section and the Cross-Target Winners Summary (Section 4.5).
+   - Move newly-evaluated models from "Models Without Evaluation Results" (Section 4.6) into the main results tables.
+   - Update the discussion (Section 5) if new findings emerge (e.g., Shift bijector impact, Scale+Shift on ofen_g_koks).
+   - Run `scripts/report_hpo_results.py` without flags to capture any new results for the terminal view.
+
+3. **Update `docs/model_architecture.md`** only if model architectures change (not needed for new evaluations of existing architectures).
+
+4. **MLflow run IDs for reference:**
+   - Experiment 85: `dcp_nf_forecast-dla`
+   - Experiment 86: `dcp_nf_forecast-ofen_g_koks`
+   - Experiment 87: `dcp_nf_forecast-ofen_f_koks`
+   - Experiment 88: `dcp_nf_forecast-pl2`
+
+## Parallel evaluation
+
+- `scripts/dvc_repro_parallel.sh` runs all evaluate stages across both GPUs.
+- Default: `dvc repro <stage>` (full repro checking deps).
+- `--force-evaluation` flag: `dvc repro --single-item --force <stage>` (re-eval only, no training).
+- Splits stages evenly across GPU 0 and GPU 1; runs both batches in background.
+- Logs written to `logs/gpu*`.
+
+```bash
+./scripts/dvc_repro_parallel.sh              # full repro
+./scripts/dvc_repro_parallel.sh --force-evaluation  # force re-eval
+```
+
+- After config changes, always disable test mode (`test_mode: false` in params.yaml) before running the full repro.
