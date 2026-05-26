@@ -11,8 +11,14 @@ matplotlib.use("Agg")  # noqa: I001
 import matplotlib.pyplot as plt  # noqa: I001, E402
 import mlflow
 import numpy as np
+import pandas as pd
 import tensorflow as tf
+import tensorflow_probability as tfp
 import yaml
+
+gpus = tf.config.list_physical_devices("GPU")
+for gpu in gpus:
+    tf.config.experimental.set_memory_growth(gpu, True)
 from hybrid_flows.utils.mlflow import (
     log_and_save_figure,
     log_cfg,
@@ -21,8 +27,8 @@ from hybrid_flows.utils.mlflow import (
 from matplotlib.figure import Figure
 
 from dcp_nf_forecast.models import build_model
-from dcp_nf_forecast.utils import load_data, setup_logging, setup_plotting_style
-from dcp_nf_forecast.validation import plot_pit_histogram, plot_qq
+from dcp_nf_forecast.utils import read_dataframe, setup_logging, setup_plotting_style
+from dcp_nf_forecast.validation import plot_pit_histogram
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +38,7 @@ def sample_predictions(
     x: np.ndarray,
     n_samples: int,
     batch_size: int,
-) -> np.ndarray:
+) -> tf.Tensor:
     """Sample from the predictive distribution in batches.
 
     Parameters
@@ -48,26 +54,32 @@ def sample_predictions(
 
     Returns
     -------
-    np.ndarray
-        Samples, shape ``(n_samples, n, prediction_horizon)``.
+    tf.Tensor
+        Samples, shape ``(n_samples, n, prediction_horizon)``,
+        still on GPU.
 
     """
     n = len(x)
-    all_samples: list[np.ndarray] = []
+    all_samples: list[tf.Tensor] = []
     pad = 0
     remainder = n % batch_size
     if remainder:
         pad = batch_size - remainder
         x = np.pad(x, ((0, pad), (0, 0)), mode="edge")
-    for i in range(0, len(x), batch_size):
-        batch = x[i : i + batch_size]
+
+    @tf.function(reduce_retracing=True)
+    def sample_batch(batch: tf.Tensor, k: tf.Tensor) -> tf.Tensor:
         dist = model(batch, training=False)
-        batch_samples = dist.sample(n_samples)
-        all_samples.append(np.array(batch_samples, dtype=np.float32))
-    result = np.concatenate(all_samples, axis=1)
+        return tf.cast(dist.sample(k), tf.float32)
+
+    for i in range(0, len(x), batch_size):
+        batch = tf.constant(x[i : i + batch_size])
+        samples_i = sample_batch(batch, tf.constant(n_samples))
+        all_samples.append(samples_i)
+
+    result = tf.concat(all_samples, axis=1)
     if pad:
         result = result[:, :n, :]
-    del all_samples
     return result
 
 
@@ -209,89 +221,44 @@ def plot_pit_histogram_grid(
     return fig
 
 
-def plot_qq_grid(
-    y_true: np.ndarray,
+def save_sample_df(
     samples: np.ndarray,
-    n_quantiles: int = 21,
-    title: str = "",
-) -> Figure:
-    """Plot QQ plots for each forecast step.
+    times: pd.Index,
+    out_dir: Path,
+    data_format: str,
+) -> Path:
+    """Save samples as a 2D DataFrame with (time, sample) MultiIndex.
 
     Parameters
     ----------
-    y_true : np.ndarray
-        True observed values, shape ``(n, prediction_horizon)``.
     samples : np.ndarray
-        Samples from predictive distribution, shape
-        ``(n_samples, n, prediction_horizon)``.
-    n_quantiles : int, optional
-        Number of quantile levels, by default ``21``.
-    title : str, optional
-        Plot title, by default ``""``.
+        Shape ``(n_samples, n, prediction_horizon)``.
+    times : pd.Index
+        Datetime index for each test sample, length ``n``.
+    out_dir : Path
+        Output directory.
+    data_format : str
+        ``"feather"`` or ``"csv"``.
 
     Returns
     -------
-    Figure
-        The figure object.
+    Path
+        Path to the saved file.
 
     """
-    n_steps = y_true.shape[1]
-    n_cols = min(4, n_steps)
-    n_rows = int(np.ceil(n_steps / n_cols))
-    width, height = n_cols * 2.8, n_rows * 2.2
-    fig, axes = plt.subplots(
-        n_rows, n_cols, figsize=(width, height), sharex=True, sharey=True
+    n_samples, n_eval, prediction_horizon = samples.shape
+    sample_numbers = np.tile(np.arange(n_samples), n_eval)
+    sample_times = np.repeat(times, n_samples)
+    idx = pd.MultiIndex.from_arrays(
+        [sample_times, sample_numbers],
+        names=["forecast_origin", "sample_number"],
     )
-    axes = axes.flatten() if n_steps > 1 else [axes]
-
-    for step in range(n_steps):
-        ax = axes[step]
-        plot_qq(
-            observations=y_true[:, step],
-            samples=samples[:, :, step],
-            n_quantiles=n_quantiles,
-            ax=ax,
-        )
-        ax.set_title(rf"$t + {step + 1}$", fontsize=9)
-
-    for j in range(n_steps, len(axes)):
-        axes[j].set_visible(False)
-
-    fig.suptitle(rf"QQ Plot -- {title}", fontsize=11)
-    fig.tight_layout()
-    return fig
-
-
-def compute_metrics(
-    y_true: np.ndarray,
-    samples: np.ndarray,
-) -> dict:
-    """Compute point forecast metrics from samples.
-
-    Parameters
-    ----------
-    y_true : np.ndarray
-        True observed values, shape ``(n, prediction_horizon)``.
-    samples : np.ndarray
-        Samples from predictive distribution, shape
-        ``(n_samples, n, prediction_horizon)``.
-
-    Returns
-    -------
-    dict
-        Dictionary with ``rmse``, ``mae``, and ``mean_90_ci_width``.
-
-    """
-    median = np.percentile(samples, 50, axis=0)
-    rmse = float(np.sqrt(np.mean((y_true - median) ** 2)))
-    mae = float(np.mean(np.abs(y_true - median)))
-    q_skill = np.percentile(samples, [5, 95], axis=0)
-    mean_90_ci_width = float(np.mean(q_skill[1] - q_skill[0]))
-    return {
-        "rmse": rmse,
-        "mae": mae,
-        "mean_90_ci_width": mean_90_ci_width,
-    }
+    flat = samples.transpose(1, 0, 2).reshape(n_eval * n_samples, prediction_horizon)
+    cols = [f"step_{s + 1}" for s in range(prediction_horizon)]
+    df = pd.DataFrame(flat, index=idx, columns=cols)
+    fp = out_dir / "samples"
+    df.reset_index().to_feather(fp.with_suffix(".feather"))
+    return fp.with_suffix(".feather")
 
 
 def main() -> None:
@@ -319,12 +286,16 @@ def main() -> None:
     processed_dir = Path(params["paths"]["data_processed"]) / args.target_name
     results_dir = Path("results") / args.target_name / args.model
 
-    x_test, y_test = load_data(processed_dir, "test", data_format)
+    x_test_df = read_dataframe(processed_dir / "X_test", data_format)
+    y_test_df = read_dataframe(processed_dir / "y_test", data_format)
+    x_test = x_test_df.values.astype(np.float32)
+    y_test = y_test_df.values.astype(np.float32)
     covariate_dim = x_test.shape[1]
 
-    n_eval = min(len(x_test), 10 if test_mode else 150)
+    n_eval = 10 if test_mode else len(x_test)
     x_test, y_test = x_test[:n_eval], y_test[:n_eval]
-    batch_size = min(n_eval, 16)
+    y_test_times = y_test_df.index[:n_eval]
+    batch_size = min(n_eval, 8)
 
     logger.info("n_samples=%d test_mode=%s", n_samples, test_mode)
 
@@ -366,19 +337,39 @@ def main() -> None:
             logger.info("NLL: %.4f", nll)
 
             logger.info("Sampling %d draws from predictive distribution ...", n_samples)
-            samples = sample_predictions(
+            samples_tf = sample_predictions(
                 model, x_test, n_samples=n_samples, batch_size=batch_size
             )
-            logger.info("Sampled shape: %s", samples.shape)
+            logger.info("Sampled shape: %s", samples_tf.shape)
+
+            logger.info("Computing metrics on GPU ...")
+            y_true_tf = tf.constant(y_test, dtype=tf.float32)
+            median = tfp.stats.percentile(samples_tf, 50.0, axis=0)
+            rmse = tf.sqrt(tf.reduce_mean((y_true_tf - median) ** 2))
+            mae = tf.reduce_mean(tf.abs(y_true_tf - median))
+            q95 = tfp.stats.percentile(samples_tf, 95.0, axis=0)
+            q05 = tfp.stats.percentile(samples_tf, 5.0, axis=0)
+            mean_ci90 = tf.reduce_mean(q95 - q05)
+            metrics = {
+                "rmse": float(rmse.numpy()),
+                "mae": float(mae.numpy()),
+                "mean_90_ci_width": float(mean_ci90.numpy()),
+                "nll": nll,
+            }
+            logger.info("Metrics: %s", metrics)
+
+            samples = samples_tf.numpy()
+            del samples_tf
 
             out_dir = results_dir / "evaluation"
             out_dir.mkdir(parents=True, exist_ok=True)
 
+            logger.info("Saving samples to feather ...")
+            save_sample_df(samples, y_test_times, out_dir, data_format)
+
             logger.info("Generating forecast plot ...")
             fig = plot_forecast_with_intervals(
-                y_test,
-                samples,
-                n_show=48,
+                y_test, samples, n_show=48,
                 title=f"{args.model} -- {args.target_name}",
             )
             log_and_save_figure(fig, str(out_dir), "forecast", "pdf", dpi=300)
@@ -387,29 +378,12 @@ def main() -> None:
 
             logger.info("Generating PIT histogram ...")
             fig = plot_pit_histogram_grid(
-                y_test,
-                samples,
-                n_bins=20,
+                y_test, samples, n_bins=20,
                 title=f"{args.model} -- {args.target_name}",
             )
             log_and_save_figure(fig, str(out_dir), "pit_histogram", "pdf", dpi=300)
             log_and_save_figure(fig, str(out_dir), "pit_histogram", "png", dpi=150)
             plt.close(fig)
-
-            logger.info("Generating QQ plot ...")
-            fig = plot_qq_grid(
-                y_test,
-                samples,
-                n_quantiles=21,
-                title=f"{args.model} -- {args.target_name}",
-            )
-            log_and_save_figure(fig, str(out_dir), "qq_plot", "pdf", dpi=300)
-            log_and_save_figure(fig, str(out_dir), "qq_plot", "png", dpi=150)
-            plt.close(fig)
-
-            metrics = compute_metrics(y_test, samples)
-            metrics["nll"] = nll
-            logger.info("Metrics: %s", metrics)
 
             mlflow.log_metrics(metrics)
             with open(out_dir / "metrics.yaml", "w") as f:
