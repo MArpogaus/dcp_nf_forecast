@@ -18,8 +18,9 @@ Target & Model & NLL & RMSE & MAE & CI90 & LR & Hidden & Epochs & Nbins & \#Para
 \textsc{dla} & Bernstein (log) & -158.55 & 0.0386 & 0.0321 & 0.1448 & 0.001 (CosineDecay) & [256,256] & 400 & — & 8 & lognormal \\
 \textsc{dla} & Spline+Scale (log) & -157.98 & 116.6718 & 29.6099 & 8673.0377 & 0.001 (CosineDecay) & [128,128] & 200 & — & 24 & lognormal \\
 \textsc{dla} & Trunc-$\mathcal{N}$-base & -147.07 & 0.0127 & 0.0089 & 0.0420 & 0.001 & [256,256] & 400 & — & — & — \\
+\textsc{dla} & Spline+Scale+Shift & -144.61 & 0.0162 & 0.0117 & 0.0326 & 0.0005 & [256,256] & 400 & — & 37 & normal \\
+\textsc{dla} & Spline+Scale (trunc) & -123.51 & 0.0265 & 0.0224 & 0.0568 & 0.001 (CosineDecay) & [256,256] & 400 & — & 24 & truncated_normal \\
 \textsc{dla} & $\mathcal{N}$-base & -111.62 & 0.1011 & 0.0789 & 1.2419 & 0.001 (CosineDecay) & [128,128] & 200 & — & — & — \\
-\textsc{dla} & Spline+Scale (trunc) & -102.82 & 0.0247 & 0.0196 & 0.0255 & 0.001 (CosineDecay) & [256,256] & 400 & — & 24 & truncated_normal \\
 \textsc{dla} & Bernstein & 42.34 & 0.0511 & 0.0446 & 0.0767 & 0.001 (CosineDecay) & [256,256] & 400 & — & 8 & normal \\
 \textsc{ofen\_f\_koks} & spline_nf_scale_lognormal_ofen_f & -195.93 & 0.0115 & 0.0058 & 0.0229 & 0.001 (CosineDecay) & [256,256] & 400 & — & 24 & truncated_normal \\
 \textsc{ofen\_f\_koks} & spline_nf_ofen_f & -191.67 & 0.0288 & 0.0278 & 0.1136 & 0.001 & [256,256] & 400 & 12 & 35 & normal \\
@@ -32,6 +33,7 @@ Target & Model & NLL & RMSE & MAE & CI90 & LR & Hidden & Epochs & Nbins & \#Para
 \textsc{ofen\_f\_koks} & bernstein_nf_lognormal_ofen_f & -161.35 & 0.0262 & 0.0253 & 0.0939 & 0.0005 (CosineDecay) & [256,256] & 400 & — & 8 & lognormal \\
 \textsc{ofen\_f\_koks} & normal_baseline_ofen_f & -120.61 & 0.1138 & 0.0824 & 1.2765 & 0.001 (CosineDecay) & [256,256] & 400 & — & — & — \\
 \textsc{ofen\_f\_koks} & bernstein_nf_ofen_f & 287.98 & 0.0727 & 0.0698 & 0.0767 & 0.0005 (CosineDecay) & [256,256] & 400 & — & 8 & normal \\
+\textsc{ofen\_f\_koks} & spline_nf_scale_shift_ofen_f & NaN & NaN & NaN & NaN & 0.0005 & [256,256] & 400 & — & 37 & normal \\
 \textsc{ofen\_g\_koks} & bernstein_nf_scale_lognormal_ofen_g & -179.87 & 0.0547 & 0.0132 & 0.0405 & 0.0005 & [128,128] & 200 & — & 13 & lognormal \\
 \textsc{ofen\_g\_koks} & spline_nf_scale_ofen_g & -170.80 & 0.0551 & 0.0129 & 0.0338 & 0.001 & [128,128] & 200 & — & 36 & normal \\
 \textsc{ofen\_g\_koks} & bernstein_nf_lognormal_ofen_g & -163.73 & 0.0961 & 0.0772 & 0.2355 & 0.0005 (CosineDecay) & [256,256] & 400 & — & 8 & lognormal \\
@@ -156,6 +158,11 @@ Iter & NLL & LR & Hidden & Epochs & Pat. & Nbins & Int. & \#Params & Base \\
 \midrule
 1 & -111.62 & 0.001 (CosineDecay) & [128,128] & 200 & 10 & — & — & — & — \\
 2 & -107.56 & 0.001 (CosineDecay) & [256,256] & 400 & 20 & — & — & — & — \\
+3 & -70.27 & 0.001 & [256,256] & 400 & 20 & — & — & — & — \\
+4 & -70.27 & 0.001 & [256,256] & 400 & 20 & — & — & — & — \\
+5 & -70.27 & 0.001 & [256,256] & 400 & 20 & — & — & — & — \\
+6 & -70.27 & 0.001 & [256,256] & 400 & 20 & — & — & — & — \\
+7 & -70.27 & 0.001 & [256,256] & 400 & 20 & — & — & — & — \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -169,6 +176,9 @@ Iter & NLL & LR & Hidden & Epochs & Pat. & Nbins & Int. & \#Params & Base \\
 \midrule
 1 & -157.58 & 0.001 & [128,128] & 200 & 10 & 12 & 8 & 35 & normal \\
 2 & -178.20 & 0.001 & [256,256] & 400 & 20 & 12 & 8 & 35 & normal \\
+3 & NaN & 0.001 & [256,256] & 400 & 20 & 12 & 10 & 35 & normal \\
+4 & NaN & 0.001 & [256,256] & 400 & 20 & 12 & 10 & 35 & normal \\
+5 & -161.09 & 0.001 & [256,256] & 400 & 20 & 12 & 10 & 35 & normal \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -199,6 +209,8 @@ Iter & NLL & LR & Hidden & Epochs & Pat. & Nbins & Int. & \#Params & Base \\
 \midrule
 1 & -166.40 & 0.001 & [128,128] & 200 & 10 & — & — & 36 & normal \\
 2 & -143.14 & 0.001 & [256,256] & 400 & 20 & — & — & 36 & normal \\
+3 & NaN & 0.001 & [256,256] & 400 & 20 & — & — & 36 & normal \\
+4 & -141.49 & 0.001 & [256,256] & 400 & 20 & — & — & 36 & normal \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -218,6 +230,19 @@ Iter & NLL & LR & Hidden & Epochs & Pat. & Nbins & Int. & \#Params & Base \\
 \end{table}
 
 \begin{table}[htbp]
+\caption{HPO parameter variations for \texttt{spline\_nf\_scale\_truncated} on \texttt{dla}.}
+\label{tab:hpo_var_dla_spline_nf_scale_truncated}
+\begin{tabular}{cS[table-format=-4.2]cccccccc}
+\toprule
+Iter & NLL & LR & Hidden & Epochs & Pat. & Nbins & Int. & \#Params & Base \\
+\midrule
+1 & -102.82 & 0.001 (CosineDecay) & [256,256] & 400 & 20 & — & — & 24 & truncated_normal \\
+2 & -123.51 & 0.001 (CosineDecay) & [256,256] & 400 & 20 & — & — & 24 & truncated_normal \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[htbp]
 \caption{HPO parameter variations for \texttt{spline\_nf\_truncated} on \texttt{dla}.}
 \label{tab:hpo_var_dla_spline_nf_truncated}
 \begin{tabular}{cS[table-format=-4.2]cccccccc}
@@ -226,6 +251,27 @@ Iter & NLL & LR & Hidden & Epochs & Pat. & Nbins & Int. & \#Params & Base \\
 \midrule
 1 & -183.72 & 0.0005 (CosineDecay) & [256,256] & 400 & 20 & 12 & 5 & 35 & truncated_normal \\
 2 & -197.66 & 0.0005 & [256,256] & 400 & 20 & 12 & 5 & 35 & truncated_normal \\
+3 & NaN & 0.0005 & [256,256] & 400 & 20 & 12 & 5 & 35 & truncated_normal \\
+4 & -164.77 & 0.0005 & [256,256] & 400 & 20 & 12 & 5 & 35 & truncated_normal \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+\caption{HPO parameter variations for \texttt{truncated\_baseline} on \texttt{dla}.}
+\label{tab:hpo_var_dla_truncated_baseline}
+\begin{tabular}{cS[table-format=-4.2]cccccccc}
+\toprule
+Iter & NLL & LR & Hidden & Epochs & Pat. & Nbins & Int. & \#Params & Base \\
+\midrule
+1 & -147.07 & 0.001 & [256,256] & 400 & 20 & — & — & — & — \\
+2 & -124.53 & 0.001 & [256,256] & 400 & 20 & — & — & — & — \\
+3 & NaN & 0.001 & [256,256] & 400 & 20 & — & — & — & — \\
+4 & -124.53 & 0.001 & [256,256] & 400 & 20 & — & — & — & — \\
+5 & -124.53 & 0.001 & [256,256] & 400 & 20 & — & — & — & — \\
+6 & -124.53 & 0.001 & [256,256] & 400 & 20 & — & — & — & — \\
+7 & NaN & 0.001 & [256,256] & 400 & 20 & — & — & — & — \\
+8 & -124.53 & 0.001 & [256,256] & 400 & 20 & — & — & — & — \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -291,6 +337,11 @@ Iter & NLL & LR & Hidden & Epochs & Pat. & Nbins & Int. & \#Params & Base \\
 \midrule
 1 & -118.61 & 0.001 (CosineDecay) & [128,128] & 200 & 10 & — & — & — & — \\
 2 & -120.61 & 0.001 (CosineDecay) & [256,256] & 400 & 20 & — & — & — & — \\
+3 & -94.58 & 0.001 & [256,256] & 400 & 20 & — & — & — & — \\
+4 & -94.58 & 0.001 & [256,256] & 400 & 20 & — & — & — & — \\
+5 & -94.58 & 0.001 & [256,256] & 400 & 20 & — & — & — & — \\
+6 & -94.58 & 0.001 & [256,256] & 400 & 20 & — & — & — & — \\
+7 & -94.58 & 0.001 & [256,256] & 400 & 20 & — & — & — & — \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -304,6 +355,14 @@ Iter & NLL & LR & Hidden & Epochs & Pat. & Nbins & Int. & \#Params & Base \\
 \midrule
 1 & -178.87 & 0.001 & [128,128] & 200 & 10 & 12 & 8 & 35 & normal \\
 2 & -191.67 & 0.001 & [256,256] & 400 & 20 & 12 & 8 & 35 & normal \\
+3 & NaN & 0.001 & [256,256] & 400 & 20 & 12 & 10 & 35 & normal \\
+4 & NaN & 0.001 & [256,256] & 400 & 20 & 12 & 10 & 35 & normal \\
+5 & NaN & 0.001 & [256,256] & 400 & 20 & 12 & 10 & 35 & normal \\
+6 & NaN & 0.001 & [256,256] & 400 & 20 & 12 & 10 & 35 & normal \\
+7 & NaN & 0.001 & [256,256] & 400 & 20 & 12 & 10 & 35 & normal \\
+8 & -146.54 & 0.001 & [256,256] & 400 & 20 & 12 & 10 & 35 & normal \\
+9 & NaN & 0.001 & [256,256] & 400 & 20 & 12 & 10 & 35 & normal \\
+10 & -146.54 & 0.001 & [256,256] & 400 & 20 & 12 & 10 & 35 & normal \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -317,6 +376,39 @@ Iter & NLL & LR & Hidden & Epochs & Pat. & Nbins & Int. & \#Params & Base \\
 \midrule
 1 & -187.81 & 0.001 & [128,128] & 200 & 10 & — & — & 36 & normal \\
 2 & -186.60 & 0.001 & [256,256] & 400 & 20 & — & — & 36 & normal \\
+3 & NaN & 0.001 & [256,256] & 400 & 20 & — & — & 36 & normal \\
+4 & -158.64 & 0.001 & [256,256] & 400 & 20 & — & — & 36 & normal \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+\caption{HPO parameter variations for \texttt{spline\_nf\_truncated\_ofen\_f} on \texttt{ofen\_f\_koks}.}
+\label{tab:hpo_var_ofen_f_koks_spline_nf_truncated_ofen_f}
+\begin{tabular}{cS[table-format=-4.2]cccccccc}
+\toprule
+Iter & NLL & LR & Hidden & Epochs & Pat. & Nbins & Int. & \#Params & Base \\
+\midrule
+1 & -164.78 & 0.0005 & [256,256] & 400 & 20 & 12 & 5 & 35 & truncated_normal \\
+2 & NaN & 0.0005 & [256,256] & 400 & 20 & 12 & 5 & 35 & truncated_normal \\
+3 & -132.17 & 0.0005 & [256,256] & 400 & 20 & 12 & 5 & 35 & truncated_normal \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+\caption{HPO parameter variations for \texttt{truncated\_baseline\_ofen\_f} on \texttt{ofen\_f\_koks}.}
+\label{tab:hpo_var_ofen_f_koks_truncated_baseline_ofen_f}
+\begin{tabular}{cS[table-format=-4.2]cccccccc}
+\toprule
+Iter & NLL & LR & Hidden & Epochs & Pat. & Nbins & Int. & \#Params & Base \\
+\midrule
+1 & -188.06 & 0.001 & [256,256] & 400 & 20 & — & — & — & — \\
+2 & -140.89 & 0.001 & [256,256] & 400 & 20 & — & — & — & — \\
+3 & NaN & 0.001 & [256,256] & 400 & 20 & — & — & — & — \\
+4 & -140.89 & 0.001 & [256,256] & 400 & 20 & — & — & — & — \\
+5 & NaN & 0.001 & [256,256] & 400 & 20 & — & — & — & — \\
+6 & -140.89 & 0.001 & [256,256] & 400 & 20 & — & — & — & — \\
 \bottomrule
 \end{tabular}
 \end{table}
