@@ -582,7 +582,7 @@ stages:
         log_level: info
         paths.data_processed: data/processed
         seed: 42
-        test_mode: true
+        test_mode: false
       params/models/dla/spline_nf_truncated.yaml:
         compile_kwargs: {}
         fit_kwargs:
@@ -618,15 +618,15 @@ stages:
     outs:
     - path: results/dla/spline_nf_truncated/metrics.yaml
       hash: md5
-      md5: dcf7dc34bc28dbb220ee8e8b5761e973
-      size: 150
+      md5: 831294cf419d3dcc260cae2ffb89f266
+      size: 154
     - path: results/dla/spline_nf_truncated/model_weights.h5
       hash: md5
-      md5: 3c67eef8dedfe0666c6b0c2773355d6f
+      md5: 3b2396fb5c9f83e1bae5f08e5de2b561
       size: 2055584
     - path: results/dla/spline_nf_truncated/parent_run_id.txt
       hash: md5
-      md5: 6f9f9877c41c2ea13e21ab87abb2ffe5
+      md5: ce82301ed16965f8a92a4bd03c9e409f
       size: 32
   evaluate@dataset0-spline_nf_truncated:
     cmd: "python scripts/evaluate.py --model spline_nf_truncated --stage-name evaluate@dataset0-spline_nf_truncated
@@ -896,7 +896,7 @@ stages:
         log_level: info
         paths.data_processed: data/processed
         seed: 42
-        test_mode: true
+        test_mode: false
       params/models/ofen_f_koks/spline_nf_truncated.yaml:
         compile_kwargs: {}
         fit_kwargs:
@@ -932,15 +932,15 @@ stages:
     outs:
     - path: results/ofen_f_koks/spline_nf_truncated/metrics.yaml
       hash: md5
-      md5: db0060859f3829397ebbb6d3eafc0c95
-      size: 150
+      md5: 0cdd64bc6b7bd9374b44fa5ff87214a2
+      size: 154
     - path: results/ofen_f_koks/spline_nf_truncated/model_weights.h5
       hash: md5
-      md5: a5546b4ada3105581edc5184b8841b42
+      md5: 9d11bc7ebb34c7d1714f444503f22c9b
       size: 2055584
     - path: results/ofen_f_koks/spline_nf_truncated/parent_run_id.txt
       hash: md5
-      md5: ac4f9e7e4ecd3e2dac15370190f12a04
+      md5: c0a8ea0b8a533bd5e8fa11ff8317945a
       size: 32
   evaluate@dataset2-spline_nf_truncated:
     cmd: "python scripts/evaluate.py --model spline_nf_truncated --stage-name evaluate@dataset2-spline_nf_truncated
@@ -1110,20 +1110,20 @@ stages:
       nfiles: 6
     - path: results/pl2/spline_nf_truncated/model_weights.h5
       hash: md5
-      md5: b25247d999ce65c9836098506dab3dc5
+      md5: 8d3a0394a103ec08af3f743bcae8f856
       size: 2055584
     - path: results/pl2/spline_nf_truncated/parent_run_id.txt
       hash: md5
-      md5: 60c82395661cca9518df4efd95a3a45e
+      md5: fee072e7dcec54fd0910fa987bf12d61
       size: 32
     - path: scripts/evaluate.py
       hash: md5
-      md5: 2001d0708546cbc3c98ca4ba9486aea6
-      size: 12780
+      md5: c17760cea53d07fe699f0ee2153092bf
+      size: 14358
     - path: src/dcp_nf_forecast/
       hash: md5
-      md5: 19a041b3a4895db7653a496c0f4f23e1.dir
-      size: 68285
+      md5: 29aaf27cf8b4b2d7d3a997866d6be3bd.dir
+      size: 68468
       nfiles: 16
     params:
       params.yaml:
@@ -1134,7 +1134,7 @@ stages:
         log_level: info
         paths.data_processed: data/processed
         seed: 42
-        test_mode: false
+        test_mode: true
       params/models/pl2/spline_nf_truncated.yaml:
         compile_kwargs: {}
         fit_kwargs:
@@ -1170,20 +1170,24 @@ stages:
     outs:
     - path: results/pl2/spline_nf_truncated/evaluation/forecast.pdf
       hash: md5
-      md5: 64961d65e5f3c7a3c6ff6bb91bb46126
-      size: 170085
+      md5: bf5a3c2078e8a3331091d8e6820769be
+      size: 51743
     - path: results/pl2/spline_nf_truncated/evaluation/metrics.yaml
       hash: md5
-      md5: 02d6feba4e291536f51679ca6197f0ea
-      size: 115
+      md5: bbef6bf0812457e1bc10ec568ac96ca9
+      size: 110
     - path: results/pl2/spline_nf_truncated/evaluation/pit_histogram.pdf
       hash: md5
-      md5: 681e3b990620f34b2610b3904bdd45d5
-      size: 49641
+      md5: 0db2d16c6623651c3158cbda79a76ac9
+      size: 44530
     - path: results/pl2/spline_nf_truncated/evaluation/qq_plot.pdf
       hash: md5
-      md5: 23a13ed5ad042f91cef6c8ca286b701e
-      size: 55054
+      md5: f61334c30b03ef0d62ed91e3191f77fe
+      size: 54935
+    - path: results/pl2/spline_nf_truncated/evaluation/samples.feather
+      hash: md5
+      md5: dc1ee4e21b6bc8cf9e3b82dabcbef8e7
+      size: 117426
   train@dataset0-spline_nf_scale_truncated:
     cmd: "python scripts/train.py --model spline_nf_scale_truncated --stage-name train@dataset0-spline_nf_scale_truncated
       --target-name dla\n"
@@ -1744,7 +1748,7 @@ stages:
         log_level: info
         paths.data_processed: data/processed
         seed: 42
-        test_mode: true
+        test_mode: false
       params/models/dla/truncated_baseline.yaml:
         compile_kwargs:
           jit_compile: false
@@ -1769,15 +1773,15 @@ stages:
     outs:
     - path: results/dla/truncated_baseline/metrics.yaml
       hash: md5
-      md5: ed4dce2404fbdf18f2c35bf935fb9e4c
-      size: 146
+      md5: 4d9bc8e665077f96aea17556cefa9f36
+      size: 151
     - path: results/dla/truncated_baseline/model_weights.h5
       hash: md5
-      md5: cb15e9754461e34b728f6d0543f309d3
+      md5: 239ba5c3bd8df964babe3a8fe1abcf6e
       size: 3374368
     - path: results/dla/truncated_baseline/parent_run_id.txt
       hash: md5
-      md5: de7500376c59f0595b71df1e9b58de2b
+      md5: 0fa4bde5feba141cf8926ea5942bd9a9
       size: 32
   train@dataset1-truncated_baseline:
     cmd: "python scripts/train.py --model truncated_baseline --stage-name train@dataset1-truncated_baseline
@@ -1866,7 +1870,7 @@ stages:
         log_level: info
         paths.data_processed: data/processed
         seed: 42
-        test_mode: true
+        test_mode: false
       params/models/ofen_f_koks/truncated_baseline.yaml:
         compile_kwargs:
           jit_compile: false
@@ -1891,15 +1895,15 @@ stages:
     outs:
     - path: results/ofen_f_koks/truncated_baseline/metrics.yaml
       hash: md5
-      md5: 915c99329b725321bbdcae68ee5262a0
+      md5: 1c939fea92c1f1b72541a2537b88789e
       size: 152
     - path: results/ofen_f_koks/truncated_baseline/model_weights.h5
       hash: md5
-      md5: 71449458cc3347b61acc1d42c1839be7
+      md5: d8715ef5795b5a161d6ba9d4ee092554
       size: 3472672
     - path: results/ofen_f_koks/truncated_baseline/parent_run_id.txt
       hash: md5
-      md5: 8b997611b952a410c53ac5a8cf9e496b
+      md5: 8045ee7938608d38374dd780d0969d10
       size: 32
   train@dataset3-truncated_baseline:
     cmd: "python scripts/train.py --model truncated_baseline --stage-name train@dataset3-truncated_baseline
@@ -2478,7 +2482,7 @@ stages:
         log_level: info
         paths.data_processed: data/processed
         seed: 42
-        test_mode: true
+        test_mode: false
       params/models/dla/normal_baseline.yaml:
         compile_kwargs:
           jit_compile: false
@@ -2501,15 +2505,15 @@ stages:
     outs:
     - path: results/dla/normal_baseline/metrics.yaml
       hash: md5
-      md5: ab8cbf03f1cdbc73e27826d025eb1453
-      size: 152
+      md5: 415a9fd1ad1a7deb1cae3e847e819ccd
+      size: 148
     - path: results/dla/normal_baseline/model_weights.h5
       hash: md5
-      md5: 5212b402979a9da99e559aae1b96ee79
+      md5: ba731f91c9b513717e45285ada1ba9de
       size: 3374368
     - path: results/dla/normal_baseline/parent_run_id.txt
       hash: md5
-      md5: 6d560a32cc8d24a4c93e423f3501d7cc
+      md5: a8fe8e51b8d0b9c5a91156addfbc0d76
       size: 32
   train@dataset0-spline_nf:
     cmd: "python scripts/train.py --model spline_nf --stage-name train@dataset0-spline_nf
@@ -2537,14 +2541,14 @@ stages:
         log_level: info
         paths.data_processed: data/processed
         seed: 42
-        test_mode: true
+        test_mode: false
       params/models/dla/spline_nf.yaml:
         compile_kwargs: {}
         fit_kwargs:
           batch_size: 256
           early_stopping_patience: 20
           epochs: 400
-          learning_rate: 0.0005
+          learning_rate: 0.001
           verbose: true
         model_kwargs:
           base_distribution_kwargs:
@@ -2571,15 +2575,15 @@ stages:
     outs:
     - path: results/dla/spline_nf/metrics.yaml
       hash: md5
-      md5: 3285ffafb8fa27682fd13097761cd9d4
-      size: 146
+      md5: cbb7b53d7c18af3c22752dd3fc076370
+      size: 150
     - path: results/dla/spline_nf/model_weights.h5
       hash: md5
-      md5: 79e99e113b762cc305bc55bb32f7510b
+      md5: 4df2cdfb92656365dfafc470f4f038c1
       size: 2055584
     - path: results/dla/spline_nf/parent_run_id.txt
       hash: md5
-      md5: d36c06f7f8a054e629ca8b892d8f3638
+      md5: 72ff6cdfb37729f749c78580526629b3
       size: 32
   train@dataset0-spline_nf_scale:
     cmd: "python scripts/train.py --model spline_nf_scale --stage-name train@dataset0-spline_nf_scale
@@ -2607,14 +2611,14 @@ stages:
         log_level: info
         paths.data_processed: data/processed
         seed: 42
-        test_mode: true
+        test_mode: false
       params/models/dla/spline_nf_scale.yaml:
         compile_kwargs: {}
         fit_kwargs:
           batch_size: 256
           early_stopping_patience: 20
           epochs: 400
-          learning_rate: 0.0005
+          learning_rate: 0.001
           verbose: true
         model_kwargs:
           base_distribution_kwargs:
@@ -2669,15 +2673,15 @@ stages:
     outs:
     - path: results/dla/spline_nf_scale/metrics.yaml
       hash: md5
-      md5: 56e6ed3a2750416b6c132542c0ca2512
+      md5: e3b515a164b0b79d242e003630911e16
       size: 150
     - path: results/dla/spline_nf_scale/model_weights.h5
       hash: md5
-      md5: 3fdcba9c101a7eaab29798bd048f7147
+      md5: 9a461797236bcb5500ff516284a71a19
       size: 4733616
     - path: results/dla/spline_nf_scale/parent_run_id.txt
       hash: md5
-      md5: ecbe8de2e7905751196517aa4bec74d7
+      md5: 75b87999e757e984099586fd30cef4a4
       size: 32
   train@dataset0-spline_nf_scale_shift:
     cmd: "python scripts/train.py --model spline_nf_scale_shift --stage-name train@dataset0-spline_nf_scale_shift
@@ -4259,7 +4263,7 @@ stages:
         log_level: info
         paths.data_processed: data/processed
         seed: 42
-        test_mode: true
+        test_mode: false
       params/models/ofen_f_koks/normal_baseline.yaml:
         compile_kwargs:
           jit_compile: false
@@ -4282,15 +4286,15 @@ stages:
     outs:
     - path: results/ofen_f_koks/normal_baseline/metrics.yaml
       hash: md5
-      md5: d8d95f7140f7a8484d8b520423b0177d
-      size: 148
+      md5: 4c4485d534a3cda4fcf3262e87e5bf2c
+      size: 147
     - path: results/ofen_f_koks/normal_baseline/model_weights.h5
       hash: md5
-      md5: e4c4f45564335675f909347274737e2c
+      md5: be495ca21f4d4c37b086e1fb5d59cf67
       size: 3472672
     - path: results/ofen_f_koks/normal_baseline/parent_run_id.txt
       hash: md5
-      md5: 47ca88635ef50ac4f2ae0d672f640c7a
+      md5: fe47b058929dd2a1dfc21b552561fd0a
       size: 32
   train@dataset2-spline_nf:
     cmd: "python scripts/train.py --model spline_nf --stage-name train@dataset2-spline_nf
@@ -4318,14 +4322,14 @@ stages:
         log_level: info
         paths.data_processed: data/processed
         seed: 42
-        test_mode: true
+        test_mode: false
       params/models/ofen_f_koks/spline_nf.yaml:
         compile_kwargs: {}
         fit_kwargs:
           batch_size: 256
           early_stopping_patience: 20
           epochs: 400
-          learning_rate: 0.0005
+          learning_rate: 0.001
           verbose: true
         model_kwargs:
           base_distribution_kwargs:
@@ -4352,15 +4356,15 @@ stages:
     outs:
     - path: results/ofen_f_koks/spline_nf/metrics.yaml
       hash: md5
-      md5: fb4977255afd4cc4d180343660bf2131
-      size: 148
+      md5: ea69c868ed3f65b449c94986565e3fe1
+      size: 153
     - path: results/ofen_f_koks/spline_nf/model_weights.h5
       hash: md5
-      md5: 1118b86e3456a45e90a0b18b133d8891
+      md5: c4e9759d162a3d8bed462e181145703e
       size: 2055584
     - path: results/ofen_f_koks/spline_nf/parent_run_id.txt
       hash: md5
-      md5: 5ab72431f40c381507013c899d0f425a
+      md5: c4ac176e3d7f87af504e672e2d43fe57
       size: 32
   train@dataset2-spline_nf_scale:
     cmd: "python scripts/train.py --model spline_nf_scale --stage-name train@dataset2-spline_nf_scale
@@ -4388,14 +4392,14 @@ stages:
         log_level: info
         paths.data_processed: data/processed
         seed: 42
-        test_mode: true
+        test_mode: false
       params/models/ofen_f_koks/spline_nf_scale.yaml:
         compile_kwargs: {}
         fit_kwargs:
           batch_size: 256
           early_stopping_patience: 20
           epochs: 400
-          learning_rate: 0.0005
+          learning_rate: 0.001
           verbose: true
         model_kwargs:
           base_distribution_kwargs:
@@ -4450,15 +4454,15 @@ stages:
     outs:
     - path: results/ofen_f_koks/spline_nf_scale/metrics.yaml
       hash: md5
-      md5: f77f0d8b1fc2d16c19ad47ca200d0b92
-      size: 146
+      md5: 468fd345938f0f150587b39717880ecb
+      size: 151
     - path: results/ofen_f_koks/spline_nf_scale/model_weights.h5
       hash: md5
-      md5: 957bbc4498c7186d13f06a55c2b978ff
+      md5: 868be99e8a733e252a89bfaec44a9dda
       size: 4831920
     - path: results/ofen_f_koks/spline_nf_scale/parent_run_id.txt
       hash: md5
-      md5: ced33dd1e6142a87fe523979b7d3eed1
+      md5: 4f6e2a92ace9d1c9f0d713b5583f0ffd
       size: 32
   train@dataset2-spline_nf_scale_shift:
     cmd: "python scripts/train.py --model spline_nf_scale_shift --stage-name train@dataset2-spline_nf_scale_shift
@@ -6025,16 +6029,16 @@ stages:
       nfiles: 6
     - path: results/dla/normal_baseline/model_weights.h5
       hash: md5
-      md5: 5212b402979a9da99e559aae1b96ee79
+      md5: ba731f91c9b513717e45285ada1ba9de
       size: 3374368
     - path: results/dla/normal_baseline/parent_run_id.txt
       hash: md5
-      md5: 6d560a32cc8d24a4c93e423f3501d7cc
+      md5: a8fe8e51b8d0b9c5a91156addfbc0d76
       size: 32
     - path: scripts/evaluate.py
       hash: md5
-      md5: 2001d0708546cbc3c98ca4ba9486aea6
-      size: 12780
+      md5: c17760cea53d07fe699f0ee2153092bf
+      size: 14358
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: 29aaf27cf8b4b2d7d3a997866d6be3bd.dir
@@ -6049,7 +6053,7 @@ stages:
         log_level: info
         paths.data_processed: data/processed
         seed: 42
-        test_mode: true
+        test_mode: false
       params/models/dla/normal_baseline.yaml:
         compile_kwargs:
           jit_compile: false
@@ -6072,20 +6076,24 @@ stages:
     outs:
     - path: results/dla/normal_baseline/evaluation/forecast.pdf
       hash: md5
-      md5: c729fcd2597932aec7672fede7821da7
-      size: 54358
+      md5: 1b6471b9a0033b012d89246d47cfb6fa
+      size: 168642
     - path: results/dla/normal_baseline/evaluation/metrics.yaml
       hash: md5
-      md5: 0c3616ec42436461f856ac49aaf8f36d
+      md5: 81ebe183a984f1b46e6cdea24a7a253e
       size: 113
     - path: results/dla/normal_baseline/evaluation/pit_histogram.pdf
       hash: md5
-      md5: 138a91249daaa57e8eda31c51c642bc3
-      size: 48534
+      md5: cb274b5a1765411eafc816ce7e747acb
+      size: 55421
     - path: results/dla/normal_baseline/evaluation/qq_plot.pdf
       hash: md5
-      md5: 031d01c54e709b88f630601840009144
-      size: 54640
+      md5: 2147fa0fcc3536342a50944c2d4a5709
+      size: 56049
+    - path: results/dla/normal_baseline/evaluation/samples.feather
+      hash: md5
+      md5: b4bac1bf44220519aa0eb4c4e37a5e68
+      size: 109585122
   evaluate@dataset0-truncated_baseline:
     cmd: "python scripts/evaluate.py --model truncated_baseline --stage-name evaluate@dataset0-truncated_baseline
       --target-name dla --prediction-horizon 48\n"
@@ -6097,16 +6105,16 @@ stages:
       nfiles: 6
     - path: results/dla/truncated_baseline/model_weights.h5
       hash: md5
-      md5: cb15e9754461e34b728f6d0543f309d3
+      md5: 239ba5c3bd8df964babe3a8fe1abcf6e
       size: 3374368
     - path: results/dla/truncated_baseline/parent_run_id.txt
       hash: md5
-      md5: de7500376c59f0595b71df1e9b58de2b
+      md5: 0fa4bde5feba141cf8926ea5942bd9a9
       size: 32
     - path: scripts/evaluate.py
       hash: md5
-      md5: 2001d0708546cbc3c98ca4ba9486aea6
-      size: 12780
+      md5: c17760cea53d07fe699f0ee2153092bf
+      size: 14358
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: 29aaf27cf8b4b2d7d3a997866d6be3bd.dir
@@ -6121,7 +6129,7 @@ stages:
         log_level: info
         paths.data_processed: data/processed
         seed: 42
-        test_mode: true
+        test_mode: false
       params/models/dla/truncated_baseline.yaml:
         compile_kwargs:
           jit_compile: false
@@ -6146,20 +6154,24 @@ stages:
     outs:
     - path: results/dla/truncated_baseline/evaluation/forecast.pdf
       hash: md5
-      md5: 3842d1be8c51921048ac62c410b4471a
-      size: 54307
+      md5: 115ae85db302b05615b6cd5bcff440ce
+      size: 168147
     - path: results/dla/truncated_baseline/evaluation/metrics.yaml
       hash: md5
-      md5: be9a791c35ff7427d6d8045f4b34d315
-      size: 116
+      md5: 79ad88908dc3ea9632bd99b1f018190a
+      size: 115
     - path: results/dla/truncated_baseline/evaluation/pit_histogram.pdf
       hash: md5
-      md5: 99dd82f6608c493b8ba34bef89795b4b
-      size: 49233
+      md5: 63ae054f872a00f8e518d2969b7afe3b
+      size: 51790
     - path: results/dla/truncated_baseline/evaluation/qq_plot.pdf
       hash: md5
-      md5: 6180c043518e90b48875571e4b9c891b
-      size: 54074
+      md5: 0cef081b438a85366b5fde8d1ce80261
+      size: 54831
+    - path: results/dla/truncated_baseline/evaluation/samples.feather
+      hash: md5
+      md5: 69e95307753b4bb340c3bd5db6957284
+      size: 109585122
   evaluate@dataset0-spline_nf:
     cmd: "python scripts/evaluate.py --model spline_nf --stage-name evaluate@dataset0-spline_nf
       --target-name dla --prediction-horizon 48\n"
@@ -8337,16 +8349,16 @@ stages:
       nfiles: 6
     - path: results/ofen_f_koks/normal_baseline/model_weights.h5
       hash: md5
-      md5: e4c4f45564335675f909347274737e2c
+      md5: be495ca21f4d4c37b086e1fb5d59cf67
       size: 3472672
     - path: results/ofen_f_koks/normal_baseline/parent_run_id.txt
       hash: md5
-      md5: 47ca88635ef50ac4f2ae0d672f640c7a
+      md5: fe47b058929dd2a1dfc21b552561fd0a
       size: 32
     - path: scripts/evaluate.py
       hash: md5
-      md5: 2001d0708546cbc3c98ca4ba9486aea6
-      size: 12780
+      md5: c17760cea53d07fe699f0ee2153092bf
+      size: 14358
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: 29aaf27cf8b4b2d7d3a997866d6be3bd.dir
@@ -8361,7 +8373,7 @@ stages:
         log_level: info
         paths.data_processed: data/processed
         seed: 42
-        test_mode: true
+        test_mode: false
       params/models/ofen_f_koks/normal_baseline.yaml:
         compile_kwargs:
           jit_compile: false
@@ -8384,20 +8396,24 @@ stages:
     outs:
     - path: results/ofen_f_koks/normal_baseline/evaluation/forecast.pdf
       hash: md5
-      md5: 1fe66763220a0619d3d26f2d2ad3d7d3
-      size: 54902
+      md5: 8d7b2be5a321ce8d0f3895d00aff1284
+      size: 171546
     - path: results/ofen_f_koks/normal_baseline/evaluation/metrics.yaml
       hash: md5
-      md5: ba83ddb5a784e0477c0eabb4f3fd4bb0
-      size: 113
+      md5: a49690744209414c02595bb8ddd7462f
+      size: 112
     - path: results/ofen_f_koks/normal_baseline/evaluation/pit_histogram.pdf
       hash: md5
-      md5: c519223c3bc0020808855046db21028d
-      size: 47773
+      md5: 24a26b2e333254fc851dc71f6edd5905
+      size: 55347
     - path: results/ofen_f_koks/normal_baseline/evaluation/qq_plot.pdf
       hash: md5
-      md5: 4a055db766dee310f1837bcca25b162a
-      size: 55912
+      md5: 82fe49d301663464c91db5a70bfa1123
+      size: 56365
+    - path: results/ofen_f_koks/normal_baseline/evaluation/samples.feather
+      hash: md5
+      md5: 06a4a3b2ba25196838152a67e2c53dd6
+      size: 111315242
   evaluate@dataset2-truncated_baseline:
     cmd: "python scripts/evaluate.py --model truncated_baseline --stage-name evaluate@dataset2-truncated_baseline
       --target-name ofen_f_koks --prediction-horizon 48\n"
@@ -8409,16 +8425,16 @@ stages:
       nfiles: 6
     - path: results/ofen_f_koks/truncated_baseline/model_weights.h5
       hash: md5
-      md5: 71449458cc3347b61acc1d42c1839be7
+      md5: d8715ef5795b5a161d6ba9d4ee092554
       size: 3472672
     - path: results/ofen_f_koks/truncated_baseline/parent_run_id.txt
       hash: md5
-      md5: 8b997611b952a410c53ac5a8cf9e496b
+      md5: 8045ee7938608d38374dd780d0969d10
       size: 32
     - path: scripts/evaluate.py
       hash: md5
-      md5: 2001d0708546cbc3c98ca4ba9486aea6
-      size: 12780
+      md5: c17760cea53d07fe699f0ee2153092bf
+      size: 14358
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: 29aaf27cf8b4b2d7d3a997866d6be3bd.dir
@@ -8433,7 +8449,7 @@ stages:
         log_level: info
         paths.data_processed: data/processed
         seed: 42
-        test_mode: true
+        test_mode: false
       params/models/ofen_f_koks/truncated_baseline.yaml:
         compile_kwargs:
           jit_compile: false
@@ -8458,20 +8474,24 @@ stages:
     outs:
     - path: results/ofen_f_koks/truncated_baseline/evaluation/forecast.pdf
       hash: md5
-      md5: 32f7f844ec3c3e03b03988d4b05a8aab
-      size: 54865
+      md5: c12548e97bc8d7afa461f58bd3801baa
+      size: 162027
     - path: results/ofen_f_koks/truncated_baseline/evaluation/metrics.yaml
       hash: md5
-      md5: 8f6ff7b96185055ac9976898ca5f08b3
-      size: 116
+      md5: cc63b4d857d0e7fb298fd95e38cf0e8c
+      size: 117
     - path: results/ofen_f_koks/truncated_baseline/evaluation/pit_histogram.pdf
       hash: md5
-      md5: 63091cc477acdb8ecced6f8b9e327256
-      size: 50679
+      md5: e9f922abc555310345c591fc5235029b
+      size: 50873
     - path: results/ofen_f_koks/truncated_baseline/evaluation/qq_plot.pdf
       hash: md5
-      md5: 9545aadbbff1bf7d77b0af6c7f095d5c
-      size: 55066
+      md5: da3c7807dbc6ca13fd728986323fab78
+      size: 57041
+    - path: results/ofen_f_koks/truncated_baseline/evaluation/samples.feather
+      hash: md5
+      md5: 6b75e975826b20e255b24b40a50f9d47
+      size: 111297306
   evaluate@dataset2-spline_nf:
     cmd: "python scripts/evaluate.py --model spline_nf --stage-name evaluate@dataset2-spline_nf
       --target-name ofen_f_koks --prediction-horizon 48\n"
@@ -8686,8 +8706,8 @@ stages:
       size: 32
     - path: scripts/evaluate.py
       hash: md5
-      md5: 2001d0708546cbc3c98ca4ba9486aea6
-      size: 12780
+      md5: c17760cea53d07fe699f0ee2153092bf
+      size: 14358
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: 29aaf27cf8b4b2d7d3a997866d6be3bd.dir
@@ -8771,22 +8791,27 @@ stages:
     - path: 
         results/ofen_f_koks/spline_nf_scale_truncated/evaluation/forecast.pdf
       hash: md5
-      md5: c05f6390461f995b595cc113e5bc1250
-      size: 55624
+      md5: dab5b6e20686e8a996f358d882da7afa
+      size: 54923
     - path: 
         results/ofen_f_koks/spline_nf_scale_truncated/evaluation/metrics.yaml
       hash: md5
-      md5: 15ba3f57a152b6c33a0f426b1294755e
-      size: 117
+      md5: 54996f81b927c11231e7ad22d12f7ab6
+      size: 116
     - path: 
         results/ofen_f_koks/spline_nf_scale_truncated/evaluation/pit_histogram.pdf
       hash: md5
-      md5: 981c23c32986914ad4be308467b60d28
-      size: 47072
+      md5: 7712ede293f782c1eb596ab5d9942e1b
+      size: 49966
     - path: results/ofen_f_koks/spline_nf_scale_truncated/evaluation/qq_plot.pdf
       hash: md5
-      md5: 8ed97dfe565635a4ec31e7c117179427
-      size: 55710
+      md5: 744b5505d2e319b41aef968d5c52163b
+      size: 55305
+    - path: 
+        results/ofen_f_koks/spline_nf_scale_truncated/evaluation/samples.feather
+      hash: md5
+      md5: 7c26a615728a8fa2a0e28b5d142f9fc6
+      size: 117426
   evaluate@dataset2-spline_nf_scale_shift:
     cmd: "python scripts/evaluate.py --model spline_nf_scale_shift --stage-name evaluate@dataset2-spline_nf_scale_shift
       --target-name ofen_f_koks --prediction-horizon 48\n"
@@ -8806,8 +8831,8 @@ stages:
       size: 32
     - path: scripts/evaluate.py
       hash: md5
-      md5: 2001d0708546cbc3c98ca4ba9486aea6
-      size: 12780
+      md5: c17760cea53d07fe699f0ee2153092bf
+      size: 14358
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: 29aaf27cf8b4b2d7d3a997866d6be3bd.dir
@@ -8897,21 +8922,25 @@ stages:
     outs:
     - path: results/ofen_f_koks/spline_nf_scale_shift/evaluation/forecast.pdf
       hash: md5
-      md5: 5d9bf5c37594c4f123ff02b05e962b4a
-      size: 55739
+      md5: d4418482bcc688e3beac64affbbf6874
+      size: 56093
     - path: results/ofen_f_koks/spline_nf_scale_shift/evaluation/metrics.yaml
       hash: md5
-      md5: 76ebe1c492eb49b957de31bf08c69f8d
-      size: 116
+      md5: ccab1ef3d1e53017312bb702ee5e6e29
+      size: 115
     - path: 
         results/ofen_f_koks/spline_nf_scale_shift/evaluation/pit_histogram.pdf
       hash: md5
-      md5: e2abd49ca9aa5eb5f56419d53fbee74e
-      size: 45745
+      md5: a621ad3e22c195c4e470ec97eca85f72
+      size: 47328
     - path: results/ofen_f_koks/spline_nf_scale_shift/evaluation/qq_plot.pdf
       hash: md5
-      md5: 7ad7e53a30ff413fc9cfa4cc8037b78a
-      size: 56037
+      md5: 1a9d850b2385f7edd687c04177c134ce
+      size: 55633
+    - path: results/ofen_f_koks/spline_nf_scale_shift/evaluation/samples.feather
+      hash: md5
+      md5: 4f111dd84d633b7e6569acba9d953470
+      size: 117426
   evaluate@dataset2-spline_nf_scale_shift_truncated:
     cmd: "python scripts/evaluate.py --model spline_nf_scale_shift_truncated --stage-name
       evaluate@dataset2-spline_nf_scale_shift_truncated --target-name ofen_f_koks
@@ -8933,8 +8962,8 @@ stages:
       size: 32
     - path: scripts/evaluate.py
       hash: md5
-      md5: 2001d0708546cbc3c98ca4ba9486aea6
-      size: 12780
+      md5: c17760cea53d07fe699f0ee2153092bf
+      size: 14358
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: 29aaf27cf8b4b2d7d3a997866d6be3bd.dir
@@ -9031,23 +9060,28 @@ stages:
     - path: 
         results/ofen_f_koks/spline_nf_scale_shift_truncated/evaluation/forecast.pdf
       hash: md5
-      md5: 63be7cee4790ba86e674bd3cde6d8fb8
-      size: 55353
+      md5: d329acb7e6a9b11da741d0ed63ba7737
+      size: 55320
     - path: 
         results/ofen_f_koks/spline_nf_scale_shift_truncated/evaluation/metrics.yaml
       hash: md5
-      md5: b8e63c03164a588409d1c8c2bb4ad273
-      size: 101
+      md5: 9e5381173864a2717621781377acf098
+      size: 98
     - path: 
         results/ofen_f_koks/spline_nf_scale_shift_truncated/evaluation/pit_histogram.pdf
       hash: md5
-      md5: 1da0a16c2edc7aa78ad71de1a414634b
-      size: 44690
+      md5: 0f3d1c48379986e966ad4d33867ddc9c
+      size: 44446
     - path: 
         results/ofen_f_koks/spline_nf_scale_shift_truncated/evaluation/qq_plot.pdf
       hash: md5
-      md5: 7bce3af976ea47272026bb4f498b3db0
-      size: 55350
+      md5: 2175052f834a9604338ecfc9b0caa015
+      size: 55306
+    - path: 
+        results/ofen_f_koks/spline_nf_scale_shift_truncated/evaluation/samples.feather
+      hash: md5
+      md5: 6d80ce21fbec69958f3f5d0e08c5014b
+      size: 117426
   evaluate@dataset2-bernstein_nf_scale:
     cmd: "python scripts/evaluate.py --model bernstein_nf_scale --stage-name evaluate@dataset2-bernstein_nf_scale
       --target-name ofen_f_koks --prediction-horizon 48\n"
@@ -9067,8 +9101,8 @@ stages:
       size: 32
     - path: scripts/evaluate.py
       hash: md5
-      md5: 2001d0708546cbc3c98ca4ba9486aea6
-      size: 12780
+      md5: c17760cea53d07fe699f0ee2153092bf
+      size: 14358
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: 29aaf27cf8b4b2d7d3a997866d6be3bd.dir
@@ -9148,20 +9182,24 @@ stages:
     outs:
     - path: results/ofen_f_koks/bernstein_nf_scale/evaluation/forecast.pdf
       hash: md5
-      md5: 7a3f4704a73b70c59d9b819f904d16f9
-      size: 53952
+      md5: 7f6e262607ee09b920eb6104dadb27b0
+      size: 53908
     - path: results/ofen_f_koks/bernstein_nf_scale/evaluation/metrics.yaml
       hash: md5
-      md5: 0a84800c050f9228b96a9069c2c14814
-      size: 116
+      md5: 5868154f2e8328eb63e84bb5d046c5c9
+      size: 118
     - path: results/ofen_f_koks/bernstein_nf_scale/evaluation/pit_histogram.pdf
       hash: md5
-      md5: 978cd69d91275b681179e61ad2cbfb9e
-      size: 46232
+      md5: 01d98bb08c3a6f7f07c60e0a9c5b202a
+      size: 47016
     - path: results/ofen_f_koks/bernstein_nf_scale/evaluation/qq_plot.pdf
       hash: md5
-      md5: c073d494041c45da653f7279839698dc
-      size: 54552
+      md5: a971e4e605732a3b8fba75b56bcf6ecb
+      size: 54557
+    - path: results/ofen_f_koks/bernstein_nf_scale/evaluation/samples.feather
+      hash: md5
+      md5: 2c5e879ae0884e79021d1e29ed81e754
+      size: 117426
   evaluate@dataset2-bernstein_nf_scale_truncated:
     cmd: "python scripts/evaluate.py --model bernstein_nf_scale_truncated --stage-name
       evaluate@dataset2-bernstein_nf_scale_truncated --target-name ofen_f_koks --prediction-horizon
@@ -9713,8 +9751,8 @@ stages:
       size: 32
     - path: scripts/evaluate.py
       hash: md5
-      md5: 2001d0708546cbc3c98ca4ba9486aea6
-      size: 12780
+      md5: c17760cea53d07fe699f0ee2153092bf
+      size: 14358
     - path: src/dcp_nf_forecast/
       hash: md5
       md5: 29aaf27cf8b4b2d7d3a997866d6be3bd.dir
@@ -9763,17 +9801,669 @@ stages:
     outs:
     - path: results/pl2/spline_nf/evaluation/forecast.pdf
       hash: md5
-      md5: e180ec2789be7ba512c1f993e72de690
-      size: 55028
+      md5: 08e39591cc0f2f0dc1f7cc954ec82945
+      size: 55162
     - path: results/pl2/spline_nf/evaluation/metrics.yaml
       hash: md5
-      md5: 2d693461a632030638aa2599052e050c
-      size: 110
+      md5: 979fe746a09e7a7251ba9964e454458c
+      size: 111
     - path: results/pl2/spline_nf/evaluation/pit_histogram.pdf
       hash: md5
-      md5: 4e100c14ff461e30193b649389d09b40
-      size: 49715
+      md5: 208fc6cb9d17615f2d271da8f88129d1
+      size: 46952
     - path: results/pl2/spline_nf/evaluation/qq_plot.pdf
       hash: md5
-      md5: 97be1ec82e32267a8a85cbdb7558bb0c
-      size: 55885
+      md5: 3beeddda2133c71355cdda624a31147c
+      size: 56030
+    - path: results/pl2/spline_nf/evaluation/samples.feather
+      hash: md5
+      md5: 81df34221b4d1c67d7573dfefc37c4de
+      size: 117426
+  evaluate@dataset3-spline_nf_scale_truncated:
+    cmd: "python scripts/evaluate.py --model spline_nf_scale_truncated --stage-name
+      evaluate@dataset3-spline_nf_scale_truncated --target-name pl2 --prediction-horizon
+      48\n"
+    deps:
+    - path: data/processed/pl2/
+      hash: md5
+      md5: 74e4fefb932881c667a3dbbc93c8ec43.dir
+      size: 33031324
+      nfiles: 6
+    - path: results/pl2/spline_nf_scale_truncated/model_weights.h5
+      hash: md5
+      md5: 28b2d1e0d32797ea0e85002ebb430283
+      size: 3549360
+    - path: results/pl2/spline_nf_scale_truncated/parent_run_id.txt
+      hash: md5
+      md5: 0553c1fcb3b889d7ee10d97b3f4456f6
+      size: 32
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: c17760cea53d07fe699f0ee2153092bf
+      size: 14358
+    - path: src/dcp_nf_forecast/
+      hash: md5
+      md5: 29aaf27cf8b4b2d7d3a997866d6be3bd.dir
+      size: 68468
+      nfiles: 16
+    params:
+      params.yaml:
+        data.data_format: feather
+        eval.n_samples: 200
+        experiment_name: dcp_nf_forecast
+        log_file: logs/pipeline.log
+        log_level: info
+        paths.data_processed: data/processed
+        seed: 42
+        test_mode: true
+      params/models/pl2/spline_nf_scale_truncated.yaml:
+        compile_kwargs: {}
+        fit_kwargs:
+          batch_size: 256
+          early_stopping_patience: 20
+          epochs: 400
+          learning_rate:
+            scheduler_kwargs:
+              decay_steps: 22000
+              initial_learning_rate: 0.001
+            scheduler_name: CosineDecay
+          verbose: true
+        model_kwargs:
+          base_distribution_kwargs:
+            distribution_name: truncated_normal
+            high: 5.0
+            low: 0.0
+          distribution: masked_autoregressive_flow
+          nested_bijectors:
+          - bijector: Scale
+            parameters_constraint_fn: tensorflow.math.softplus
+            parameters_fn: parameter_vector_or_simple_network
+            parameters_fn_kwargs:
+              activation: relu
+              batch_norm: false
+              conditional: true
+              dropout: 0
+              hidden_units:
+              - 256
+              - 256
+              parameter_shape:
+              - 48
+            parameters_slice_size: 1
+          - bijector: RationalQuadraticSpline
+            bijector_kwargs:
+              range_min: 0
+            invert: true
+            parameters_constraint_fn: 
+              hybrid_flows.activations.get_spline_param_constrain_fn
+            parameters_constraint_fn_kwargs:
+              interval_width: 5
+              min_bin_width: 0.001
+              min_slope: 0.001
+              nbins: 8
+            parameters_fn: parameter_vector_or_simple_network
+            parameters_fn_kwargs:
+              activation: relu
+              batch_norm: false
+              conditional: true
+              dropout: 0
+              hidden_units:
+              - 256
+              - 256
+              parameter_shape:
+              - 48
+              - 23
+            parameters_slice_size: 23
+          num_layers: 1
+          num_parameters: 24
+          parameters_fn_kwargs:
+            activation: relu
+            hidden_units:
+            - 256
+            - 256
+    outs:
+    - path: results/pl2/spline_nf_scale_truncated/evaluation/forecast.pdf
+      hash: md5
+      md5: 3319256175b0a726a103eb956fdc65f0
+      size: 55045
+    - path: results/pl2/spline_nf_scale_truncated/evaluation/metrics.yaml
+      hash: md5
+      md5: 0933f15e3c96f6bf0d23bb5e4e3384eb
+      size: 115
+    - path: results/pl2/spline_nf_scale_truncated/evaluation/pit_histogram.pdf
+      hash: md5
+      md5: a56d10cfce6cc364a332c3c00af8ee1a
+      size: 45949
+    - path: results/pl2/spline_nf_scale_truncated/evaluation/qq_plot.pdf
+      hash: md5
+      md5: 4c3f061a347541174e22f75c2fa9fa84
+      size: 55130
+    - path: results/pl2/spline_nf_scale_truncated/evaluation/samples.feather
+      hash: md5
+      md5: 00faa1b09fd18cfc0290db219b3a6754
+      size: 117426
+  evaluate@dataset3-spline_nf_scale_shift:
+    cmd: "python scripts/evaluate.py --model spline_nf_scale_shift --stage-name evaluate@dataset3-spline_nf_scale_shift
+      --target-name pl2 --prediction-horizon 48\n"
+    deps:
+    - path: data/processed/pl2/
+      hash: md5
+      md5: 74e4fefb932881c667a3dbbc93c8ec43.dir
+      size: 33031324
+      nfiles: 6
+    - path: results/pl2/spline_nf_scale_shift/model_weights.h5
+      hash: md5
+      md5: 687a4db9bf83470adbf2d0cac65fc221
+      size: 5256968
+    - path: results/pl2/spline_nf_scale_shift/parent_run_id.txt
+      hash: md5
+      md5: 7a804d13ff85199cc4bd48f351ffd14b
+      size: 32
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: c17760cea53d07fe699f0ee2153092bf
+      size: 14358
+    - path: src/dcp_nf_forecast/
+      hash: md5
+      md5: 29aaf27cf8b4b2d7d3a997866d6be3bd.dir
+      size: 68468
+      nfiles: 16
+    params:
+      params.yaml:
+        data.data_format: feather
+        eval.n_samples: 200
+        experiment_name: dcp_nf_forecast
+        log_file: logs/pipeline.log
+        log_level: info
+        paths.data_processed: data/processed
+        seed: 42
+        test_mode: true
+      params/models/pl2/spline_nf_scale_shift.yaml:
+        compile_kwargs: {}
+        fit_kwargs:
+          batch_size: 256
+          early_stopping_patience: 20
+          epochs: 400
+          learning_rate: 0.0005
+          verbose: true
+        model_kwargs:
+          base_distribution_kwargs:
+            distribution_name: normal
+          distribution: masked_autoregressive_flow
+          nested_bijectors:
+          - bijector: Scale
+            parameters_constraint_fn: tensorflow.math.softplus
+            parameters_fn: parameter_vector_or_simple_network
+            parameters_fn_kwargs:
+              activation: relu
+              batch_norm: false
+              conditional: true
+              dropout: 0
+              hidden_units:
+              - 256
+              - 256
+              parameter_shape:
+              - 48
+            parameters_slice_size: 1
+          - bijector: Shift
+            parameters_fn: parameter_vector_or_simple_network
+            parameters_fn_kwargs:
+              activation: relu
+              batch_norm: false
+              conditional: true
+              dropout: 0
+              hidden_units:
+              - 256
+              - 256
+              parameter_shape:
+              - 48
+            parameters_slice_size: 1
+          - bijector: RationalQuadraticSpline
+            bijector_kwargs:
+              range_min: -5
+            invert: true
+            parameters_constraint_fn: 
+              hybrid_flows.activations.get_spline_param_constrain_fn
+            parameters_constraint_fn_kwargs:
+              interval_width: 10
+              min_bin_width: 0.001
+              min_slope: 0.001
+              nbins: 12
+            parameters_fn: parameter_vector_or_simple_network
+            parameters_fn_kwargs:
+              activation: relu
+              batch_norm: false
+              conditional: true
+              dropout: 0
+              hidden_units:
+              - 256
+              - 256
+              parameter_shape:
+              - 48
+              - 35
+            parameters_slice_size: 35
+          num_layers: 1
+          num_parameters: 37
+          parameters_fn_kwargs:
+            activation: relu
+            hidden_units:
+            - 256
+            - 256
+    outs:
+    - path: results/pl2/spline_nf_scale_shift/evaluation/forecast.pdf
+      hash: md5
+      md5: f1d295b2e890610b49ee005ce11886e0
+      size: 55344
+    - path: results/pl2/spline_nf_scale_shift/evaluation/metrics.yaml
+      hash: md5
+      md5: d4346d815165eb8db35ee525d7664dca
+      size: 115
+    - path: results/pl2/spline_nf_scale_shift/evaluation/pit_histogram.pdf
+      hash: md5
+      md5: 30dac9fb31bac69c0ff5785f82ff9af1
+      size: 46950
+    - path: results/pl2/spline_nf_scale_shift/evaluation/qq_plot.pdf
+      hash: md5
+      md5: 744ce04d4e2eec5e54f5f1d2cf46ce2d
+      size: 57051
+    - path: results/pl2/spline_nf_scale_shift/evaluation/samples.feather
+      hash: md5
+      md5: 4dec55d85aed74c00db80a310972956d
+      size: 117426
+  evaluate@dataset3-spline_nf_scale_shift_truncated:
+    cmd: "python scripts/evaluate.py --model spline_nf_scale_shift_truncated --stage-name
+      evaluate@dataset3-spline_nf_scale_shift_truncated --target-name pl2 --prediction-horizon
+      48\n"
+    deps:
+    - path: data/processed/pl2/
+      hash: md5
+      md5: 74e4fefb932881c667a3dbbc93c8ec43.dir
+      size: 33031324
+      nfiles: 6
+    - path: results/pl2/spline_nf_scale_shift_truncated/model_weights.h5
+      hash: md5
+      md5: e802251ab638987544463f78a2fe22dc
+      size: 4072712
+    - path: results/pl2/spline_nf_scale_shift_truncated/parent_run_id.txt
+      hash: md5
+      md5: b8d580260833d561765e3bcfd59d797b
+      size: 32
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: c17760cea53d07fe699f0ee2153092bf
+      size: 14358
+    - path: src/dcp_nf_forecast/
+      hash: md5
+      md5: 29aaf27cf8b4b2d7d3a997866d6be3bd.dir
+      size: 68468
+      nfiles: 16
+    params:
+      params.yaml:
+        data.data_format: feather
+        eval.n_samples: 200
+        experiment_name: dcp_nf_forecast
+        log_file: logs/pipeline.log
+        log_level: info
+        paths.data_processed: data/processed
+        seed: 42
+        test_mode: true
+      params/models/pl2/spline_nf_scale_shift_truncated.yaml:
+        compile_kwargs: {}
+        fit_kwargs:
+          batch_size: 256
+          early_stopping_patience: 20
+          epochs: 400
+          learning_rate:
+            scheduler_kwargs:
+              decay_steps: 22000
+              initial_learning_rate: 0.001
+            scheduler_name: CosineDecay
+          verbose: true
+        model_kwargs:
+          base_distribution_kwargs:
+            distribution_name: truncated_normal
+            high: 5.0
+            low: 0.0
+          distribution: masked_autoregressive_flow
+          nested_bijectors:
+          - bijector: Scale
+            parameters_constraint_fn: tensorflow.math.softplus
+            parameters_fn: parameter_vector_or_simple_network
+            parameters_fn_kwargs:
+              activation: relu
+              batch_norm: false
+              conditional: true
+              dropout: 0
+              hidden_units:
+              - 256
+              - 256
+              parameter_shape:
+              - 48
+            parameters_slice_size: 1
+          - bijector: Shift
+            parameters_fn: parameter_vector_or_simple_network
+            parameters_fn_kwargs:
+              activation: relu
+              batch_norm: false
+              conditional: true
+              dropout: 0
+              hidden_units:
+              - 256
+              - 256
+              parameter_shape:
+              - 48
+            parameters_slice_size: 1
+          - bijector: RationalQuadraticSpline
+            bijector_kwargs:
+              range_min: 0
+            invert: true
+            parameters_constraint_fn: 
+              hybrid_flows.activations.get_spline_param_constrain_fn
+            parameters_constraint_fn_kwargs:
+              interval_width: 5
+              min_bin_width: 0.001
+              min_slope: 0.001
+              nbins: 8
+            parameters_fn: parameter_vector_or_simple_network
+            parameters_fn_kwargs:
+              activation: relu
+              batch_norm: false
+              conditional: true
+              dropout: 0
+              hidden_units:
+              - 256
+              - 256
+              parameter_shape:
+              - 48
+              - 23
+            parameters_slice_size: 23
+          num_layers: 1
+          num_parameters: 25
+          parameters_fn_kwargs:
+            activation: relu
+            hidden_units:
+            - 256
+            - 256
+    outs:
+    - path: results/pl2/spline_nf_scale_shift_truncated/evaluation/forecast.pdf
+      hash: md5
+      md5: 5572a55477ab680359472230ee6e7cd1
+      size: 54397
+    - path: results/pl2/spline_nf_scale_shift_truncated/evaluation/metrics.yaml
+      hash: md5
+      md5: 91e22ca86117859df0cd1e8ba4e2947c
+      size: 102
+    - path: 
+        results/pl2/spline_nf_scale_shift_truncated/evaluation/pit_histogram.pdf
+      hash: md5
+      md5: a3aa65052b19f77c102a11a955b7b0fe
+      size: 47596
+    - path: results/pl2/spline_nf_scale_shift_truncated/evaluation/qq_plot.pdf
+      hash: md5
+      md5: 01847207462b61917af9008ba0698b0c
+      size: 57092
+    - path: 
+        results/pl2/spline_nf_scale_shift_truncated/evaluation/samples.feather
+      hash: md5
+      md5: 3c24d9ddd185d45deb97b400cf8e3b76
+      size: 117426
+  evaluate@dataset3-bernstein_nf_scale_truncated:
+    cmd: "python scripts/evaluate.py --model bernstein_nf_scale_truncated --stage-name
+      evaluate@dataset3-bernstein_nf_scale_truncated --target-name pl2 --prediction-horizon
+      48\n"
+    deps:
+    - path: data/processed/pl2/
+      hash: md5
+      md5: 74e4fefb932881c667a3dbbc93c8ec43.dir
+      size: 33031324
+      nfiles: 6
+    - path: results/pl2/bernstein_nf_scale_truncated/model_weights.h5
+      hash: md5
+      md5: 9369f11ae6f46192016f22c417d000b5
+      size: 2858544
+    - path: results/pl2/bernstein_nf_scale_truncated/parent_run_id.txt
+      hash: md5
+      md5: b23ffa2b510890e5f2b9e0f7c3998226
+      size: 32
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: c17760cea53d07fe699f0ee2153092bf
+      size: 14358
+    - path: src/dcp_nf_forecast/
+      hash: md5
+      md5: 29aaf27cf8b4b2d7d3a997866d6be3bd.dir
+      size: 68468
+      nfiles: 16
+    params:
+      params.yaml:
+        data.data_format: feather
+        eval.n_samples: 200
+        experiment_name: dcp_nf_forecast
+        log_file: logs/pipeline.log
+        log_level: info
+        paths.data_processed: data/processed
+        seed: 42
+        test_mode: true
+      params/models/pl2/bernstein_nf_scale_truncated.yaml:
+        compile_kwargs: {}
+        fit_kwargs:
+          batch_size: 256
+          early_stopping_patience: 20
+          epochs: 400
+          learning_rate: 0.0005
+          verbose: true
+        model_kwargs:
+          base_distribution_kwargs:
+            distribution_name: truncated_normal
+            high: 5.0
+            low: 0.0
+          distribution: masked_autoregressive_flow
+          nested_bijectors:
+          - bijector: Scale
+            parameters_constraint_fn: tensorflow.math.softplus
+            parameters_fn: parameter_vector_or_simple_network
+            parameters_fn_kwargs:
+              activation: relu
+              batch_norm: false
+              conditional: true
+              dropout: 0
+              hidden_units:
+              - 256
+              - 256
+              parameter_shape:
+              - 48
+            parameters_slice_size: 1
+          - bijector: BernsteinPolynomial
+            bijector_kwargs:
+              domain:
+              - 0.0
+              - 5.0
+              extrapolation: false
+            invert: true
+            parameters_constraint_fn: 
+              hybrid_flows.activations.get_thetas_constrain_fn
+            parameters_constraint_fn_kwargs:
+              allow_flexible_bounds: false
+              bounds: none
+              high: 5.0
+              low: 0.0
+            parameters_fn: parameter_vector_or_simple_network
+            parameters_fn_kwargs:
+              activation: relu
+              batch_norm: false
+              conditional: true
+              dropout: 0
+              hidden_units:
+              - 256
+              - 256
+              parameter_shape:
+              - 48
+              - 16
+            parameters_slice_size: 16
+          num_layers: 1
+          num_parameters: 17
+          parameters_fn_kwargs:
+            activation: relu
+            hidden_units:
+            - 256
+            - 256
+    outs:
+    - path: results/pl2/bernstein_nf_scale_truncated/evaluation/forecast.pdf
+      hash: md5
+      md5: 7570fa369f3e6df2f602fba527ca88f9
+      size: 55371
+    - path: results/pl2/bernstein_nf_scale_truncated/evaluation/metrics.yaml
+      hash: md5
+      md5: ee63c3679b427bfb330eb79f7352ed1d
+      size: 117
+    - path: 
+        results/pl2/bernstein_nf_scale_truncated/evaluation/pit_histogram.pdf
+      hash: md5
+      md5: f87cb9b422d97cd21c0e23e00cd862b8
+      size: 46580
+    - path: results/pl2/bernstein_nf_scale_truncated/evaluation/qq_plot.pdf
+      hash: md5
+      md5: e4d96c50613a97128cbad95b0b0f5f30
+      size: 56845
+    - path: results/pl2/bernstein_nf_scale_truncated/evaluation/samples.feather
+      hash: md5
+      md5: 4d9f4b3925539a881ea96f817d89d697
+      size: 117426
+  evaluate@dataset3-bernstein_nf_scale_shift_truncated:
+    cmd: "python scripts/evaluate.py --model bernstein_nf_scale_shift_truncated --stage-name
+      evaluate@dataset3-bernstein_nf_scale_shift_truncated --target-name pl2 --prediction-horizon
+      48\n"
+    deps:
+    - path: data/processed/pl2/
+      hash: md5
+      md5: 74e4fefb932881c667a3dbbc93c8ec43.dir
+      size: 33031324
+      nfiles: 6
+    - path: results/pl2/bernstein_nf_scale_shift_truncated/model_weights.h5
+      hash: md5
+      md5: 8b130374047e7adff8d13ad70b092a8d
+      size: 3381896
+    - path: results/pl2/bernstein_nf_scale_shift_truncated/parent_run_id.txt
+      hash: md5
+      md5: 0d48c7b7ed378df9965340f3bcc32e39
+      size: 32
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: c17760cea53d07fe699f0ee2153092bf
+      size: 14358
+    - path: src/dcp_nf_forecast/
+      hash: md5
+      md5: 29aaf27cf8b4b2d7d3a997866d6be3bd.dir
+      size: 68468
+      nfiles: 16
+    params:
+      params.yaml:
+        data.data_format: feather
+        eval.n_samples: 200
+        experiment_name: dcp_nf_forecast
+        log_file: logs/pipeline.log
+        log_level: info
+        paths.data_processed: data/processed
+        seed: 42
+        test_mode: true
+      params/models/pl2/bernstein_nf_scale_shift_truncated.yaml:
+        compile_kwargs: {}
+        fit_kwargs:
+          batch_size: 256
+          early_stopping_patience: 20
+          epochs: 400
+          learning_rate: 0.0005
+          verbose: true
+        model_kwargs:
+          base_distribution_kwargs:
+            distribution_name: truncated_normal
+            high: 5.0
+            low: 0.0
+          distribution: masked_autoregressive_flow
+          nested_bijectors:
+          - bijector: Scale
+            parameters_constraint_fn: tensorflow.math.softplus
+            parameters_fn: parameter_vector_or_simple_network
+            parameters_fn_kwargs:
+              activation: relu
+              batch_norm: false
+              conditional: true
+              dropout: 0
+              hidden_units:
+              - 256
+              - 256
+              parameter_shape:
+              - 48
+            parameters_slice_size: 1
+          - bijector: Shift
+            parameters_fn: parameter_vector_or_simple_network
+            parameters_fn_kwargs:
+              activation: relu
+              batch_norm: false
+              conditional: true
+              dropout: 0
+              hidden_units:
+              - 256
+              - 256
+              parameter_shape:
+              - 48
+            parameters_slice_size: 1
+          - bijector: BernsteinPolynomial
+            bijector_kwargs:
+              domain:
+              - 0.0
+              - 5.0
+              extrapolation: false
+            invert: true
+            parameters_constraint_fn: 
+              hybrid_flows.activations.get_thetas_constrain_fn
+            parameters_constraint_fn_kwargs:
+              allow_flexible_bounds: false
+              bounds: none
+              high: 5.0
+              low: 0.0
+            parameters_fn: parameter_vector_or_simple_network
+            parameters_fn_kwargs:
+              activation: relu
+              batch_norm: false
+              conditional: true
+              dropout: 0
+              hidden_units:
+              - 256
+              - 256
+              parameter_shape:
+              - 48
+              - 16
+            parameters_slice_size: 16
+          num_layers: 1
+          num_parameters: 18
+          parameters_fn_kwargs:
+            activation: relu
+            hidden_units:
+            - 256
+            - 256
+    outs:
+    - path: 
+        results/pl2/bernstein_nf_scale_shift_truncated/evaluation/forecast.pdf
+      hash: md5
+      md5: ec1117a54f47c2244c0c5b5890b6e06d
+      size: 53825
+    - path: 
+        results/pl2/bernstein_nf_scale_shift_truncated/evaluation/metrics.yaml
+      hash: md5
+      md5: ac4a59e399d82549370d770b0a117fd3
+      size: 102
+    - path: 
+        results/pl2/bernstein_nf_scale_shift_truncated/evaluation/pit_histogram.pdf
+      hash: md5
+      md5: d87658752854667bf8aee145114d3dce
+      size: 46019
+    - path: 
+        results/pl2/bernstein_nf_scale_shift_truncated/evaluation/qq_plot.pdf
+      hash: md5
+      md5: ab0b2b7d2968acd7ac1f24c0eafc8c59
+      size: 55552
+    - path: 
+        results/pl2/bernstein_nf_scale_shift_truncated/evaluation/samples.feather
+      hash: md5
+      md5: f87f175ea73bd362f4385bb0c6be576e
+      size: 117426
