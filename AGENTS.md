@@ -16,7 +16,7 @@ Models use suffix indicating base distribution:
 - `*` (no suffix) = `normal(0, 1)` base
 - `*_baseline` = simple diagonal distributions (not NF)
 
-## Active models (6)
+## Active models (12)
 
 - `normal_baseline` — diagonal multivariate normal
 - `truncated_baseline` — diagonal truncated_normal(0,5) (best CI, competitive NLL)
@@ -24,8 +24,14 @@ Models use suffix indicating base distribution:
 - `spline_nf_truncated` — truncated_normal(0,5) base, RationalQuadraticSpline (best NLL on DLA/pl2)
 - `spline_nf_scale` — normal(0,1) base, Scale + RationalQuadraticSpline
 - `spline_nf_scale_truncated` — truncated_normal(0,5) base, Scale + Spline (DLA only, NaN on other targets)
+- `spline_nf_scale_shift` — normal(0,1) base, Scale + Shift + RationalQuadraticSpline
+- `spline_nf_scale_shift_truncated` — truncated_normal(0,5) base, Scale + Shift + RQS
+- `bernstein_nf_scale` — normal(0,1) base, Scale + BernsteinPolynomial
+- `bernstein_nf_scale_truncated` — truncated_normal(0,5) base, Scale + BernsteinPolynomial
+- `bernstein_nf_scale_shift` — normal(0,1) base, Scale + Shift + BernsteinPolynomial
+- `bernstein_nf_scale_shift_truncated` — truncated_normal(0,5) base, Scale + Shift + BernsteinPolynomial
 
-**Dropped:** Bernstein variants (consistently underperformed vs spline), `truncated_baseline` replaced `lognormal_baseline`.
+**Dropped:** plain `bernstein_nf`, `bernstein_nf_truncated`, `lognormal_baseline`.
 
 ## Config rules
 
@@ -34,7 +40,7 @@ Models use suffix indicating base distribution:
   - Normal base: `low: -5.0, high: 5.0`
   - TruncatedNormal base: `low: 0.0, high: 5.0`
 - Spline domain = `[range_min, range_min + interval_width]`. Must match base distribution support:
-  - Normal base: `range_min: -4, interval_width: 8` → domain [-4, 4]
+  - Normal base: `range_min: -5, interval_width: 10` → domain [-5, 5] (covers 5σ of Normal(0,1))
   - TruncatedNormal base: `range_min: 0, interval_width: 5` → domain [0, 5]
 - **Scale + TruncatedNormal(0,5) fails** on non-DLA targets (NaN at init). Use non-scale `spline_nf_truncated` or `truncated_baseline` for ofen_g/ofen_f/pl2.
 - `truncated_baseline` uses custom `multivariate_truncated_normal` distribution (hard-codes low/high).

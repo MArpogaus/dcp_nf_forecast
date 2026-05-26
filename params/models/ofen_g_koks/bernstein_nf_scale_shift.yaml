@@ -24,16 +24,7 @@ model_kwargs:
       parameter_shape:
       - 48
     parameters_slice_size: 1
-  - bijector: RationalQuadraticSpline
-    bijector_kwargs:
-      range_min: -5
-    invert: true
-    parameters_constraint_fn: hybrid_flows.activations.get_spline_param_constrain_fn
-    parameters_constraint_fn_kwargs:
-      interval_width: 10
-      min_bin_width: 0.001
-      min_slope: 0.001
-      nbins: 12
+  - bijector: Shift
     parameters_fn: parameter_vector_or_simple_network
     parameters_fn_kwargs:
       activation: relu
@@ -45,10 +36,35 @@ model_kwargs:
       - 256
       parameter_shape:
       - 48
-      - 35
-    parameters_slice_size: 35
+    parameters_slice_size: 1
+  - bijector: BernsteinPolynomial
+    bijector_kwargs:
+      domain:
+      - 0.0
+      - 1.0
+      extrapolation: false
+    invert: true
+    parameters_constraint_fn: hybrid_flows.activations.get_thetas_constrain_fn
+    parameters_constraint_fn_kwargs:
+      allow_flexible_bounds: false
+      bounds: none
+      high: 5.0
+      low: -5.0
+    parameters_fn: parameter_vector_or_simple_network
+    parameters_fn_kwargs:
+      activation: relu
+      batch_norm: false
+      conditional: true
+      dropout: 0
+      hidden_units:
+      - 256
+      - 256
+      parameter_shape:
+      - 48
+      - 12
+    parameters_slice_size: 12
   num_layers: 1
-  num_parameters: 36
+  num_parameters: 14
   parameters_fn_kwargs:
     activation: relu
     hidden_units:

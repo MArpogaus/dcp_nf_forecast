@@ -2,7 +2,7 @@ experiment_name: dcp_nf_forecast
 log_level: info
 log_file: logs/pipeline.log
 seed: 42
-test_mode: false
+test_mode: true
 
 paths:
   raw_data: data/raw/norm_fondium_15_min_data_2023.csv
@@ -75,3 +75,9 @@ models:
 - spline_nf_truncated
 - spline_nf_scale
 - spline_nf_scale_truncated
+- spline_nf_scale_shift
+- spline_nf_scale_shift_truncated
+- bernstein_nf_scale
+- bernstein_nf_scale_truncated
+- bernstein_nf_scale_shift
+- bernstein_nf_scale_shift_truncated

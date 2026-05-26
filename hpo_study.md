@@ -505,4 +505,62 @@ base samples outside [0,1] are clamped at boundaries, producing degenerate PIT.
 | ofen_f_koks | spline_nf_scale_lognormal | -195.93 | 0.023 |
 | pl2 | spline_nf_lognormal | -202.86 | 0.046 |
 
-**Next steps:** ❌ HPO complete — all models stable, no further tuning needed. Transition to paper figures & analysis.
+## Phase 8 — Scale+Shift Bijector Addition + Config Optimisation
+
+**Date:** 2026-05-26
+
+**Goal:** Add Scale+Shift bijector combinations for both Spline and Bernstein NF
+variants, revise all configs with HPO-optimal parameters, and keep all existing
+configurations.
+
+### Changes Made
+
+| Change | Details |
+|--------|---------|
+| New `spline_nf_scale_shift` | normal(0,1) base, Scale + Shift + RationalQuadraticSpline (num_parameters=37) |
+| New `spline_nf_scale_shift_truncated` | truncated_normal(0,5) base, Scale + Shift + RQS (num_parameters=25, CosineDecay LR) |
+| New `bernstein_nf_scale_shift` | normal(0,1) base, Scale + Shift + BernsteinPolynomial (num_parameters=14) |
+| New `bernstein_nf_scale_shift_truncated` | truncated_normal(0,5) base, Scale + Shift + BernsteinPolynomial (num_parameters=18) |
+| Re-added `bernstein_nf_scale` | back to active pipeline (was only on disk) |
+| Re-added `bernstein_nf_scale_truncated` | back to active pipeline (was only on disk) |
+| Synced non-DLA Bernstein configs | ofen_g_koks/ofen_f_koks/pl2 now match DLA HPO-optimised num_parameters |
+| Fixed `max_epochs` | removed extraneous field from `dla/spline_nf_truncated.yaml` |
+
+### Active Model Inventory (12 models × 4 targets = 48 configs)
+
+| Model | Base | Bijectors | num_parameters |
+|-------|------|-----------|---------------|
+| normal_baseline | — | multivariate_normal (diag) | — |
+| truncated_baseline | — | multivariate_truncated_normal (diag) | — |
+| spline_nf | normal(0,1) | RationalQuadraticSpline | 35 |
+| spline_nf_truncated | truncated_normal(0,5) | RQS | 35 |
+| spline_nf_scale | normal(0,1) | Scale + RQS | 36 |
+| spline_nf_scale_truncated | truncated_normal(0,5) | Scale + RQS | 24 |
+| **spline_nf_scale_shift** | normal(0,1) | Scale + Shift + RQS | **37** |
+| **spline_nf_scale_shift_truncated** | truncated_normal(0,5) | Scale + Shift + RQS | **25** |
+| bernstein_nf_scale | normal(0,1) | Scale + Bernstein | 13 |
+| bernstein_nf_scale_truncated | truncated_normal(0,5) | Scale + Bernstein | 17 |
+| **bernstein_nf_scale_shift** | normal(0,1) | Scale + Shift + Bernstein | **14** |
+| **bernstein_nf_scale_shift_truncated** | truncated_normal(0,5) | Scale + Shift + Bernstein | **18** |
+
+### Config Rules (updated)
+
+- **Scale + Shift** bijectors follow the same base distribution rules as Scale:
+  - Normal(0,1) base: `range_min: -4, interval_width: 8`
+  - TruncatedNormal(0,5) base: `range_min: 0, interval_width: 5`
+- Shift bijector uses no `parameters_constraint_fn` (shift can be any real value)
+- `parameter_shape: [48]` for both Scale and Shift (1 parameter per dimension)
+- `parameters_slice_size: 1` for both Scale and Shift
+- `nbins=12` for spline normal base, `nbins=8` for truncated base scale variants
+- Shift is inserted after Scale, before the flow bijector in `nested_bijectors`
+
+### Known Issues
+
+- **Scale + TruncatedNormal(0,5) NaN on non-DLA** still applies to both scale-only
+  and scale+shift variants. On ofen_g_koks, ofen_f_koks, pl2 the Scale bijector
+  may push data outside truncated support at initialisation.
+- Bernstein models still expected to underperform spline (historical evidence from
+  Phases 5-7), but kept for completeness.
+
+**Next steps:** Run full pipeline to evaluate the new scale+shift models and
+re-validated Bernstein scale models across all 4 targets.

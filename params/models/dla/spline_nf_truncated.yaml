@@ -4,7 +4,6 @@ fit_kwargs:
   early_stopping_patience: 20
   epochs: 400
   learning_rate: 0.0005
-  max_epochs: 400
   verbose: true
 model_kwargs:
   base_distribution_kwargs:

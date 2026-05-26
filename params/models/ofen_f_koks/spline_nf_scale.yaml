@@ -26,11 +26,11 @@ model_kwargs:
     parameters_slice_size: 1
   - bijector: RationalQuadraticSpline
     bijector_kwargs:
-      range_min: -4
+      range_min: -5
     invert: true
     parameters_constraint_fn: hybrid_flows.activations.get_spline_param_constrain_fn
     parameters_constraint_fn_kwargs:
-      interval_width: 8
+      interval_width: 10
       min_bin_width: 0.001
       min_slope: 0.001
       nbins: 12

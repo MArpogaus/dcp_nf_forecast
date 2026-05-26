@@ -24,6 +24,19 @@ model_kwargs:
       parameter_shape:
       - 48
     parameters_slice_size: 1
+  - bijector: Shift
+    parameters_fn: parameter_vector_or_simple_network
+    parameters_fn_kwargs:
+      activation: relu
+      batch_norm: false
+      conditional: true
+      dropout: 0
+      hidden_units:
+      - 256
+      - 256
+      parameter_shape:
+      - 48
+    parameters_slice_size: 1
   - bijector: RationalQuadraticSpline
     bijector_kwargs:
       range_min: -5
@@ -48,7 +61,7 @@ model_kwargs:
       - 35
     parameters_slice_size: 35
   num_layers: 1
-  num_parameters: 36
+  num_parameters: 37
   parameters_fn_kwargs:
     activation: relu
     hidden_units:
