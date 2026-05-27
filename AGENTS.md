@@ -23,7 +23,7 @@ Models use suffix indicating base distribution:
 - `spline_nf` — normal(0,1) base, RationalQuadraticSpline
 - `spline_nf_truncated` — truncated_normal(0,5) base, RationalQuadraticSpline (best NLL on DLA/pl2)
 - `spline_nf_scale` — normal(0,1) base, Scale + RationalQuadraticSpline
-- `spline_nf_scale_truncated` — truncated_normal(0,5) base, Scale + Spline (DLA only, NaN on other targets)
+- `spline_nf_scale_truncated` — truncated_normal(0,5) base, Scale + RationalQuadraticSpline
 - `spline_nf_scale_shift` — normal(0,1) base, Scale + Shift + RationalQuadraticSpline
 - `spline_nf_scale_shift_truncated` — truncated_normal(0,5) base, Scale + Shift + RQS
 - `bernstein_nf_scale` — normal(0,1) base, Scale + BernsteinPolynomial
@@ -42,7 +42,8 @@ Models use suffix indicating base distribution:
 - Spline domain = `[range_min, range_min + interval_width]`. Must match base distribution support:
   - Normal base: `range_min: -5, interval_width: 10` → domain [-5, 5] (covers 5σ of Normal(0,1))
   - TruncatedNormal base: `range_min: 0, interval_width: 5` → domain [0, 5]
-- **Scale + TruncatedNormal(0,5) fails** on non-DLA targets (NaN at init). Use non-scale `spline_nf_truncated` or `truncated_baseline` for ofen_g/ofen_f/pl2.
+- **Scale + TruncatedNormal(0,5)** requires `clipped_softplus_constrain_fn` with `min_value: 0.5` (not 0.01). Root cause: MADE initialization produces near-zero Scale, causing `RQS.forward(y)/scale` to amplify outside TruncatedNormal(0,5) support [0,5]. Fix: constrain scale to [0.5, 1.0]. Applied to all 14 NaN-affected configs.
+- Use non-scale `spline_nf_truncated` or `truncated_baseline` only if NaN persists despite min_value=0.5.
 - `truncated_baseline` uses custom `multivariate_truncated_normal` distribution (hard-codes low/high).
 
 ## Environment

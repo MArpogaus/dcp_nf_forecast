@@ -350,13 +350,13 @@ All 12 active models have now been evaluated on all 4 targets. Key findings from
 
 2. **Why does the Shift bijector consistently degrade all models across all targets?** Adding 48 shift parameters (1 per forecast step) reduces NLL by 6–58 points universally. The MAF's autoregressive structure already captures the conditional mean; the extra Shift layer may interfere with the gradient flow through the chain.
 
-3. **Why does `spline_nf_scale_truncated` fail on non-DLA targets?** NaN at initialization — likely the Scale bijector's softplus constraint pushes values outside the truncated base support [0, 5] for some of the 48 dimensions.
+3. **Why does `spline_nf_scale_truncated` fail on non-DLA targets?** NaN at initialization — confirmed root cause: MADE network initialization can produce near-zero Scale values (< 0.2). With `RQS.forward(y) / scale`, even `scale=0.2` amplifies the spline output by 5× (data range [0, 1] after min-max scaling). The TruncatedNormal(0,5) base has support [0, 5]; values > 5 give `-inf` log_prob, making the loss Inf and gradients NaN.
 
 4. **What is the real-world value of NLL differences on pl2?** The top 4 models are within 2.5 points. In practice, per-step CI90 widths and calibration (PIT/QQ) should drive deployment decisions, not raw joint density.
 
 5. **How important is the MAF autoregressive structure?** The `truncated_baseline` (diagonal, no flow) is competitive on ofen_f_koks. An ablation study removing the MAF from NF models would quantify the value of modeling cross-step dependencies.
 
-6. **Can the NaN issue with Scale + TruncatedNormal on non-DLA targets be resolved?** Potential approaches: clip softplus output to reduce extreme scale values, initialize with smaller scales, use a bounded scale transformation, or drop the Scale bijector entirely for truncated-base models on non-DLA targets.
+6. **Can the NaN issue with Scale + TruncatedNormal on non-DLA targets be resolved?** **Yes.** Root cause was the `clipped_softplus_constrain_fn` minimum (≤ 0.01) allowing scale values too small to keep `RQS.forward(y) / scale` within [0, 5]. Fix: raise `min_value` to 0.5, ensuring scale ∈ [0.5, 1.0] → max amplification 2× → output ≤ 2, safely within [0, 5]. Applied to all 14 Scale+TruncatedNormal configs. Verified: trains without NaN, NLL ≈ −153.9 on ofen_f_koks.
 
 ### 5.4 Supplementary Materials
 
