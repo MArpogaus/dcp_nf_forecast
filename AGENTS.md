@@ -42,8 +42,13 @@ Models use suffix indicating base distribution:
 - Spline domain = `[range_min, range_min + interval_width]`. Must match base distribution support:
   - Normal base: `range_min: -5, interval_width: 10` → domain [-5, 5] (covers 5σ of Normal(0,1))
   - TruncatedNormal base: `range_min: 0, interval_width: 5` → domain [0, 5]
-- **Scale + TruncatedNormal(0,5)** requires `clipped_softplus_constrain_fn` with `min_value: 0.5` (not 0.01). Root cause: MADE initialization produces near-zero Scale, causing `RQS.forward(y)/scale` to amplify outside TruncatedNormal(0,5) support [0,5]. Fix: constrain scale to [0.5, 1.0]. Applied to all 14 NaN-affected configs.
-- Use non-scale `spline_nf_truncated` or `truncated_baseline` only if NaN persists despite min_value=0.5.
+- **Scale + TruncatedNormal(0,5)** requires `clipped_softplus_constrain_fn` with `min_value: 0.3` (raised from 0.5 for more flexibility; originally 0.01 caused NaN). Root cause: MADE initialization produces near-zero Scale, causing `RQS.forward(y)/scale` to exceed [0,5] support. Fix: constrain scale to [0.3, 1.0]. Applied to all 14 truncated configs.
+- **Shift + TruncatedNormal(0,5)** requires `shift_constrain_fn` with `max_shift: 0.5`. The composite flow output `(RQS.forward(y) - shift) / scale` stays in [0,5] only when shift ∈ (-0.5, 0). Derivation:
+  - Upper bound (data=1, scale=0.3): `(1 - shift) / 0.3 ≤ 5 → shift ≥ -0.5`
+  - Lower bound (data=0): `(0 - shift) / scale ≥ 0 → shift ≤ 0`
+  - `max_shift=5.0` (old value) allowed shift=-5 → `(1 + 5)/0.3 = 20` ≫ 5 → `-inf` log_prob.
+  - `max_shift=0.5` keeps output at or below `(1 + 0.5)/0.3 = 5.0`, exactly at [0,5] edge.
+- Shift **must be negative** for TruncatedNormal base. Positive shift causes data=0 → `-shift/scale < 0` → `-inf` log_prob (verified empirically).
 - `truncated_baseline` uses custom `multivariate_truncated_normal` distribution (hard-codes low/high).
 
 ## Environment

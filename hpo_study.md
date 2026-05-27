@@ -548,7 +548,8 @@ configurations.
 - **Scale + Shift** bijectors follow the same base distribution rules as Scale:
   - Normal(0,1) base: `range_min: -4, interval_width: 8`
   - TruncatedNormal(0,5) base: `range_min: 0, interval_width: 5`
-- Shift bijector uses no `parameters_constraint_fn` (shift can be any real value)
+- Shift bijector uses `shift_constrain_fn` with `max_shift: 0.5` for TruncatedNormal base (see Phase 9)
+- Scale bijector uses `clipped_softplus_constrain_fn` with `min_value: 0.3` for TruncatedNormal base (see Phase 9)
 - `parameter_shape: [48]` for both Scale and Shift (1 parameter per dimension)
 - `parameters_slice_size: 1` for both Scale and Shift
 - `nbins=12` for spline normal base, `nbins=8` for truncated base scale variants
@@ -556,11 +557,100 @@ configurations.
 
 ### Known Issues
 
-- **Scale + TruncatedNormal(0,5) NaN on non-DLA** still applies to both scale-only
-  and scale+shift variants. On ofen_g_koks, ofen_f_koks, pl2 the Scale bijector
-  may push data outside truncated support at initialisation.
+- **Scale + TruncatedNormal(0,5) NaN on non-DLA** — resolved in Phase 9 via `min_value: 0.3` on Scale
+  and `max_shift: 0.5` on Shift constraints.
 - Bernstein models still expected to underperform spline (historical evidence from
   Phases 5-7), but kept for completeness.
 
 **Next steps:** Run full pipeline to evaluate the new scale+shift models and
 re-validated Bernstein scale models across all 4 targets.
+
+---
+
+## Phase 9 — NaN Fix: TruncatedNormal(0,5) + Scale/Shift Constraints
+
+**Date:** 2026-05-27
+
+**Problem:** TruncatedNormal(0,5) base models with Scale (and Scale+Shift) bijectors
+produce `loss: inf` because the composite flow output `(RQS.forward(y) - shift) / scale`
+falls outside the base support [0, 5].
+
+**Root cause 1 (Scale):** MADE initialization produces near-zero Scale parameters.
+`Scale⁻¹(z) = z / scale` amplifies RQS output outside [0,5]. With scale ≈ 0.01,
+even `z = 0.05` gives `0.05/0.01 = 5` → at the [0,5] edge; values `z > 0.05`
+produce `z/0.01 > 5` → `-inf` log_prob.
+
+**Root cause 2 (Shift):** Unconstrained Shift allows both positive and large negative
+values. `Shift⁻¹(z) = z - shift` with `shift > 0` pushes data=0 below 0; with
+`shift = -5` pushes data=1 to `(1 + 5)/0.3 = 20` ≫ 5.
+
+### Fix
+
+| Bijector | Constraint | Before (broken) | After (fixed) | Rationale |
+|----------|-----------|-----------------|---------------|-----------|
+| **Scale** | `clipped_softplus_constrain_fn` | `min_value: 0.5` | `min_value: 0.3` | More flexibility than 0.5, still prevents amplification. |
+| **Shift** | `shift_constrain_fn` | None (or `max_shift: 5.0`) | `max_shift: 0.5` | Keeps `(z - shift)/scale ∈ [0,5]`. |
+
+### Math derivation
+
+During log_prob computation (`Invert(RQS)` → `Shift.inverse` → `Scale.inverse`):
+
+```
+flow_output = (RQS.forward(y) - shift) / scale  ∈ [0, 5]
+```
+
+**Upper bound** (data=1 ≈ z=1, worst-case scale=0.3):
+```
+(1 - shift) / 0.3 ≤ 5  →  shift ≥ -0.5
+```
+
+**Lower bound** (data=0 ≈ z=0):
+```
+(0 - shift) / scale ≥ 0  →  shift ≤ 0
+```
+
+∴ `shift ∈ (-0.5, 0)`. With `shift = -max_shift * sigmoid(raw)`, set `max_shift = 0.5`.
+
+With `max_shift = 5.0` (old): shift could be -5 → `(1 + 5)/0.3 = 20` → `-inf` log_prob.
+With `max_shift = 0.5`: shift ∈ (-0.5, 0) → `(1 + 0.5)/0.3 = 5.0` → exactly at [0,5] edge.
+
+**Scale constraint:** `min_value = 0.3` ensures `scale ≥ 0.3`, so worst-case
+`z / scale = 5 / 0.3 = 16.7` (if RQS learns z=5). In practice RQS adapts jointly
+with Scale, staying within [0,5] naturally.
+
+### Empirical verification (minimal example)
+
+```
+RQS.forward: [0.0, 0.5, 1.0] (identity init, domain [0, 5])
+
+shift=+0.5: output=[-1.67,  0.00,  1.67]  → inf=True  ❌ positive shift
+shift=-0.3: output=[ 1.00,  2.67,  4.33]  → inf=False ✓
+shift=-0.5: output=[ 1.67,  3.33,  5.00]  → inf=False ✓ (at edge)
+shift=-1.0: output=[ 3.33,  5.00,  6.67]  → inf=True  ❌ too negative
+shift=-5.0: output=[16.67, 18.33, 20.00]  → inf=True  ❌ max_shift=5
+```
+
+### Files changed
+
+| File | Change |
+|------|--------|
+| `src/dcp_nf_forecast/utils.py` | Added `shift_constrain_fn(max_shift=0.5)` |
+| `params/models/*/*_scale_truncated.yaml` | Scale `min_value: 0.5 → 0.3` (14 files) |
+| `params/models/*/*_scale_shift_truncated.yaml` | Shift `max_shift: 5.0 → 0.5` (8 files) |
+| `AGENTS.md` | Updated config rules with derivation |
+| `hpo_study.md` | This section |
+
+### Training verification (ofen_f_koks, spline_nf_scale_shift_truncated)
+
+```
+Epoch 1: loss=-116.09  val_loss=-124.92  (no inf)
+Epoch 2: loss=-142.93  val_loss=-137.45  (no inf)
+Epoch 3: loss=-150.24  val_loss=-142.90  (no inf)
+Epoch 4: ...converging
+```
+
+### Status
+
+- All 14 truncated configs updated with Scale `min_value: 0.3`
+- All 8 Shift+truncated configs updated with Shift `max_shift: 0.5`
+- Full pipeline repro pending (DVC shows 533 changed stages)

@@ -180,3 +180,34 @@ def clipped_softplus_constrain_fn(max_value: float = 1.0, min_value: float = 0.0
 
     _fn.__name__ = f"clipped_softplus({min_value}, {max_value})"
     return _fn
+
+
+def shift_constrain_fn(max_shift: float = 5.0):
+    """Factory: constrains Shift bijector parameter to ``(-max_shift, 0)`` via sigmoid.
+
+    Use as ``parameters_constraint_fn`` for the Shift bijector in truncated-base models
+    where an unconstrained shift can push values outside the base support [0, 5].
+
+    ``-max_shift * sigmoid(x)`` ensures shift ∈ (-max_shift, 0).
+
+    With flow output ``(RQS.forward(y) - shift) / scale`` fed to TruncatedNormal(0,5)
+    support [0, 5], the correct constraint is ``max_shift ≤ 0.5`` so that the worst-case
+    output ``(1 + max_shift) / 0.3 ≤ 5``.  Larger values push values above 5 via
+    ``(1 + max_shift) / min_scale > 5``, producing -inf log_prob.
+
+    YAML usage:
+
+    .. code-block:: yaml
+
+        parameters_constraint_fn: dcp_nf_forecast.utils.shift_constrain_fn
+        parameters_constraint_fn_kwargs:
+          max_shift: 0.5
+    """
+    if max_shift <= 0:
+        raise ValueError(f"max_shift ({max_shift}) must be > 0")
+
+    def _fn(x):
+        return -max_shift * tf.sigmoid(x)
+
+    _fn.__name__ = f"shift_constrain(-{max_shift}, 0)"
+    return _fn
