@@ -152,3 +152,31 @@ def setup_plotting_style() -> None:
             "font.family": "sans-serif",
         }
     )
+
+
+import tensorflow as tf
+
+
+def clipped_softplus_constrain_fn(max_value: float = 1.0, min_value: float = 0.01):
+    """Factory: returns a closure that applies softplus then clips to ``[min_value, max_value]``.
+
+    Use as ``parameters_constraint_fn`` for the Scale bijector in truncated-base models
+    where unbounded softplus causes NaN by pushing values outside the base support.
+
+    YAML usage:
+
+    .. code-block:: yaml
+
+        parameters_constraint_fn: dcp_nf_forecast.utils.clipped_softplus_constrain_fn
+        parameters_constraint_fn_kwargs:
+          max_value: 1.0
+          min_value: 0.01
+    """
+    if max_value <= min_value:
+        raise ValueError(f"max_value ({max_value}) must be > min_value ({min_value})")
+
+    def _fn(x):
+        return tf.clip_by_value(tf.nn.softplus(x), min_value, max_value)
+
+    _fn.__name__ = f"clipped_softplus({min_value}, {max_value})"
+    return _fn

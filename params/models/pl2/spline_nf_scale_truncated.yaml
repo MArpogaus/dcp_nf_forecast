@@ -4,59 +4,42 @@ fit_kwargs:
   early_stopping_patience: 20
   epochs: 400
   learning_rate:
-    scheduler_kwargs:
-      decay_steps: 22000
-      initial_learning_rate: 0.001
+    scheduler_kwargs: {decay_steps: 22000, initial_learning_rate: 0.001}
     scheduler_name: CosineDecay
   verbose: true
 model_kwargs:
-  base_distribution_kwargs:
-    distribution_name: truncated_normal
-    high: 5.0
-    low: 0.0
+  base_distribution_kwargs: {distribution_name: truncated_normal, high: 5.0, low: 0.0}
   distribution: masked_autoregressive_flow
   nested_bijectors:
   - bijector: Scale
-    parameters_constraint_fn: tensorflow.math.softplus
+    parameters_constraint_fn: dcp_nf_forecast.utils.clipped_softplus_constrain_fn
     parameters_fn: parameter_vector_or_simple_network
     parameters_fn_kwargs:
       activation: relu
       batch_norm: false
       conditional: true
       dropout: 0
-      hidden_units:
-      - 256
-      - 256
-      parameter_shape:
-      - 48
+      hidden_units: [256, 256]
+      parameter_shape: [48]
     parameters_slice_size: 1
+    parameters_constraint_fn_kwargs: {max_value: 1.0, min_value: 0.01}
   - bijector: RationalQuadraticSpline
-    bijector_kwargs:
-      range_min: 0
+    bijector_kwargs: {range_min: 0}
     invert: true
     parameters_constraint_fn: hybrid_flows.activations.get_spline_param_constrain_fn
-    parameters_constraint_fn_kwargs:
-      interval_width: 5
-      min_bin_width: 0.001
-      min_slope: 0.001
-      nbins: 8
+    parameters_constraint_fn_kwargs: {interval_width: 5, min_bin_width: 0.001, min_slope: 0.001,
+      nbins: 8}
     parameters_fn: parameter_vector_or_simple_network
     parameters_fn_kwargs:
       activation: relu
       batch_norm: false
       conditional: true
       dropout: 0
-      hidden_units:
-      - 256
-      - 256
-      parameter_shape:
-      - 48
-      - 23
+      hidden_units: [256, 256]
+      parameter_shape: [48, 23]
     parameters_slice_size: 23
   num_layers: 1
   num_parameters: 24
   parameters_fn_kwargs:
     activation: relu
-    hidden_units:
-    - 256
-    - 256
+    hidden_units: [256, 256]
