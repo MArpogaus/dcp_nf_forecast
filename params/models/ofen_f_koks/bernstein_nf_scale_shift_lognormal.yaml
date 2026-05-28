@@ -1,0 +1,51 @@
+compile_kwargs: {}
+fit_kwargs: {batch_size: 256, early_stopping_patience: 20, epochs: 400, learning_rate: 0.0005, verbose: true}
+model_kwargs:
+  base_distribution_kwargs: {distribution_name: lognormal}
+  distribution: masked_autoregressive_flow
+  nested_bijectors:
+  - bijector: Scale
+    parameters_constraint_fn: dcp_nf_forecast.utils.clipped_softplus_constrain_fn
+    parameters_fn: parameter_vector_or_simple_network
+    parameters_fn_kwargs:
+      activation: relu
+      batch_norm: false
+      conditional: true
+      dropout: 0
+      hidden_units: [256, 256]
+      parameter_shape: [48]
+    parameters_slice_size: 1
+    parameters_constraint_fn_kwargs: {max_value: 1.0, min_value: 0.3}
+  - bijector: Shift
+    parameters_fn: parameter_vector_or_simple_network
+    parameters_fn_kwargs:
+      activation: relu
+      batch_norm: false
+      conditional: true
+      dropout: 0
+      hidden_units: [256, 256]
+      parameter_shape: [48]
+    parameters_slice_size: 1
+    parameters_constraint_fn: dcp_nf_forecast.utils.shift_constrain_fn
+    parameters_constraint_fn_kwargs: {max_shift: 5.0}
+  - bijector: BernsteinPolynomial
+    bijector_kwargs:
+      domain: [0.0, 1.0]
+      extrapolation: false
+    invert: true
+    parameters_constraint_fn: hybrid_flows.activations.get_thetas_constrain_fn
+    parameters_constraint_fn_kwargs: {allow_flexible_bounds: false, bounds: none, high: 148.413159, low: 0.006738}
+    parameters_fn: parameter_vector_or_simple_network
+    parameters_fn_kwargs:
+      activation: relu
+      batch_norm: false
+      conditional: true
+      dropout: 0
+      hidden_units: [256, 256]
+      parameter_shape: [48, 16]
+    parameters_slice_size: 16
+  num_layers: 1
+  num_parameters: 18
+  parameters_fn_kwargs:
+    activation: relu
+    hidden_units: [256, 256]
