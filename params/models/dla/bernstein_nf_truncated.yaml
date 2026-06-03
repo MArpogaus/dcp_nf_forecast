@@ -10,25 +10,31 @@ model_kwargs:
     distribution_name: truncated_normal
     high: 5.0
     low: 0.0
-  bijector: BernsteinPolynomial
-  bijector_kwargs:
-    domain:
-    - 0.0
-    - 5.0
-    extrapolation: false
   distribution: masked_autoregressive_flow
-  invert: true
+  nested_bijectors:
+  - bijector: BernsteinPolynomial
+    bijector_kwargs:
+      domain: [0.0, 5.0]
+      extrapolation: false
+    invert: true
+    parameters_constraint_fn: hybrid_flows.activations.get_thetas_constrain_fn
+    parameters_constraint_fn_kwargs:
+      allow_flexible_bounds: false
+      bounds: none
+      high: 5.0
+      low: 0.0
+    parameters_fn: parameter_vector_or_simple_network
+    parameters_fn_kwargs:
+      activation: relu
+      batch_norm: false
+      conditional: true
+      dropout: 0
+      hidden_units: [256, 256]
+      parameter_shape: [48, 16]
+    parameters_slice_size: 16
   num_layers: 1
   num_parameters: 16
-  parameters_constraint_fn: hybrid_flows.activations.get_thetas_constrain_fn
-  parameters_constraint_fn_kwargs:
-    allow_flexible_bounds: false
-    bounds: none
-    high: 5.0
-    low: 0.0
+  maf_kwargs: {bijector_kwargs: {unroll_loop: true}}
   parameters_fn_kwargs:
     activation: relu
-    conditional: true
-    hidden_units:
-    - 256
-    - 256
+    hidden_units: [256, 256]

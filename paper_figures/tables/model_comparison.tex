@@ -1,0 +1,104 @@
+\begin{table}[t]
+\centering
+\caption{Test-set metrics per target and model. Best per metric bolded.}
+\label{tab:model_comparison}
+\small
+\begin{tabular}{lcccc}
+\toprule
+Target / Model & NLL $\downarrow$ & RMSE $\downarrow$ & MAE $\downarrow$ & CI90 $\downarrow$ \\
+\midrule
+\multicolumn{5}{l}{\textbf{DLA}} \\
+  spline\_nf & \textbf{-65.30} & 0.2295 & 0.2014 & 0.669 \\
+  spline\_nf\_truncated & -60.91 & 0.2502 & 0.2275 & 0.755 \\
+  lognormal\_baseline & -60.32 & 0.1861 & 0.1601 & 0.800 \\
+  normal\_baseline & -57.18 & 0.4746 & 0.4269 & 1.012 \\
+  spline\_nf\_scale & -52.19 & \textbf{0.1313} & \textbf{0.0979} & 0.270 \\
+  spline\_nf\_scale\_shift & -48.87 & 0.1369 & 0.1037 & \textbf{0.248} \\
+  bernstein\_nf\_scale & -43.28 & 0.1431 & 0.1082 & 0.251 \\
+  bernstein\_nf\_scale\_truncated & -39.18 & 0.2642 & 0.2242 & 0.461 \\
+  bernstein\_nf\_scale\_shift & -37.78 & 0.1490 & 0.1103 & 0.250 \\
+  spline\_nf\_scale\_shift\_lognormal & -37.75 & 0.1894 & 0.1499 & 0.546 \\
+  spline\_nf\_scale\_truncated & -37.03 & 0.1612 & 0.1267 & 0.310 \\
+  spline\_nf\_scale\_shift\_truncated & -33.33 & 0.1716 & 0.1330 & 0.275 \\
+  bernstein\_nf\_scale\_shift\_truncated & -32.21 & 0.2279 & 0.1933 & 0.401 \\
+  bernstein\_nf\_scale\_lognormal & -26.59 & 0.1621 & 0.1282 & 0.286 \\
+  spline\_nf\_lognormal & -24.55 & 0.4839 & 0.4348 & 0.753 \\
+  bernstein\_nf\_truncated & -24.53 & 0.2661 & 0.2274 & 0.652 \\
+  truncated\_baseline & -22.93 & 0.1329 & 0.1013 & 0.348 \\
+  spline\_nf\_scale\_lognormal & -3.50 & 0.4097 & 0.3645 & 12.964 \\
+  bernstein\_nf & -2.66 & 0.1740 & 0.1435 & 1.286 \\
+  bernstein\_nf\_scale\_shift\_lognormal & -0.42 & 0.2063 & 0.1543 & 0.261 \\
+  bernstein\_nf\_lognormal & 4.54 & 0.3246 & 0.2870 & 2.206 \\
+\midrule
+\multicolumn{5}{l}{\textbf{Ofen F Koks}} \\
+  bernstein\_nf\_scale\_shift\_lognormal & \textbf{-150.49} & \textbf{0.0242} & \textbf{0.0145} & 0.053 \\
+  bernstein\_nf\_scale\_lognormal & -135.01 & 0.0297 & 0.0175 & 0.066 \\
+  spline\_nf\_scale & -130.77 & 0.0406 & 0.0259 & 0.058 \\
+  spline\_nf\_scale\_shift & -129.33 & 0.0371 & 0.0221 & 0.043 \\
+  bernstein\_nf\_scale & -122.57 & 0.0483 & 0.0263 & \textbf{0.041} \\
+  bernstein\_nf\_scale\_shift & -118.84 & 0.0441 & 0.0272 & 0.041 \\
+  spline\_nf\_scale\_truncated & -118.73 & 0.0452 & 0.0330 & 0.105 \\
+  spline\_nf & -116.25 & 0.0713 & 0.0662 & 0.230 \\
+  spline\_nf\_scale\_shift\_truncated & -115.58 & 0.0386 & 0.0226 & 0.053 \\
+  bernstein\_nf\_scale\_shift\_truncated & -112.20 & 0.0276 & 0.0182 & 0.139 \\
+  bernstein\_nf\_scale\_truncated & -110.21 & 0.0379 & 0.0239 & 0.143 \\
+  spline\_nf\_scale\_shift\_lognormal & -100.94 & 0.0548 & 0.0374 & 0.337 \\
+  truncated\_baseline & -100.08 & 0.0385 & 0.0220 & 0.066 \\
+  spline\_nf\_truncated & -99.64 & 0.0742 & 0.0611 & 0.178 \\
+  normal\_baseline & -79.40 & 0.1086 & 0.0898 & 0.501 \\
+  bernstein\_nf\_truncated & -78.03 & 0.0374 & 0.0296 & 0.278 \\
+  bernstein\_nf\_lognormal & -28.40 & 0.0781 & 0.0721 & 0.311 \\
+  bernstein\_nf & -3.83 & 0.0972 & 0.0776 & 1.303 \\
+  spline\_nf\_lognormal & inf & 0.3279 & 0.2106 & 0.799 \\
+  lognormal\_baseline & nan & nan & nan & nan \\
+  spline\_nf\_scale\_lognormal & nan & nan & nan & nan \\
+\midrule
+\multicolumn{5}{l}{\textbf{Ofen G Koks}} \\
+  spline\_nf\_scale & \textbf{-126.75} & 0.0547 & 0.0243 & 0.066 \\
+  spline\_nf\_scale\_shift\_truncated & -125.08 & 0.0575 & 0.0280 & 0.082 \\
+  bernstein\_nf\_scale\_shift & -122.81 & 0.0553 & 0.0266 & 0.065 \\
+  bernstein\_nf\_scale & -121.84 & \textbf{0.0522} & \textbf{0.0212} & 0.064 \\
+  bernstein\_nf\_scale\_lognormal & -121.20 & 0.0571 & 0.0288 & 0.111 \\
+  spline\_nf\_scale\_shift & -119.93 & 0.0589 & 0.0297 & 0.065 \\
+  spline\_nf\_scale\_truncated & -116.27 & 0.0611 & 0.0315 & 0.143 \\
+  bernstein\_nf\_scale\_shift\_truncated & -92.63 & 0.0598 & 0.0300 & 0.222 \\
+  bernstein\_nf\_scale\_truncated & -91.61 & 0.0596 & 0.0311 & 0.232 \\
+  truncated\_baseline & -88.67 & 0.0664 & 0.0373 & 0.144 \\
+  spline\_nf & -86.12 & 0.1571 & 0.1367 & 0.393 \\
+  spline\_nf\_scale\_shift\_lognormal & -74.75 & 0.1160 & 0.0857 & 0.324 \\
+  spline\_nf\_truncated & -69.75 & 0.1682 & 0.1267 & 0.468 \\
+  bernstein\_nf\_truncated & -65.55 & 0.0596 & 0.0379 & 0.381 \\
+  normal\_baseline & -44.29 & 0.1730 & 0.1429 & 0.696 \\
+  bernstein\_nf & -4.09 & 0.0698 & 0.0441 & 1.213 \\
+  bernstein\_nf\_lognormal & 11.77 & 0.2168 & 0.1851 & 0.311 \\
+  spline\_nf\_lognormal & 104.74 & 0.3346 & 0.2600 & 0.628 \\
+  bernstein\_nf\_scale\_shift\_lognormal & 280.35 & 0.1003 & 0.0690 & \textbf{0.047} \\
+  lognormal\_baseline & nan & nan & nan & nan \\
+  spline\_nf\_scale\_lognormal & nan & nan & nan & nan \\
+\midrule
+\multicolumn{5}{l}{\textbf{PL2}} \\
+  spline\_nf & \textbf{-68.02} & 0.2180 & 0.1733 & 0.654 \\
+  spline\_nf\_truncated & -64.20 & 0.2197 & 0.1689 & 0.620 \\
+  bernstein\_nf\_scale & -62.52 & 0.1263 & \textbf{0.0872} & 0.293 \\
+  spline\_nf\_scale & -58.68 & 0.1278 & 0.0913 & 0.294 \\
+  bernstein\_nf\_scale\_lognormal & -55.97 & 0.1260 & 0.0907 & 0.313 \\
+  spline\_nf\_scale\_shift & -48.45 & 0.1336 & 0.0973 & 0.325 \\
+  spline\_nf\_scale\_shift\_truncated & -44.49 & 0.1374 & 0.0993 & 0.502 \\
+  spline\_nf\_scale\_truncated & -44.32 & 0.1395 & 0.1027 & 0.532 \\
+  bernstein\_nf\_scale\_shift\_truncated & -41.78 & 0.1511 & 0.1221 & 0.368 \\
+  bernstein\_nf\_scale\_shift & -40.38 & 0.1388 & 0.1031 & 0.375 \\
+  normal\_baseline & -40.31 & 0.3669 & 0.3340 & 1.051 \\
+  bernstein\_nf\_scale\_truncated & -39.58 & 0.1682 & 0.1361 & 0.391 \\
+  truncated\_baseline & -37.31 & \textbf{0.1249} & 0.0919 & 0.363 \\
+  bernstein\_nf\_truncated & -32.55 & 0.1442 & 0.1168 & 0.607 \\
+  spline\_nf\_scale\_shift\_lognormal & -21.06 & 0.2107 & 0.1658 & 0.641 \\
+  bernstein\_nf\_lognormal & -2.73 & 0.2963 & 0.2480 & 1.947 \\
+  bernstein\_nf & -2.54 & 0.1568 & 0.1369 & 1.232 \\
+  spline\_nf\_lognormal & 4.53 & 0.3562 & 0.3151 & 0.888 \\
+  bernstein\_nf\_scale\_shift\_lognormal & 399.02 & 0.3515 & 0.2903 & \textbf{0.174} \\
+  lognormal\_baseline & nan & nan & nan & nan \\
+  spline\_nf\_scale\_lognormal & nan & nan & nan & nan \\
+\midrule
+\bottomrule
+\end{tabular}
+\end{table}

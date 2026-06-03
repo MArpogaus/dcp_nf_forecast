@@ -1,0 +1,16 @@
+\begin{table}[t]
+\centering
+\caption{Best model per target by NLL.}
+\label{tab:cross_target_winners}
+\small
+\begin{tabular}{lcccc}
+\toprule
+Target & Best Model & NLL & RMSE & CI90 \\
+\midrule
+  DLA & spline$\_$nf & -65.30 & 0.2295 & 0.669 \\
+  Ofen F Koks & bernstein$\_$nf$\_$scale$\_$shift$\_$lognormal & -150.49 & 0.0242 & 0.053 \\
+  Ofen G Koks & spline$\_$nf$\_$scale & -126.75 & 0.0547 & 0.066 \\
+  PL2 & spline$\_$nf & -68.02 & 0.2180 & 0.654 \\
+\bottomrule
+\end{tabular}
+\end{table}
