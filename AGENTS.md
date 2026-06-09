@@ -3,7 +3,7 @@
 ## Project structure
 
 - `params/models/<target>/<model>.yaml` — per-target per-model configs
-- `scripts/` — CLI entry points (train, evaluate, prepare_features, split_data)
+- `scripts/` — CLI entry points (train, evaluate, prepare_features, split_data, describe_data)
 - `src/dcp_nf_forecast/` — package code (data, models, utils)
 - `params.yaml` — global DVC pipeline params
 - `dvc.yaml` — DVC pipeline definition (foreach over targets × models)
@@ -12,31 +12,34 @@
 ## Model naming
 
 Models use suffix indicating base distribution:
-- `*_truncated` = `truncated_normal(0, 5)` base (replaces old `*_lognormal`)
+- `*_truncated` = `truncated_normal(0, 5)` base
+- `*_lognormal` = `LogNormal(0, 1)` base
 - `*` (no suffix) = `normal(0, 1)` base
 - `*_baseline` = simple diagonal distributions (not NF)
 
-## Active models (17)
+## Active models (21)
 
 - `normal_baseline` — diagonal multivariate normal
-- `truncated_baseline` — diagonal truncated_normal(0,5) (best CI, competitive NLL)
+- `truncated_baseline` — diagonal truncated_normal(0,5)
+- `lognormal_baseline` — diagonal multivariate lognormal
 - `spline_nf` — normal(0,1) base, RationalQuadraticSpline
-- `spline_nf_truncated` — truncated_normal(0,5) base, RationalQuadraticSpline (best NLL on DLA/pl2)
+- `spline_nf_truncated` — truncated_normal(0,5) base, RationalQuadraticSpline
+- `spline_nf_lognormal` — LogNormal(0,1) base, RationalQuadraticSpline
 - `spline_nf_scale` — normal(0,1) base, Scale + RationalQuadraticSpline
 - `spline_nf_scale_truncated` — truncated_normal(0,5) base, Scale + RationalQuadraticSpline
+- `spline_nf_scale_lognormal` — LogNormal(0,1) base, Scale + RationalQuadraticSpline
 - `spline_nf_scale_shift` — normal(0,1) base, Scale + Shift + RationalQuadraticSpline
 - `spline_nf_scale_shift_truncated` — truncated_normal(0,5) base, Scale + Shift + RQS
+- `spline_nf_scale_shift_lognormal` — LogNormal(0,1) base, Scale + Shift + RQS
+- `bernstein_nf` — normal(0,1) base, BernsteinPolynomial
+- `bernstein_nf_truncated` — truncated_normal(0,5) base, BernsteinPolynomial
+- `bernstein_nf_lognormal` — LogNormal(0,1) base, BernsteinPolynomial
 - `bernstein_nf_scale` — normal(0,1) base, Scale + BernsteinPolynomial
 - `bernstein_nf_scale_truncated` — truncated_normal(0,5) base, Scale + BernsteinPolynomial
+- `bernstein_nf_scale_lognormal` — LogNormal(0,1) base, Scale + BernsteinPolynomial
 - `bernstein_nf_scale_shift` — normal(0,1) base, Scale + Shift + BernsteinPolynomial
 - `bernstein_nf_scale_shift_truncated` — truncated_normal(0,5) base, Scale + Shift + BernsteinPolynomial
-- `spline_nf_lognormal` — LogNormal(0,1) base, RationalQuadraticSpline
-- `spline_nf_scale_lognormal` — LogNormal(0,1) base, Scale + RationalQuadraticSpline
-- `spline_nf_scale_shift_lognormal` — LogNormal(0,1) base, Scale + Shift + RQS
-- `bernstein_nf_scale_lognormal` — LogNormal(0,1) base, Scale + BernsteinPolynomial
 - `bernstein_nf_scale_shift_lognormal` — LogNormal(0,1) base, Scale + Shift + BernsteinPolynomial
-
-**Dropped:** plain `bernstein_nf`, `bernstein_nf_truncated`, `lognormal_baseline`.
 
 ## Config rules
 

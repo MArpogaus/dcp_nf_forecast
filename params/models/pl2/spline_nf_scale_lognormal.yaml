@@ -1,11 +1,11 @@
 compile_kwargs: {}
 fit_kwargs:
   batch_size: 256
-  early_stopping_patience: 20
-  epochs: 400
+  early_stopping_patience: 10
+  epochs: 200
   learning_rate:
-    scheduler_kwargs: {decay_steps: 22000, initial_learning_rate: 0.001}
     scheduler_name: CosineDecay
+    scheduler_kwargs: {initial_learning_rate: 0.001, decay_steps: 22000}
   verbose: true
 model_kwargs:
   base_distribution_kwargs: {distribution_name: lognormal}
@@ -27,13 +27,19 @@ model_kwargs:
     bijector_kwargs: {range_min: 0.006738}
     invert: true
     parameters_constraint_fn: hybrid_flows.activations.get_spline_param_constrain_fn
-    parameters_constraint_fn_kwargs: {interval_width: 148.406421, min_bin_width: 0.001, min_slope: 0.001, nbins: 24}
+    parameters_constraint_fn_kwargs: {interval_width: 148.406421, min_bin_width: 0.001,
+      min_slope: 0.001, nbins: 24}
     parameters_fn: parameter_vector_or_simple_network
     parameters_fn_kwargs:
+      activation: relu
+      batch_norm: false
+      conditional: true
+      dropout: 0
+      hidden_units: [256, 256]
       parameter_shape: [48, 71]
     parameters_slice_size: 71
   num_layers: 1
-  num_parameters: 24
+  num_parameters: 72
   parameters_fn_kwargs:
     activation: relu
-    hidden_units: [256, 256]
+    hidden_units: [128, 128]

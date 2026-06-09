@@ -27,7 +27,12 @@ from hybrid_flows.utils.mlflow import (
 from matplotlib.figure import Figure
 
 from dcp_nf_forecast.models import build_model
-from dcp_nf_forecast.utils import read_dataframe, setup_logging, setup_plotting_style
+from dcp_nf_forecast.utils import (
+    parse_model_tags,
+    read_dataframe,
+    setup_logging,
+    setup_plotting_style,
+)
 from dcp_nf_forecast.validation import plot_pit_histogram
 logger = logging.getLogger(__name__)
 
@@ -305,6 +310,8 @@ def main() -> None:
     with mlflow.start_run(run_id=parent_run_id_file.read_text().strip()):
         with start_run_with_exception_logging(run_name=f"{run_name}_evaluation"):
             mlflow.set_tag("stage", "evaluation")
+            for k, v in parse_model_tags(args.model).items():
+                mlflow.set_tag(k, v)
             log_cfg(params)
 
             mlflow.tensorflow.autolog()

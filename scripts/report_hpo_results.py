@@ -64,7 +64,6 @@ TOP_PARAM_KEYS = [
 MODEL_SHORT = {
     "normal_baseline": "$\\mathcal{N}$-base",
     "truncated_baseline": "Trunc-$\\mathcal{N}$-base",
-    "lognormal_baseline": "LogNormal-base",
     "spline_nf": "Spline",
     "spline_nf_truncated": "Spline (trunc)",
     "spline_nf_lognormal": "Spline (log)",
@@ -73,9 +72,6 @@ MODEL_SHORT = {
     "spline_nf_scale_lognormal": "Spline+Scale (log)",
     "spline_nf_scale_shift": "Spline+Scale+Shift",
     "spline_nf_scale_shift_truncated": "Spline+Scale+Shift (trunc)",
-    "bernstein_nf": "Bernstein",
-    "bernstein_nf_truncated": "Bernstein (trunc)",
-    "bernstein_nf_lognormal": "Bernstein (log)",
     "bernstein_nf_scale": "Bernstein+Scale",
     "bernstein_nf_scale_truncated": "Bernstein+Scale (trunc)",
     "bernstein_nf_scale_lognormal": "Bernstein+Scale (log)",

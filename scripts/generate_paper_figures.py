@@ -13,7 +13,7 @@ Outputs:
         figures/
             example_forecast.pdf       — best-model forecast with CI bands
             pit_histograms.pdf         — 2x2 PIT grid, one per target
-            nll_comparison.pdf         — bar chart ranked by NLL
+            nll_comparison.pdf         — 4x3 bar chart by model family
 """
 
 import argparse
@@ -41,10 +41,83 @@ TARGETS = {
 
 RESULTS_DIR = Path("results")
 
-# LaTeX article: \textwidth ≈ 246pt = 3.417in, \columnwidth similar
 COL_WIDTH = 3.417
-TEXT_WIDTH = 7.0  # full page width for 2-column figure
-GOLDEN_RATIO = (np.sqrt(5) - 1) / 2
+TEXT_WIDTH = 7.0
+
+MODEL_FAMILIES = {
+    "Baselines": ["normal_baseline", "truncated_baseline", "lognormal_baseline"],
+    "Spline RQS": [m for m in [
+        "spline_nf", "spline_nf_truncated", "spline_nf_lognormal",
+        "spline_nf_scale", "spline_nf_scale_truncated", "spline_nf_scale_lognormal",
+        "spline_nf_scale_shift", "spline_nf_scale_shift_truncated", "spline_nf_scale_shift_lognormal",
+    ]],
+    "Bernstein": [m for m in [
+        "bernstein_nf", "bernstein_nf_truncated", "bernstein_nf_lognormal",
+        "bernstein_nf_scale", "bernstein_nf_scale_truncated", "bernstein_nf_scale_lognormal",
+        "bernstein_nf_scale_shift", "bernstein_nf_scale_shift_truncated", "bernstein_nf_scale_shift_lognormal",
+    ]],
+}
+
+FAMILY_ORDER = ["Baselines", "Spline RQS", "Bernstein"]
+
+FAMILY_COLORS = {
+    "Baselines": "#7f7f7f",
+    "Spline RQS": "#1f77b4",
+    "Bernstein": "#2ca02c",
+}
+
+
+BASELINE_LABELS = {
+    "normal_baseline": "Normal",
+    "truncated_baseline": "TruncNorm",
+    "lognormal_baseline": "LogNormal",
+}
+
+
+def _short_model_name(model: str) -> str:
+    """Short readable label for a model name.
+
+    Format: ``{S|B}[+Sc][+Sh] | {N|Tr|LN}``
+    """
+    if model in BASELINE_LABELS:
+        return BASELINE_LABELS[model]
+    if model.startswith("spline_nf"):
+        prefix = "S"
+        rest = model[len("spline_nf"):].strip("_")
+    elif model.startswith("bernstein_nf"):
+        prefix = "B"
+        rest = model[len("bernstein_nf"):].strip("_")
+    else:
+        return model
+    parts = []
+    if "scale_shift" in rest:
+        parts.append("Sc")
+        parts.append("Sh")
+    elif "scale" in rest:
+        parts.append("Sc")
+    if "truncated" in rest:
+        base = "Tr"
+    elif "lognormal" in rest:
+        base = "LN"
+    else:
+        base = "N"
+    if parts:
+        return f"{prefix}+{'+'.join(parts)} | {base}"
+    return f"{prefix} | {base}"
+
+
+def load_samples(eval_dir: Path) -> np.ndarray | None:
+    """Load samples from single samples.feather, return (n_samp, n_eval, pred_h) array."""
+    samp_file = eval_dir / "samples.feather"
+    if not samp_file.exists():
+        return None
+    df = pd.read_feather(samp_file)
+    n_eval = df["forecast_origin"].nunique()
+    n_samples = df["sample_number"].nunique()
+    step_cols = [c for c in df.columns if c.startswith("step_")]
+    flat = df[step_cols].values
+    samples = flat.reshape(n_eval, n_samples, -1).transpose(1, 0, 2)
+    return samples
 
 
 def load_all_metrics() -> pd.DataFrame:
@@ -76,8 +149,6 @@ def get_best_model(df: pd.DataFrame, target: str) -> pd.Series:
     return tdf.loc[tdf["nll"].idxmin()]
 
 
-# ── Tables ──────────────────────────────────────────────────────────
-
 def generate_latex_tables(df: pd.DataFrame, output_dir: Path) -> None:
     table_dir = output_dir / "tables"
     table_dir.mkdir(parents=True, exist_ok=True)
@@ -89,7 +160,6 @@ def generate_latex_tables(df: pd.DataFrame, output_dir: Path) -> None:
         ("mean_90_ci_width", "CI90 $\\downarrow$", "{:.3f}"),
     ]
 
-    # ── Per-target model comparison ──
     lines = [
         r"\begin{table}[t]",
         r"\centering",
@@ -123,7 +193,6 @@ def generate_latex_tables(df: pd.DataFrame, output_dir: Path) -> None:
     (table_dir / "model_comparison.tex").write_text("\n".join(lines) + "\n")
     print(f"  Wrote {table_dir / 'model_comparison.tex'}")
 
-    # ── Cross-target winners ──
     lines = [
         r"\begin{table}[t]",
         r"\centering",
@@ -147,8 +216,6 @@ def generate_latex_tables(df: pd.DataFrame, output_dir: Path) -> None:
     print(f"  Wrote {table_dir / 'cross_target_winners.tex'}")
 
 
-# ── Figure: Example Forecast ──────────────────────────────────────
-
 def plot_example_forecast(best_row: pd.Series, output_dir: Path) -> None:
     """Time series: actual, median, 50/80/90% CI bands, history/forecast split."""
     fig_dir = output_dir / "figures"
@@ -158,21 +225,11 @@ def plot_example_forecast(best_row: pd.Series, output_dir: Path) -> None:
     model = best_row["model"]
     eval_dir = RESULTS_DIR / target / model / "evaluation"
 
-    # Load saved samples and y_test
-    import pandas as pd
-    samples_dir = eval_dir / "samples"
-    if not samples_dir.exists():
-        print(f"  WARNING: No samples directory for {target}/{model}")
+    samples = load_samples(eval_dir)
+    if samples is None:
+        print(f"  WARNING: No samples.feather for {target}/{model}")
         return
-    sample_files = sorted(samples_dir.glob("*.feather"))
-    if not sample_files:
-        print(f"  WARNING: No sample files for {target}/{model}")
-        return
-    samples_list = [pd.read_feather(f).values for f in sample_files[:200]]
-    samples = np.concatenate(samples_list, axis=0)
 
-    y_test_path = eval_dir.parent.parent / "processed" / target / "y_test.feather"
-    # Try loading from processed dir instead
     processed_dir = Path("data/processed") / target
     y_test_path = processed_dir / "y_test.feather"
     if not y_test_path.exists():
@@ -180,14 +237,13 @@ def plot_example_forecast(best_row: pd.Series, output_dir: Path) -> None:
         return
     y_true = pd.read_feather(y_test_path).values
 
-    # Pick one random sample with clear forecast horizon
     n_show = min(48, len(y_true))
     idx = np.random.randint(0, len(y_true) - n_show) if len(y_true) > n_show else 0
-    y_seg = y_true[idx : idx + n_show, 0]
+    y_seg = y_true[idx: idx + n_show, 0]
     n_history = n_show // 3
     n_forecast = n_show - n_history
 
-    samp_seg = samples[:, idx : idx + n_show, 0]
+    samp_seg = samples[:, idx: idx + n_show, 0]
 
     setup_plotting_style()
     fig, ax = plt.subplots(figsize=(COL_WIDTH, COL_WIDTH * 0.6))
@@ -195,28 +251,20 @@ def plot_example_forecast(best_row: pd.Series, output_dir: Path) -> None:
     t = np.arange(n_show)
     q = np.percentile(samp_seg, [5, 10, 25, 50, 75, 90, 95], axis=0)
 
-    # CI bands
     ax.fill_between(t, q[0], q[-1], alpha=0.15, color="#1f77b4", label="90% CI")
     ax.fill_between(t, q[1], q[-2], alpha=0.25, color="#2c8ad4", label="80% CI")
     ax.fill_between(t, q[2], q[-3], alpha=0.35, color="#3a9ee6", label="50% CI")
-
-    # Median
     ax.plot(t, q[3], color="#d62728", linestyle="--", linewidth=0.8, label="Median")
-
-    # Actual
     ax.plot(t, y_seg, color="#333333", linewidth=0.7, label="Actual")
-
-    # History/forecast separator
     ax.axvline(x=n_history - 0.5, color="gray", linestyle=":", linewidth=0.6)
-    ax.text(n_history / 2 - 1, ax.get_ylim()[1], "History",
-            ha="center", va="bottom", fontsize=7, style="italic")
-    ax.text(n_history + n_forecast / 2 - 1, ax.get_ylim()[1], "Forecast",
-            ha="center", va="bottom", fontsize=7, style="italic")
-
+    ax.text(0.17, 0.95, "History",
+            ha="center", va="top", fontsize=6, style="italic", transform=ax.transAxes)
+    ax.text(0.67, 0.95, "Forecast",
+            ha="center", va="top", fontsize=6, style="italic", transform=ax.transAxes)
     ax.set_xlabel("Time step", fontsize=8)
     ax.set_ylabel("Value (normalized)", fontsize=8)
-    ax.set_title(f"{best_row['target_label']} — {model.replace('_', ' ')}", fontsize=9)
-    ax.legend(fontsize=6, loc="upper right", framealpha=0.9, ncol=2)
+    ax.set_title(f"{best_row['target_label']} — {_short_model_name(best_row['model'])}", fontsize=9, pad=2)
+    ax.legend(fontsize=5.5, loc="upper right", framealpha=0.7, ncol=1)
     ax.tick_params(labelsize=7)
     fig.tight_layout()
     fig.savefig(fig_dir / "example_forecast.pdf", dpi=300, bbox_inches="tight")
@@ -224,15 +272,15 @@ def plot_example_forecast(best_row: pd.Series, output_dir: Path) -> None:
     print(f"  Wrote {fig_dir / 'example_forecast.pdf'} (model={model})")
 
 
-# ── Figure: PIT Histograms 2×2 ─────────────────────────────────────
-
 def plot_pit_histograms_2x2(df: pd.DataFrame, output_dir: Path) -> None:
     """2×2 grid of PIT histograms, best model per target."""
     fig_dir = output_dir / "figures"
     fig_dir.mkdir(parents=True, exist_ok=True)
 
     setup_plotting_style()
-    fig, axes = plt.subplots(2, 2, figsize=(COL_WIDTH, COL_WIDTH * 0.85), sharex=True, sharey=True)
+    fig, axes = plt.subplots(2, 2, figsize=(COL_WIDTH, COL_WIDTH * 0.95),
+                             sharex=True, sharey=True,
+                             gridspec_kw=dict(hspace=0.50, wspace=0.15))
 
     targets_sorted = sorted(TARGETS.keys())
     for ax, target in zip(axes.flatten(), targets_sorted):
@@ -243,17 +291,10 @@ def plot_pit_histograms_2x2(df: pd.DataFrame, output_dir: Path) -> None:
         if pit_file.exists():
             pit = pd.read_feather(pit_file).values.flatten()
         else:
-            # Compute PIT from samples if not saved
-            samples_dir = eval_dir / "samples"
-            if not samples_dir.exists():
+            samples = load_samples(eval_dir)
+            if samples is None:
                 ax.text(0.5, 0.5, "No data", ha="center", va="center", transform=ax.transAxes)
                 continue
-            sample_files = sorted(samples_dir.glob("*.feather"))
-            if not sample_files:
-                ax.text(0.5, 0.5, "No data", ha="center", va="center", transform=ax.transAxes)
-                continue
-            samples_list = [pd.read_feather(f).values for f in sample_files[:50]]
-            samples = np.concatenate(samples_list, axis=0)
             processed_dir = Path("data/processed") / target
             y_test_path = processed_dir / "y_test.feather"
             if not y_test_path.exists():
@@ -266,53 +307,105 @@ def plot_pit_histograms_2x2(df: pd.DataFrame, output_dir: Path) -> None:
         ax.hist(pit, bins=20, range=(0, 1), density=True,
                 color="#1f77b4", alpha=0.7, edgecolor="white", linewidth=0.3)
         ax.axhline(y=1.0, color="#d62728", linestyle="--", linewidth=0.6, label="Uniform")
-        ax.set_title(f"{TARGETS[target]} — {best['model'].replace('_', ' ')}", fontsize=7)
+        ax.set_title(f"{TARGETS[target]} — {_short_model_name(best['model'])}", fontsize=7, pad=2)
         ax.tick_params(labelsize=6)
-        if ax in axes[-1, :] or (len(targets_sorted) <= 2):
+        if ax in axes[-1, :]:
             ax.set_xlabel("PIT value", fontsize=7)
         if ax in axes[:, 0]:
             ax.set_ylabel("Density", fontsize=7)
-        ax.legend(fontsize=5, loc="upper right", framealpha=0.9)
+        ax.legend(fontsize=5, loc="upper right", framealpha=0.7)
 
-    fig.suptitle("PIT Histograms — Best model per target", fontsize=9)
-    fig.tight_layout()
+    fig.suptitle("PIT Histograms — Best model per target", fontsize=8, y=0.99)
     fig.savefig(fig_dir / "pit_histograms.pdf", dpi=300, bbox_inches="tight")
     fig.savefig(fig_dir / "pit_histograms.png", dpi=150, bbox_inches="tight")
     plt.close(fig)
     print(f"  Wrote {fig_dir / 'pit_histograms.pdf'}")
 
 
-# ── Figure: NLL bar chart ──────────────────────────────────────────
-
 def plot_nll_bar_chart(df: pd.DataFrame, output_dir: Path) -> None:
+    """4×3 grid: targets × model families, each panel sorted by NLL."""
     fig_dir = output_dir / "figures"
     fig_dir.mkdir(parents=True, exist_ok=True)
 
     setup_plotting_style()
     targets_sorted = sorted(TARGETS.keys())
-    fig, axes = plt.subplots(1, len(targets_sorted),
-                             figsize=(TEXT_WIDTH, TEXT_WIDTH * 0.35), sharey=False)
+    n_targets = len(targets_sorted)
+    n_families = len(FAMILY_ORDER)
 
-    for ax, target in zip(axes, targets_sorted):
-        tdf = df[df["target"] == target].sort_values("nll")
-        colors = ["#1f77b4"] * len(tdf)
-        colors[0] = "#d62728"
-        ax.barh(range(len(tdf)), tdf["nll"].values, color=colors, height=0.6)
-        ax.set_yticks(range(len(tdf)))
-        ax.set_yticklabels([m.replace("_", " ") for m in tdf["model"]], fontsize=6)
-        ax.set_xlabel("NLL", fontsize=7)
-        ax.set_title(target.replace("_", " ").title(), fontsize=8)
-        ax.tick_params(labelsize=6)
+    # per-column xlim: same for all targets in a given family
+    col_xlim = {}
+    for fi, family in enumerate(FAMILY_ORDER):
+        fam_models = MODEL_FAMILIES[family]
+        all_vals = []
+        for target in targets_sorted:
+            tdf = df[df["target"] == target].dropna(subset=["nll"])
+            tdf = tdf[~np.isinf(tdf["nll"])]
+            fdf = tdf[tdf["model"].isin(fam_models)]
+            if not fdf.empty:
+                all_vals.extend(fdf["nll"].values)
+        if all_vals:
+            gmin = min(all_vals)
+            gmax = max(all_vals)
+            grange = max(gmax - gmin, 1.0)
+            col_xlim[family] = (gmin - 0.08 * grange, gmin + 1.15 * grange)
+        else:
+            col_xlim[family] = (0, 1)
 
-    fig.suptitle("Test NLL per target (lower is better, red = best)", fontsize=9)
-    fig.tight_layout()
+    fig, axes = plt.subplots(n_targets, n_families,
+                             figsize=(TEXT_WIDTH, TEXT_WIDTH * 0.65),
+                             sharex=False, sharey=False,
+                             gridspec_kw=dict(wspace=0.55, hspace=0.40))
+
+    for ti, target in enumerate(targets_sorted):
+        tdf = df[df["target"] == target].dropna(subset=["nll"]).copy()
+        tdf = tdf[~np.isinf(tdf["nll"])].copy()
+        if tdf.empty:
+            for fi in range(n_families):
+                axes[ti, fi].text(0.5, 0.5, "—", ha="center", va="center", fontsize=8)
+            continue
+        nll_min = tdf["nll"].min()
+        nll_range = max(tdf["nll"].max() - nll_min, 1.0)
+
+        for fi, family in enumerate(FAMILY_ORDER):
+            ax = axes[ti, fi]
+            fam_models = MODEL_FAMILIES[family]
+            fdf = tdf[tdf["model"].isin(fam_models)]
+            fdf = fdf[~np.isinf(fdf["nll"])].sort_values("nll")
+            if fdf.empty:
+                ax.text(0.5, 0.5, "—", ha="center", va="center", fontsize=8, transform=ax.transAxes)
+                ax.set_frame_on(False)
+                continue
+
+            labels = [_short_model_name(m) for m in fdf["model"]]
+            vals = fdf["nll"].values
+            colors_list = ["#d62728" if abs(v - nll_min) < 1e-6 else FAMILY_COLORS[family] for v in vals]
+            ax.barh(range(len(vals)), vals, color=colors_list, height=0.55)
+            ax.set_yticks(range(len(vals)))
+            ax.set_yticklabels(labels, fontsize=5.5)
+            ax.set_xlim(*col_xlim[family])
+
+            if ti == 0:
+                ax.set_title(family, fontsize=7, fontweight="bold", pad=3)
+            if ti == n_targets - 1:
+                ax.set_xlabel("NLL", fontsize=6.5)
+            else:
+                ax.tick_params(labelbottom=False)
+            ax.tick_params(labelsize=5.5)
+            ax.grid(axis="x", alpha=0.2, linewidth=0.3)
+            ax.set_axisbelow(True)
+            if nll_range < 100:
+                ax.xaxis.set_major_formatter(plt.FormatStrFormatter("%.1f"))
+
+            # target label as ylabel on leftmost column
+            if fi == 0:
+                ax.set_ylabel(TARGETS[target], fontsize=7.5, fontweight="bold", labelpad=2)
+
+    fig.suptitle("Test NLL per target (lower is better, red = best per target)", fontsize=9, y=0.99)
     fig.savefig(fig_dir / "nll_comparison.pdf", dpi=300, bbox_inches="tight")
     fig.savefig(fig_dir / "nll_comparison.png", dpi=150, bbox_inches="tight")
     plt.close(fig)
     print(f"  Wrote {fig_dir / 'nll_comparison.pdf'}")
 
-
-# ── Terminal summary ───────────────────────────────────────────────
 
 def print_summary(df: pd.DataFrame) -> None:
     print("\n" + "=" * 80)

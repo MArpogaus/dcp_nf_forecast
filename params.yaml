@@ -65,19 +65,26 @@ targets:
   fillna_value: 0.0
   fillna_noise_type: lognormal
   fillna_noise_scale: 0.0
-  # TODO: Anzahl der Kästen noch als covariate einführen
-  # TODO: Feiertage einfügen
 
 models:
 - normal_baseline
 - truncated_baseline
+- lognormal_baseline
 - spline_nf
 - spline_nf_truncated
+- spline_nf_lognormal
 - spline_nf_scale
 - spline_nf_scale_truncated
+- spline_nf_scale_lognormal
 - spline_nf_scale_shift
 - spline_nf_scale_shift_truncated
+- spline_nf_scale_shift_lognormal
+- bernstein_nf
+- bernstein_nf_truncated
+- bernstein_nf_lognormal
 - bernstein_nf_scale
 - bernstein_nf_scale_truncated
+- bernstein_nf_scale_lognormal
 - bernstein_nf_scale_shift
 - bernstein_nf_scale_shift_truncated
+- bernstein_nf_scale_shift_lognormal

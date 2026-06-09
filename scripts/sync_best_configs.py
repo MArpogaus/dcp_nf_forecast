@@ -37,30 +37,28 @@ HP_KEYS = [
     ("model_kwargs.parameters_fn_kwargs.hidden_units.1", "hidden_units.1"),
 ]
 
-# Targets that have NaN issues with Scale+TruncatedNormal
-NAN_NON_DLA_TARGETS = {"ofen_g_koks", "ofen_f_koks", "pl2"}
-
-# Models that use Scale + TruncatedNormal and produce NaN on non-DLA
-NAN_SCALE_TRUNCATED_MODELS = {
-    "spline_nf_scale_truncated",
-    "spline_nf_scale_shift_truncated",
-    "bernstein_nf_scale_truncated",
-    "bernstein_nf_scale_shift_truncated",
-}
-
 ACTIVE_MODELS = [
     "normal_baseline",
     "truncated_baseline",
+    "lognormal_baseline",
     "spline_nf",
     "spline_nf_truncated",
+    "spline_nf_lognormal",
     "spline_nf_scale",
     "spline_nf_scale_truncated",
+    "spline_nf_scale_lognormal",
     "spline_nf_scale_shift",
     "spline_nf_scale_shift_truncated",
+    "spline_nf_scale_shift_lognormal",
+    "bernstein_nf",
+    "bernstein_nf_truncated",
+    "bernstein_nf_lognormal",
     "bernstein_nf_scale",
     "bernstein_nf_scale_truncated",
+    "bernstein_nf_scale_lognormal",
     "bernstein_nf_scale_shift",
     "bernstein_nf_scale_shift_truncated",
+    "bernstein_nf_scale_shift_lognormal",
 ]
 
 
@@ -82,14 +80,6 @@ def get_best_run(exp_id, model_name, target_name):
         if r.data.tags.get("mlflow.runName", "") == f"eval_{model_name}_{target_suffix}_evaluation"
     ]
     # Pick the run with lowest NLL (excluding inf/NaN)
-    best = None
-    best_nll = float("inf")
-    for r in runs:
-        nll = r.data.metrics.get("nll")
-        if nll is not None and nll < best_nll and nll < 1e100:
-            best_nll = nll
-            best = r
-    return best
     best = None
     best_nll = float("inf")
     for r in runs:
@@ -253,7 +243,6 @@ def main():
 
     total_mismatches = 0
     total_fixes = 0
-    skipped_nan = 0
 
     for exp_id, target in TARGETS.items():
         print(f"\n{'='*60}")
@@ -261,11 +250,6 @@ def main():
         print(f"{'='*60}")
 
         for model in ACTIVE_MODELS:
-            # Skip models that will produce NaN on non-DLA targets
-            if target in NAN_NON_DLA_TARGETS and model in NAN_SCALE_TRUNCATED_MODELS:
-                skipped_nan += 1
-                continue
-
             best_run = get_best_run(exp_id, model, target)
             if best_run is None:
                 print(f"  {model:40s}  NO MLFLOW RUN")
@@ -296,7 +280,7 @@ def main():
                 print(f"  {model:40s}  OK ({nll_str})")
 
     print(f"\n{'='*60}")
-    print(f"  Summary: {total_mismatches} mismatches, {total_fixes} fixes applied, {skipped_nan} NaN models skipped")
+    print(f"  Summary: {total_mismatches} mismatches, {total_fixes} fixes applied")
     print(f"{'='*60}")
 
     if args.check and total_mismatches > 0:

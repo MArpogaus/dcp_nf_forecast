@@ -14,7 +14,7 @@ from hybrid_flows.utils.mlflow import (
 )
 
 from dcp_nf_forecast.models import build_model
-from dcp_nf_forecast.utils import load_data, setup_logging
+from dcp_nf_forecast.utils import load_data, parse_model_tags, setup_logging
 
 
 def main() -> None:
@@ -73,6 +73,8 @@ def main() -> None:
 
         with start_run_with_exception_logging(run_name=f"{run_name}_training"):
             mlflow.set_tag("stage", "training")
+            for k, v in parse_model_tags(args.model).items():
+                mlflow.set_tag(k, v)
             log_cfg(params)
             mlflow.tensorflow.autolog(checkpoint_save_weights_only=True)
 

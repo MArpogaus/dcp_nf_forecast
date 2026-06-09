@@ -12,69 +12,118 @@
 ** About The Project
 
 Probabilistic multi-step time series forecasting using normalizing flows.
-Each target variable gets its own univariate model (Bernstein polynomial or
-rational quadratic spline MAF).
+Each target variable gets its own univariate model with one of three base
+distributions: Normal, TruncatedNormal(0,5), or LogNormal. The flow
+architecture is a one-layer Masked Autoregressive Flow (MAF) with optional
+Scale and Shift bijectors, paired with either:
+
+- *Rational Quadratic Spline* (RQS) — 12-bin spline with domain matching
+  the base distribution support, or
+- *Bernstein Polynomial* — 16-degree polynomial with configurable domain.
+
+17 model variants are trained and evaluated per target. All experiments
+are tracked via MLflow.
+
+** Project Structure
 
 #+begin_src bash
 .
-├── .envrc                          # direnv venv activation
-├── .gitignore
-├── .pre-commit-config.yaml         # ruff, pre-commit-hooks, commitizen
-├── dvc.lock                        # DVC pipeline lock file
-├── dvc.yaml                        # DVC pipeline definition
-├── params.yaml                     # global pipeline configuration
-├── params
-│   ├── models                      # per-target per-model hyperparameters
-│   │   ├── dla
-│   │   ├── ofen_f_koks
-│   │   ├── ofen_g_koks
-│   │   └── pl2
+├── dvc.lock                      # DVC pipeline lock file
+├── dvc.yaml                      # DVC pipeline definition
+├── params.yaml                   # global pipeline configuration
+├── params/models/                # per-target per-model hyperparameters
+│   ├── dla/
+│   ├── ofen_g_koks/
+│   ├── ofen_f_koks/
+│   └── pl2/
 ├── pyproject.toml
-├── scripts
-│   ├── prepare_features.py         # build X (features) and Y (target)
-│   ├── split_data.py               # temporal train/val/test split
-│   ├── train.py                    # train normalizing flow model
-│   └── evaluate.py                 # evaluate model with PIT / QQ plots
-├── src
-│   └── dcp_nf_forecast
+├── scripts/
+│   ├── prepare_features.py       # build X (features) and Y (target)
+│   ├── split_data.py             # temporal train/val/test split
+│   ├── describe_data.py          # exploratory data description
+│   ├── train.py                  # train normalizing flow model
+│   ├── evaluate.py               # evaluate model, metrics, plots
+│   ├── report_hpo_results.py     # query MLflow, generate LaTeX tables
+│   ├── generate_paper_figures.py # publication-ready figures
+│   ├── query_best_configs.py     # best config per target/model
+│   ├── sync_best_configs.py      # apply best MLflow configs to YAML
+│   ├── check_repro.py            # DVC repro status monitor
+│   ├── dvc_repro_parallel.sh     # multi-GPU parallel repro launcher
+│   ├── finalize_pipeline.py      # autonomous finalization pipeline
+│   └── hpo_master_loop.py        # autonomous HPO iteration loop
+├── src/dcp_nf_forecast/
+│   ├── __init__.py               # distribution registration
+│   ├── data.py                   # core data pipeline functions
+│   ├── distributions.py          # custom base distributions
+│   ├── models.py                 # model builder
+│   ├── utils.py                  # logging, I/O, constraint functions
+│   └── validation/
 │       ├── __init__.py
-│       ├── data.py                 # core data pipeline functions
-│       ├── models.py               # model builder
-│       ├── utils.py                # logging, I/O helpers
-│       └── validation/             # PIT histogram, QQ plot
-├── test
+│       ├── pit.py                # PIT histogram computation
+│       └── qq.py                 # QQ plot computation
+├── test/
 │   ├── conftest.py
 │   ├── test_data.py
 │   └── test_utils.py
-└── AGENTS.md                       # agent conventions
+├── docs/
+│   ├── hpo_summary.md            # publication-oriented results summary
+│   ├── hpo_study.md              # HPO phase log
+│   └── model_architecture.md     # detailed architecture description
+├── AGENTS.md                     # agent conventions
+└── README.org
 #+end_src
 
-*** Input Data (X)
+** Model Variants
 
-- *Tabular covariates with optional offset* – columns can be included at their
-  current timestep (e.g. ~ofen_metall_kg~) or shifted forward/backward
-  (~col_name:N~, positive N = lead, negative N = lag).
-- *Sin/cos encoded time/date variables* – configurable components for
-  time-of-day, day-of-week, day-of-year.
-- *Lag features* – configurable history length per column (e.g.
-  ~target:96~ creates 96 past values).
-- *Lead (future) features* – forward-looking values per column (e.g.
-  ~covariate:48~ creates 48 future values). Useful when future covariate
-  values are known (scheduled production plans, weather forecasts, etc.).
-- *Holiday indicator* – binary flag per timestep via the ~holidays~ library
-  with configurable country / region code (e.g. ~DE-BW~).
-- *NaN filling with configurable noise* – fills missing values in selected
-  columns with a constant plus optional random noise drawn from any
-  ~numpy.random.Generator~ distribution (e.g. ~lognormal~, ~uniform~).
+| Variant | Base Distribution | Bijector(s) | Scale Constraint | Shift Constraint |
+|---------+-------------------+-------------+------------------+------------------|
+| normal_baseline | Normal(0,1) | Diagonal | — | — |
+| truncated_baseline | TruncatedNormal(0,5) | Diagonal | — | — |
+| lognormal_baseline | LogNormal(0,1) | Diagonal | — | — |
+| spline_nf | Normal(0,1) | RQS (8-bin) | — | — |
+| spline_nf_truncated | TruncatedNormal(0,5) | RQS (8-bin) | — | — |
+| spline_nf_lognormal | LogNormal(0,1) | RQS (24-bin) | — | — |
+| spline_nf_scale | Normal(0,1) | Scale + RQS | softplus | — |
+| spline_nf_scale_truncated | TruncatedNormal(0,5) | Scale + RQS | [0.3, 1.0] | — |
+| spline_nf_scale_lognormal | LogNormal(0,1) | Scale + RQS | [0.3, 1.0] | — |
+| spline_nf_scale_shift | Normal(0,1) | Scale+Shift+RQS | softplus | softplus |
+| spline_nf_scale_shift_truncated | TruncatedNormal(0,5) | Scale+Shift+RQS | [0.3, 1.0] | (-0.5, 0) |
+| spline_nf_scale_shift_lognormal | LogNormal(0,1) | Scale+Shift+RQS | [0.3, 1.0] | (-5, 0) |
+| bernstein_nf | Normal(0,1) | BernsteinPolynomial | — | — |
+| bernstein_nf_truncated | TruncatedNormal(0,5) | BernsteinPolynomial | — | — |
+| bernstein_nf_lognormal | LogNormal(0,1) | BernsteinPolynomial | — | — |
+| bernstein_nf_scale | Normal(0,1) | Scale + Bernstein | softplus | — |
+| bernstein_nf_scale_truncated | TruncatedNormal(0,5) | Scale + Bernstein | [0.3, 1.0] | — |
+| bernstein_nf_scale_lognormal | LogNormal(0,1) | Scale + Bernstein | [0.3, 1.0] | — |
+| bernstein_nf_scale_shift | Normal(0,1) | Scale+Shift+Bernstein | softplus | softplus |
+| bernstein_nf_scale_shift_truncated | TruncatedNormal(0,5) | Scale+Shift+Bernstein | [0.3, 1.0] | (-0.5, 0) |
+| bernstein_nf_scale_shift_lognormal | LogNormal(0,1) | Scale+Shift+Bernstein | [0.3, 1.0] | (-5, 0) |
 
-*** Output Data (Y)
+Spline domain = [range_min, range_min + interval_width]:
+- Normal: [-5, 5] (range_min=-5, interval_width=10)
+- TruncatedNormal(0,5): [0, 5] (range_min=0, interval_width=5)
+- LogNormal(0,1): [exp(-5), exp(5)] (range_min=exp(-5), interval_width≈148.4)
 
-- *Multi-step forecast horizon* – future values of a single target column,
-  configurable horizon length.
+** Pipeline
 
-The pipeline is orchestrated with *DVC* using ~foreach~ over the four
-targets (~dla~, ~ofen_g_koks~, ~ofen_f_koks~, ~pl2~). All intermediate and
-processed data uses the feather format for fast I/O.
+The DVC pipeline handles all 68 stages (17 models × 4 targets):
+
+#+begin_src bash
+# Full pipeline
+dvc repro
+
+# Individual stages
+dvc repro prepare@0 split@0                    # data for DLA
+dvc repro train@dataset0-spline_nf              # train on DLA
+dvc repro evaluate@dataset0-spline_nf           # evaluate on DLA
+
+# Parallel multi-GPU evaluation
+bash scripts/dvc_repro_parallel.sh
+#+end_src
+
+Per-target configuration is stored in =params.yaml=. Each target entry
+specifies its own covariates, lag/lead features, NaN handling, and
+prediction horizon.
 
 ** Getting Started
 
@@ -84,121 +133,23 @@ This project uses [[https://docs.astral.sh/uv/][uv]] for dependency management
 and [[https://direnv.net/][direnv]] for automatic virtual environment activation.
 
 #+begin_src bash
-# clone the repository
 git clone <repo-url>
 cd dcp-nf-forecast
-
-# allow direnv to activate the venv
 direnv allow
-
-# install the package and all dependencies
 uv sync
 #+end_src
-
-*** Running the Pipeline
-
-The DVC pipeline consists of four stages per target (16 total):
-
-#+begin_src bash
-dvc repro
-#+end_src
-
-Run a single target / model:
-
-#+begin_src bash
-# data stages for DLA only
-dvc repro prepare@0 split@0
-
-# train Bernstein NF on DLA with test mode (1 epoch)
-# set test_mode: true in params.yaml first
-dvc repro train@dataset0-bernstein_nf
-#+end_src
-
-Each stage can also be run directly:
-
-#+begin_src bash
-python scripts/prepare_features.py \
-  --raw-data-path data/raw/norm_fondium_15_min_data_2023.csv \
-  --datetime-column new_time \
-  --tabular-covariate-columns "ofen_metall_kg:1" \
-  --time-components "time,day_of_week,day_of_year" \
-  --target-name ofen_g_koks \
-  --y-column ofen_g_koks_kg \
-  --prediction-horizon 48 \
-  --lag-columns "ofen_g_koks_kg:96" \
-  --output-dir data/interim/ofen_g_koks \
-  --data-format feather \
-  --log-level info \
-  --log-file logs/pipeline.log \
-  --holiday-country "DE-BW" \
-  --end-date "2023-10-31" \
-  --fillna-columns "ofen_g_koks_kg,ofen_f_koks_kg" \
-  --fillna-value 0.0 \
-  --fillna-noise-type lognormal \
-  --fillna-noise-scale 0.005 \
-  --future-columns "ofen_metall_kg:48"
-#+end_src
-
-All CLI arguments of ~prepare_features.py~ are mandatory and carry no defaults.
-This script is fully decoupled from the DVC API – it reads no params files
-internally.  ~train.py~ and ~evaluate.py~, in contrast, load model
-hyperparameters from the per-target config files under
-~params/models/<target>/<model>.yaml~ (via DVC's param injection).
-
-Per-target configuration is stored in [[./params.yaml][params.yaml]].  Each target
-entry can specify its own:
-
-- ~tabular_covariate_columns~ – static covariates with optional ~col:offset~
-- ~future_columns~ – lead (future) columns with the same ~col:N~ syntax as
-  ~lag_columns~
-- ~fillna_columns~ / ~fillna_value~ / ~fillna_noise_type~ / ~fillna_noise_scale~
-  – NaN handling with configurable noise distribution
-- ~lag_columns~ – lag history length
-- ~prediction_horizon~ – number of future steps to predict
 
 *** Running Tests
 
 #+begin_src bash
-# run all tests with coverage
 uv run pytest --cov
-
-# run tests with 6 workers (default)
 uv run pytest -n auto
 #+end_src
 
-Current coverage: >98%.
-
 ** NaN Filling
 
-Missing values in the raw data (common in ~ofen_g_koks_kg~ and
-~ofen_f_koks_kg~) can be filled with a constant plus optional noise.
-
-Example configuration (in ~params.yaml~):
-
-#+begin_src yaml
-- name: ofen_g_koks
-  fillna_columns: ofen_g_koks_kg,ofen_f_koks_kg
-  fillna_value: 0.0
-  fillna_noise_type: lognormal
-  fillna_noise_scale: 0.005
-#+end_src
-
-The ~fillna_noise_type~ parameter accepts any ~numpy.random.Generator~ method
-name (e.g. ~lognormal~, ~uniform~, ~exponential~, ~normal~). The
-~fillna_noise_scale~ is passed as the distribution's scale parameter.
-
-** Lead (Future) Features
-
-~future_columns~ works like ~lag_columns~ but in the forward direction.
-For example ~ofen_metall_kg:48~ creates 48 columns
-~ofen_metall_kg_lead_1~ through ~ofen_metall_kg_lead_48~, each holding the
-covariate value that many steps ahead.  This is useful when future covariate
-values are known (e.g. planned production schedules).
-
-** Contributing
-
-Any Contributions are greatly appreciated! If you have a question, an issue or
-would like to contribute, please read our [[file:CONTRIBUTING.md][contributing guidelines]].
+Missing values can be filled with a constant plus optional noise
+(=lognormal=, =uniform=, etc.). Configured per-target in =params.yaml=.
 
 ** License
 
