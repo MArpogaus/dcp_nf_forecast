@@ -1,0 +1,97 @@
+samples.feather — Structure & Date Mapping
+===========================================
+
+1. Pipeline Overview
+--------------------
+
+raw CSV (35040 rows, 2023-01-01 to 2023-12-31)
+  │
+  ▼  end_date filter: keep rows ≤ 2023-10-31
+  │
+  ▼  29184 rows
+  │
+  ▼  prepare_features.py: lag/shift features → 239 initial rows
+  │   dropped due to NaN (shifted columns have no predecessor)
+  │
+  ▼  28945 rows  ──►  saved as interim/X.feather, interim/y.feather
+  │
+  ▼  split_data.py: temporal 80/10/10 split (no shuffle)
+  │
+  ┌──────────┬───────────┬──────────┐
+  │  train   │   val     │   test   │
+  │  23156   │   2894    │   2895   │
+  │ rows 0-  │ rows      │ rows     │
+  │ 23155    │ 23156-    │ 26050-   │
+  │          │ 26049     │ 28944    │
+  └──────────┴───────────┴──────────┘
+       │
+       ▼  evaluate.py
+       │
+       ▼  samples.feather (2895 × 1000 rows)
+
+2. samples.feather Structure
+-----------------------------
+
+The file is written by evaluate.py:save_sample_df().
+
+Schema (flat DataFrame, 50 columns):
+
+  forecast_origin  sample_number  step_1 ... step_48
+  ───────────────  ─────────────  ──────     ──────
+  int64            int64          float32    float32
+
+  The MultiIndex [forecast_origin, sample_number] is reset
+  before saving to feather (feather does not support MultiIndex).
+
+  Row count: n_eval × n_samples
+    = 2895 × 200 = 579000 rows
+
+  - forecast_origin:  integer 0..2894, the row index in y_test
+  - sample_number:    integer 0..199, the Monte Carlo draw
+  - step_1..step_48:  float32 vector of 48 forecast steps
+
+Why forecast_origin is not a datetime:
+  The DataFrame y_test.feather is saved with a RangeIndex
+  (not the original datetime index). This index becomes the
+  forecast_origin column. The original timestamps are not
+  preserved during the save/load cycle.
+
+3. Test Set Dates
+------------------
+
+Because of the end_date='2023-10-31' filter and NaN drop,
+the test set corresponds to the LAST 2895 rows of the
+end_date-filtered data. All four targets share identical
+test dates:
+
+  Target           Test Start            Test End              Rows
+  ──────           ──────────            ───────              ────
+  dla              2023-10-01 20:15      2023-10-31 23:45     2895
+  ofen_g_koks      2023-10-01 20:15      2023-10-31 23:45     2895
+  ofen_f_koks      2023-10-01 20:15      2023-10-31 23:45     2895
+  pl2              2023-10-01 20:15      2023-10-31 23:45     2895
+
+Resolution: 15 minutes (96 timesteps per day).
+Test duration: ~30 days.
+
+4. Reconstructing the datetime
+-------------------------------
+
+To map forecast_origin → timestamp in your analysis:
+
+  import pandas as pd
+
+  raw = pd.read_csv('data/raw/norm_fondium_15_min_data_2023.csv')
+  raw.columns = ['timestamp'] + list(raw.columns[1:])
+  raw['timestamp'] = pd.to_datetime(raw['timestamp'])
+
+  # end_date filter
+  mask = raw['timestamp'] <= '2023-10-31 23:45'
+  filtered = raw[mask].reset_index(drop=True)
+
+  # first non-NaN row after lag operations begins at filtered[239]
+  test_start_row = 239 + 23156 + 2894   # = 26289
+
+  for origin_id in range(2895):
+      actual_timestamp = filtered.iloc[test_start_row + origin_id]['timestamp']
+      # map origin_id → actual_timestamp
